@@ -853,9 +853,10 @@
         addLog("Loan shark's boys came by — nothing to collect.", 'warn');
         return;
       }
-      const take = Math.min(G.cash, rnd(500, 1200));
+      const pct  = rnd(10, 25);
+      const take = Math.min(G.cash, Math.max(200, Math.round(G.debt * pct / 100)));
       G.cash -= take;
-      addLog(`Loan shark took ${fmt(take)} from you.`, 'bad');
+      addLog(`Loan shark took ${fmt(take)} (${pct}% of your debt) as a reminder.`, 'bad');
     } else if (type === 'bribe') {
       const take = Math.min(G.cash, 200);
       G.cash -= take;
