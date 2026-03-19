@@ -445,7 +445,8 @@
   <div class="modal-box">
     <div class="modal-title" id="eventTitle">EVENT</div>
     <div class="modal-msg" id="eventMsg"></div>
-    <button class="modal-ok" onclick="dismissEvent()">OK, GOT IT</button>
+    <button class="modal-ok" id="eventOkBtn" onclick="dismissEvent()">OK, GOT IT</button>
+    <button class="modal-ok" id="eventEndBtn" onclick="endGame()" style="display:none;border-color:var(--accent);color:var(--accent)">WRAP UP &amp; END GAME</button>
   </div>
 </div>
 
@@ -990,6 +991,7 @@
       coatsBought: 0,
       lastVisit: {},
       shown3DayWarning: false,
+      shownEndGamePopup: false,
       supplierBurnedUntil: 0,
       corneredDrug: null, corneredUntil: 0,
       tippedCity: null,   tippedExpiry: 0,
@@ -1129,9 +1131,20 @@
   function showEvent(title, msg) {
     document.getElementById('eventTitle').textContent = title;
     document.getElementById('eventMsg').textContent   = msg;
+    document.getElementById('eventOkBtn').style.display = '';
+    document.getElementById('eventEndBtn').style.display = 'none';
+    document.getElementById('eventOverlay').classList.remove('hidden');
+  }
+  function showEndGameModal() {
+    document.getElementById('eventTitle').textContent = 'FINAL DAY';
+    document.getElementById('eventMsg').textContent   = "Time's up. Sell what you have, settle your accounts, and wrap up.";
+    document.getElementById('eventOkBtn').style.display = 'none';
+    document.getElementById('eventEndBtn').style.display = '';
     document.getElementById('eventOverlay').classList.remove('hidden');
   }
   function dismissEvent() {
+    document.getElementById('eventOkBtn').style.display = '';
+    document.getElementById('eventEndBtn').style.display = 'none';
     document.getElementById('eventOverlay').classList.add('hidden');
     renderAll();
   }
@@ -1854,13 +1867,9 @@
       if (c.name !== G.city && !isLastDay) btn.onclick = () => travel(c.name);
       cg.appendChild(btn);
     });
-    if (isLastDay) {
-      const msg = document.createElement('div');
-      msg.style.cssText = 'grid-column:1/-1;text-align:center;padding:10px 4px';
-      msg.innerHTML = `
-        <div style="font-size:13px;color:var(--accent2);margin-bottom:10px">It's the end of the day. Sell what you have and settle your accounts.</div>
-        <button class="action-btn" onclick="endGame()" style="font-size:14px;padding:7px 18px;border-color:var(--accent);color:var(--accent)">WRAP UP & END GAME</button>`;
-      cg.appendChild(msg);
+    if (isLastDay && !G.shownEndGamePopup) {
+      G.shownEndGamePopup = true;
+      setTimeout(showEndGameModal, 50);
     }
   }
 
