@@ -988,6 +988,7 @@
       supplierUsedToday: false,
       heatDay: false,
       coatsBought: 0,
+      lastVisit: {},
       supplierBurnedUntil: 0,
       corneredDrug: null, corneredUntil: 0,
       tippedCity: null,   tippedExpiry: 0,
@@ -1014,6 +1015,11 @@
     const specialty  = cityData ? cityData.specialty : null;
     // expire cornered drug
     if (G.corneredDrug && G.day > G.corneredUntil) { G.corneredDrug = null; G.corneredUntil = 0; }
+    // accumulation bonus: supply grows for each day since last visit
+    const daysSince   = G.lastVisit[G.city] ? G.day - G.lastVisit[G.city] : 0;
+    const accumNormal = Math.min(daysSince * 8,  80);
+    const accumSpec   = Math.min(daysSince * 12, 120);
+    G.lastVisit[G.city] = G.day;
     const skipChance = G.hasBurner ? 0.05 : 0.15;
     DRUGS.forEach(d => {
       const isSpecialty = d.name === specialty;
@@ -1027,7 +1033,9 @@
         if (isSpecialty) price = Math.round(price * 0.8);
       }
       G.prices[d.name] = price;
-      G.market[d.name] = isSpecialty ? rnd(20, 80) : rnd(5, 60);
+      G.market[d.name] = isSpecialty
+        ? rnd(60, 120) + accumSpec
+        : rnd(10, 60)  + accumNormal;
     });
   }
 
