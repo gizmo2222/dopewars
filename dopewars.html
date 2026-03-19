@@ -957,7 +957,8 @@
     if (!price)                  { addLog('No market price for that here.', 'bad'); return; }
     const halfPrice = Math.round(price / 2);
     const space     = G.coat - carried();
-    let qty         = Math.min(space, Math.floor(G.cash / halfPrice));
+    const avail     = G.market[name] || 0;
+    let qty         = Math.min(avail, space, Math.floor(G.cash / halfPrice));
     if (qty <= 0)                { addLog('Not enough cash or space for the connect deal.', 'bad'); return; }
     // use executeBuy but at half price — temporarily patch price
     const realPrice = G.prices[name];
