@@ -1820,11 +1820,21 @@
   function renderCities() {
     const cg = document.getElementById('cityGrid');
     cg.innerHTML = '';
-    const freeLeft = G.hasCar ? Math.max(0, CAR_FREE_TRIPS - G.carTripsToday) : 0;
+    const isLastDay = G.day >= G.maxDays;
+    const freeLeft  = G.hasCar ? Math.max(0, CAR_FREE_TRIPS - G.carTripsToday) : 0;
     const travelTitle = document.getElementById('travelTitle');
     if (travelTitle) {
-      travelTitle.innerHTML = `Travel — <span id="cityDisplay">${G.city}</span>`
-        + (G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '');
+      travelTitle.innerHTML = isLastDay
+        ? `Travel — <span id="cityDisplay">${G.city}</span> <span style="color:var(--accent2);font-size:13px">— FINAL DAY</span>`
+        : `Travel — <span id="cityDisplay">${G.city}</span>`
+          + (G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '');
+    }
+    if (isLastDay) {
+      cg.style.opacity = '0.35';
+      cg.style.pointerEvents = 'none';
+    } else {
+      cg.style.opacity = '';
+      cg.style.pointerEvents = '';
     }
     CITIES.forEach(c => {
       const btn = document.createElement('div');
@@ -1835,9 +1845,15 @@
         <div class="city-name">${c.name}</div>
         <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>
         ${specialtyLine}`;
-      if (c.name !== G.city) btn.onclick = () => travel(c.name);
+      if (c.name !== G.city && !isLastDay) btn.onclick = () => travel(c.name);
       cg.appendChild(btn);
     });
+    if (isLastDay) {
+      const msg = document.createElement('div');
+      msg.style.cssText = 'grid-column:1/-1;text-align:center;padding:10px 0;font-size:13px;color:var(--accent2)';
+      msg.textContent = "It's the end of the day. Sell what you have and settle your accounts.";
+      cg.appendChild(msg);
+    }
   }
 
   /* ─── TRAYS ─── */
