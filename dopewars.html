@@ -1118,9 +1118,13 @@
       G.cash -= take;
       addLog(`Loan shark took ${fmt(take)} (${pct}% of your debt) as a reminder.`, 'bad');
     } else if (type === 'bribe') {
-      const take = Math.min(G.cash, 200);
-      G.cash -= take;
-      addLog(`Paid a cop ${fmt(take)} to look away.`, 'warn');
+      if (G.cash < 200) {
+        applyEvent('bust');
+        addLog(`Couldn't afford the bribe — cop busted you instead.`, 'bad');
+      } else {
+        G.cash -= 200;
+        addLog(`Paid a cop $200 to look away.`, 'warn');
+      }
     } else if (type === 'tip') {
       // find the drug with the lowest price relative to its base (best deal)
       let bestDrug = null, bestRatio = Infinity;
@@ -1205,7 +1209,8 @@
     const discountPrice = Math.round(price * 0.75);
     const space         = G.coat - carried();
     const avail         = G.market[name] || 0;
-    const maxSupply     = Math.max(1, Math.floor(avail / 2));
+    const maxSupply     = Math.floor(avail / 2);
+    if (maxSupply <= 0)          { addLog('Not enough supply here for the connect deal.', 'bad'); return; }
     let qty             = Math.min(maxSupply, space, Math.floor(G.cash / discountPrice));
     if (qty <= 0)                { addLog('Not enough cash or space for the connect deal.', 'bad'); return; }
     // use executeBuy at discount price — temporarily patch price
