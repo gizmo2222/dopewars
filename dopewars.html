@@ -658,6 +658,12 @@
         { name:'Speed',   street:'Crank',   base:90,    variance:0.70              },
         { name:'Ludes',   street:'Buttons', base:15,    variance:0.80              },
       ],
+      upgrades: [
+        { id:'gun',      icon:'🔫', short:'Gun',     label:'9mm Pistol',       desc:'Halves bust losses. 60% chance to scare off muggers.' },
+        { id:'burner',   icon:'📱', short:'Burner',  label:'Burner Phone',     desc:'Better connect info — nearly full drug selection every market.' },
+        { id:'car',      icon:'🚗', short:'Car',     label:'Stolen Honda',     desc:'1 free trip per day — travel once without losing a day or accruing interest.' },
+        { id:'supplier', icon:'📞', short:'Connect', label:'Supplier Contact', desc:'Once per day, buy any drug at 50% of market price.' },
+      ],
       headlines: [
         'NYPD REPORTS SURGE IN STREET DRUG ACTIVITY',
         'MAYOR PLEDGES CRACKDOWN ON BRONX DEALERS',
@@ -697,6 +703,12 @@
         { name:'Quaaludes',  street:'Ludes',   base:30,    variance:0.80              },
         { name:'Speed',      street:'Crank',   base:120,   variance:0.70              },
         { name:'Angel Dust', street:'Dust',    base:1200,  variance:0.65              },
+      ],
+      upgrades: [
+        { id:'gun',      icon:'🔫', short:'Piece',   label:'Saturday Night Special', desc:'Halves bust losses. 60% chance to scare off muggers.' },
+        { id:'burner',   icon:'📟', short:'Pager',   label:'Pager',                  desc:'Better connect info — nearly full selection every market.' },
+        { id:'car',      icon:'🚤', short:'Boat',    label:'Go-Fast Boat',           desc:'1 free trip per day — run the coast without losing a day or accruing interest.' },
+        { id:'supplier', icon:'📋', short:'Cartel',  label:'Cartel Contact',         desc:'Once per day, buy any drug at 50% of market price.' },
       ],
       headlines: [
         'METRO-DADE REPORTS SURGE IN COCAINE TRAFFICKING',
@@ -738,6 +750,12 @@
         { name:'Pills',    street:'Beans',   base:80,   variance:0.75              },
         { name:'Spice',    street:'Mamba',   base:25,   variance:0.80              },
       ],
+      upgrades: [
+        { id:'gun',      icon:'🔪', short:'Shank',   label:'Flick Knife',      desc:'Halves bust losses. 60% chance to scare off muggers.' },
+        { id:'burner',   icon:'📱', short:'Burner',  label:'Burner',           desc:'Better connect info — nearly full selection every market.' },
+        { id:'car',      icon:'🛵', short:'Moped',   label:'Moped',            desc:'1 free trip per day — ride out without losing a day or accruing interest.' },
+        { id:'supplier', icon:'🤝', short:'Connect', label:'Street Connect',   desc:'Once per day, buy any drug at 50% of market price.' },
+      ],
       headlines: [
         'MET POLICE REPORT SURGE IN CLASS A DRUG ACTIVITY',
         'MAYOR PLEDGES CRACKDOWN ON BRIXTON DEALERS',
@@ -777,6 +795,12 @@
         { name:'Whiskey',     street:'Rotgut', base:60,   variance:0.55              },
         { name:'Tobacco',     street:'Leaf',   base:20,   variance:0.45              },
         { name:'Snake Oil',   street:'Tonic',  base:15,   variance:0.80              },
+      ],
+      upgrades: [
+        { id:'gun',      icon:'🔫', short:'Iron',    label:'Colt Revolver',    desc:'Halves losses when caught. 60% chance to scare off outlaws.' },
+        { id:'burner',   icon:'📰', short:'Wire',    label:'Telegraph Wire',   desc:'Better market intel — nearly full selection at every trading post.' },
+        { id:'car',      icon:'🐴', short:'Horse',   label:'Horse',            desc:'1 free ride per day — travel once without losing a day or accruing interest.' },
+        { id:'supplier', icon:'🤠', short:'Fence',   label:'Fence Contact',    desc:'Once per day, buy any goods at 50% of market price.' },
       ],
       headlines: [
         'TOMBSTONE MARSHAL REPORTS SURGE IN OPIUM DENS',
@@ -910,6 +934,10 @@
     DRUGS     = t.drugs;
     CITIES    = t.cities;
     HEADLINES = t.headlines;
+    t.upgrades.forEach(u => {
+      const upg = UPGRADES.find(x => x.id === u.id);
+      if (upg) { upg.icon = u.icon; upg.short = u.short; upg.label = u.label; upg.desc = u.desc; }
+    });
   }
 
   function readSettings() {
@@ -1228,10 +1256,10 @@
 
   /* ─── UPGRADES ─── */
   const UPGRADES = [
-    { id:'gun',       label:'9mm Pistol',       price:1500,  desc:'Halves bust losses. 60% chance to scare off muggers.' },
-    { id:'burner',    label:'Burner Phone',     price:500,   desc:'Better connect info — nearly full drug selection every market.' },
-    { id:'car',       label:'Stolen Honda',     price:3000,  desc:'1 free trip per day — travel once without losing a day or accruing interest.' },
-    { id:'supplier',  label:'Supplier Contact', price:2000,  desc:'Once per day, buy any drug at 50% of market price.' },
+    { id:'gun',      icon:'🔫', short:'Gun',     label:'9mm Pistol',       price:1500, desc:'Halves bust losses. 60% chance to scare off muggers.' },
+    { id:'burner',   icon:'📱', short:'Burner',  label:'Burner Phone',     price:500,  desc:'Better connect info — nearly full drug selection every market.' },
+    { id:'car',      icon:'🚗', short:'Car',     label:'Stolen Honda',     price:3000, desc:'1 free trip per day — travel once without losing a day or accruing interest.' },
+    { id:'supplier', icon:'📞', short:'Connect', label:'Supplier Contact', price:2000, desc:'Once per day, buy any drug at 50% of market price.' },
   ];
 
   function renderShop() {
@@ -1244,7 +1272,7 @@
       row.className = 'drug-row';
       row.innerHTML = `
         <div>
-          <div class="drug-name">${u.label}</div>
+          <div class="drug-name">${u.icon} ${u.label}</div>
           <div class="drug-avail">${u.desc}</div>
         </div>
         <div class="drug-price${canAfford && !owned ? '' : ''}">${fmt(u.price)}</div>
@@ -1483,11 +1511,12 @@
     document.getElementById('debtDisplay').textContent = fmt(G.debt);
     document.getElementById('coatDisplay').textContent = carried() + ' / ' + G.coat;
 
+    const ug = id => UPGRADES.find(x => x.id === id);
     const badges = [
-      G.hasGun      && '🔫 Gun',
-      G.hasBurner   && '📱 Burner',
-      G.hasCar      && '🚗 Car',
-      G.hasSupplier && ('📞 Connect' + (G.supplierUsedToday ? ' (used)' : ' (ready)')),
+      G.hasGun      && `${ug('gun').icon} ${ug('gun').short}`,
+      G.hasBurner   && `${ug('burner').icon} ${ug('burner').short}`,
+      G.hasCar      && `${ug('car').icon} ${ug('car').short}`,
+      G.hasSupplier && `${ug('supplier').icon} ${ug('supplier').short}${G.supplierUsedToday ? ' (used)' : ' (ready)'}`,
     ].filter(Boolean);
     document.getElementById('upgradeStatus').textContent = badges.length ? 'Owned: ' + badges.join(' · ') : '';
 
