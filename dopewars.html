@@ -1067,7 +1067,8 @@
       });
       addLog('Prices surged across the board!', 'bad');
     } else if (type === 'drought') {
-      const keys = Object.keys(G.market);
+      const citySpec = (CITIES.find(c => c.name === G.city) || {}).specialty;
+      const keys = Object.keys(G.market).filter(k => k !== citySpec);
       for (let i = 0; i < Math.floor(keys.length / 2); i++) {
         delete G.market[keys[i]];
         delete G.prices[keys[i]];
@@ -1296,7 +1297,9 @@
       G.prices[d] = Math.round(G.prices[d] * (1.3 + Math.random() * 0.4));
       addLog(`📰 ${hl.text} — ${d} prices are up.`, 'headline');
     } else if (hl.type === 'drought' && drugs.length) {
-      const d = drugs[rnd(0, drugs.length - 1)];
+      const citySpec = (CITIES.find(c => c.name === G.city) || {}).specialty;
+      const pool = drugs.filter(d => d !== citySpec);
+      const d = (pool.length ? pool : drugs)[rnd(0, (pool.length || drugs.length) - 1)];
       delete G.prices[d];
       delete G.market[d];
       addLog(`📰 ${hl.text} — ${d} is off the market today.`, 'headline');
