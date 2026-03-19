@@ -1,6 +1,6 @@
 # Dope Wars
 
-A browser-based remake of the classic drug trading game. Buy low, sell high, pay off your debt, and make your fortune before time runs out. Choose from four themes: NYC (1984), Miami (1986), London, and the Frontier West.
+A browser-based drug trading game. Buy low, sell high, pay off your debt, and make your fortune before time runs out.
 
 ![Game Screenshot](https://via.placeholder.com/800x400/0a0a0a/e8c840?text=DOPE+WARS)
 
@@ -18,9 +18,9 @@ You start with cash, a debt to a loan shark, and 30 days to make your fortune. Y
 
 ### The Basics
 
-- **Travel** between the six NYC boroughs to find different drug prices each day
-- **Buy** drugs cheap in one location and **sell** them high in another
-- Every trip to a new city costs one day and applies daily interest to your debt
+- **Travel** between six cities to find different prices each day
+- **Buy** cheap in one location and **sell** high in another
+- Every trip costs one day and applies daily interest to your debt
 - Run out of days with more debt than cash and you lose
 
 ### Managing Your Money
@@ -33,16 +33,18 @@ Click the **Cash** or **Debt** labels in the Finances panel to deposit, withdraw
 
 ### Upgrades (Black Market)
 
+Upgrade names and icons vary by theme, but every theme has the same four upgrades:
+
 | Upgrade | Cost | Benefit |
 |---|---|---|
-| 🔫 9mm Pistol | $1,500 | Halves bust losses · 60% chance to scare off muggers |
-| 📱 Burner Phone | $500 | Nearly full drug selection every market visit |
-| 🚗 Stolen Honda | $3,000 | 1 free trip/day — no day lost, no interest accrued |
-| 📞 Supplier Contact | $2,000 | Once per day, buy any drug at 25% off (up to half the available supply) |
+| Gun | $1,500 | Halves bust losses · 60% chance to scare off muggers |
+| Burner | $500 | Nearly full drug selection every market visit |
+| Car / Transport | $3,000 | 1 free trip/day — no day lost, no interest accrued |
+| Supplier Contact | $2,000 | Once per day, buy any drug at 25% off (up to half the available supply) |
 
 ### City Specialties
 
-Each city has a specialty drug that is always available, priced ~20% cheaper, and stocked in larger quantities. The specialty is shown on each city button (★).
+Each city has a specialty drug (shown as ★ on the city button) that is always available, priced ~20% cheaper, and stocked in larger quantities than elsewhere.
 
 ### Random Events
 
@@ -69,6 +71,19 @@ On the last day you cannot travel. A popup prompts you to sell your stash, settl
 
 ---
 
+## Themes
+
+Select a theme in the Settings screen. Each theme has its own cities, drugs, and upgrade names.
+
+| Theme | Setting | Cities | Drugs |
+|---|---|---|---|
+| **NYC Classic** | New York, 1984 | Bronx, Manhattan, Brooklyn, Queens, Harlem, Staten Is. | Cocaine, Heroin, Acid, Shrooms, PCP, Weed, Speed, Ludes |
+| **Miami Vice** | Miami, 1986 | South Beach, Little Havana, Overtown, Coral Gables, Hialeah, Liberty City | Cocaine, Crack, Heroin, Hash, Weed, Quaaludes, Speed, Angel Dust |
+| **London** | London, Now | Camden, Brixton, Hackney, Peckham, Lewisham, Shoreditch | Cocaine, MDMA, Heroin, Ketamine, Cannabis, Speed, Pills, Spice |
+| **Wild West** | Frontier, 1881 | Tombstone, Dodge City, Deadwood, Abilene, El Paso, Santa Fe | Opium, Gold Dust, Laudanum, Dynamite, Stolen Guns, Whiskey, Tobacco, Snake Oil |
+
+---
+
 ## Difficulty
 
 | | Easy | Medium | Hard |
@@ -84,59 +99,9 @@ Presets are available in the Settings screen. Individual settings can be customi
 
 ---
 
-## Drugs
-
-Each theme has its own set of drugs with different price ranges and volatility. The NYC theme (default) uses Cocaine, Heroin, Acid, Shrooms, PCP, Weed, Speed, and Ludes. Prices vary wildly between cities. The Burner Phone upgrade ensures nearly all drugs are available in every market.
-
----
-
-## Versions
-
-This repo contains three versions of the game:
-
-### `dopewars.html` — Standalone browser game ⭐ recommended
-Single HTML file. Open in a browser and play. No setup required. Sessions persist via `localStorage`.
-
-### `dopewars.py` — Terminal version
-Requires Python 3.7+ and the `rich` library.
-
-```bash
-pip install rich
-python dopewars.py
-```
-
-### `app.py` + `templates/index.html` — Flask web app
-Full client-server version with a Python backend. Game state is managed server-side.
-
-```bash
-pip install -r requirements.txt
-python app.py
-# Open http://localhost:5000
-```
-
-> **Note:** The Flask version stores game state in memory. Sessions are lost if the server restarts. For production use, replace the in-memory `GAMES` dict in `app.py` with a database or Redis store.
-
----
-
-## Project Structure
-
-```
-dopewars.html          Standalone browser game (recommended)
-dopewars.py            Terminal version (requires rich)
-app.py                 Flask backend
-templates/
-  index.html           Web frontend for Flask version
-passenger_wsgi.py      WSGI entry point (for Passenger-based hosting)
-requirements.txt       Python dependencies
-```
-
----
-
 ## High Scores
 
-- **Browser version** — saved to `localStorage` in your browser
-- **Terminal version** — saved to `~/.dopewars_scores.json`
-- **Flask version** — saved to `~/.dopewars_scores.json` on the server
+Saved to `localStorage` in your browser.
 
 ---
 
