@@ -1846,7 +1846,7 @@
     const travelTitle = document.getElementById('travelTitle');
     if (travelTitle) {
       travelTitle.innerHTML = isLastDay
-        ? `Travel — <span id="cityDisplay">${G.city}</span> <span style="color:var(--accent2);font-size:13px">— FINAL DAY</span>`
+        ? `Travel — <span id="cityDisplay">${G.city}</span> <span style="color:var(--accent2);font-size:13px;cursor:pointer;text-decoration:underline" onclick="showEndGameModal()">— END GAME</span>`
         : `Travel — <span id="cityDisplay">${G.city}</span>`
           + (G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '');
     }
