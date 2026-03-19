@@ -594,7 +594,7 @@
         🔫 <strong>9mm Pistol ($1,500)</strong> — Halves losses in a bust. 60% chance to scare off muggers.<br>
         📱 <strong>Burner Phone ($500)</strong> — Nearly full drug selection every market visit.<br>
         🚗 <strong>Stolen Honda ($3,000)</strong> — 1 free trip per day (no day lost, no interest accrued).<br>
-        📞 <strong>Supplier Contact ($2,000)</strong> — Once per day, buy any drug at 50% market price.
+        📞 <strong>Supplier Contact ($2,000)</strong> — Once per day, buy any drug at 25% off (up to half the available supply).
       </div>
 
       <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">RANDOM EVENTS</div>
@@ -674,7 +674,7 @@
         { id:'gun',      icon:'🔫', short:'Gun',     label:'9mm Pistol',       desc:'Halves bust losses. 60% chance to scare off muggers.' },
         { id:'burner',   icon:'📱', short:'Burner',  label:'Burner Phone',     desc:'Better connect info — nearly full drug selection every market.' },
         { id:'car',      icon:'🚗', short:'Car',     label:'Stolen Honda',     desc:'1 free trip per day — travel once without losing a day or accruing interest.' },
-        { id:'supplier', icon:'📞', short:'Connect', label:'Supplier Contact', desc:'Once per day, buy any drug at 50% of market price.' },
+        { id:'supplier', icon:'📞', short:'Connect', label:'Supplier Contact', desc:'Once per day, buy any drug at 25% off (up to half the available supply).' },
       ],
       headlines: [
         { text:'NYPD REPORTS SURGE IN STREET DRUG ACTIVITY',        type:'heat'    },
@@ -720,7 +720,7 @@
         { id:'gun',      icon:'🔫', short:'Piece',   label:'Saturday Night Special', desc:'Halves bust losses. 60% chance to scare off muggers.' },
         { id:'burner',   icon:'📟', short:'Pager',   label:'Pager',                  desc:'Better connect info — nearly full selection every market.' },
         { id:'car',      icon:'🚤', short:'Boat',    label:'Go-Fast Boat',           desc:'1 free trip per day — run the coast without losing a day or accruing interest.' },
-        { id:'supplier', icon:'📋', short:'Cartel',  label:'Cartel Contact',         desc:'Once per day, buy any drug at 50% of market price.' },
+        { id:'supplier', icon:'📋', short:'Cartel',  label:'Cartel Contact',         desc:'Once per day, buy any drug at 25% off (up to half the available supply).' },
       ],
       headlines: [
         { text:'METRO-DADE REPORTS SURGE IN COCAINE TRAFFICKING',       type:'surge'   },
@@ -766,7 +766,7 @@
         { id:'gun',      icon:'🔪', short:'Shank',   label:'Flick Knife',      desc:'Halves bust losses. 60% chance to scare off muggers.' },
         { id:'burner',   icon:'📱', short:'Burner',  label:'Burner',           desc:'Better connect info — nearly full selection every market.' },
         { id:'car',      icon:'🛵', short:'Moped',   label:'Moped',            desc:'1 free trip per day — ride out without losing a day or accruing interest.' },
-        { id:'supplier', icon:'🤝', short:'Connect', label:'Street Connect',   desc:'Once per day, buy any drug at 50% of market price.' },
+        { id:'supplier', icon:'🤝', short:'Connect', label:'Street Connect',   desc:'Once per day, buy any drug at 25% off (up to half the available supply).' },
       ],
       headlines: [
         { text:'MET POLICE REPORT SURGE IN CLASS A DRUG ACTIVITY',     type:'heat'    },
@@ -812,7 +812,7 @@
         { id:'gun',      icon:'🔫', short:'Iron',    label:'Colt Revolver',    desc:'Halves losses when caught. 60% chance to scare off outlaws.' },
         { id:'burner',   icon:'📰', short:'Wire',    label:'Telegraph Wire',   desc:'Better market intel — nearly full selection at every trading post.' },
         { id:'car',      icon:'🐴', short:'Horse',   label:'Horse',            desc:'1 free ride per day — travel once without losing a day or accruing interest.' },
-        { id:'supplier', icon:'🤠', short:'Fence',   label:'Fence Contact',    desc:'Once per day, buy any goods at 50% of market price.' },
+        { id:'supplier', icon:'🤠', short:'Fence',   label:'Fence Contact',    desc:'Once per day, buy any goods at 25% off (up to half the available supply).' },
       ],
       headlines: [
         { text:'TOMBSTONE MARSHAL REPORTS SURGE IN OPIUM DENS',       type:'surge'   },
@@ -1194,20 +1194,21 @@
     if (G.supplierUsedToday)                  { addLog('Already used the connect today.', 'bad'); return; }
     const price = G.prices[name];
     if (!price)                  { addLog('No market price for that here.', 'bad'); return; }
-    const halfPrice = Math.round(price / 2);
-    const space     = G.coat - carried();
-    const avail     = G.market[name] || 0;
-    let qty         = Math.min(avail, space, Math.floor(G.cash / halfPrice));
+    const discountPrice = Math.round(price * 0.75);
+    const space         = G.coat - carried();
+    const avail         = G.market[name] || 0;
+    const maxSupply     = Math.max(1, Math.floor(avail / 2));
+    let qty             = Math.min(maxSupply, space, Math.floor(G.cash / discountPrice));
     if (qty <= 0)                { addLog('Not enough cash or space for the connect deal.', 'bad'); return; }
-    // use executeBuy but at half price — temporarily patch price
+    // use executeBuy at discount price — temporarily patch price
     const realPrice = G.prices[name];
-    G.prices[name]  = halfPrice;
+    G.prices[name]  = discountPrice;
     executeBuy(name, qty);
     G.prices[name]  = realPrice;
     G.supplierUsedToday = true;
     delete G.prices[name];
     delete G.market[name];
-    addLog(`Connect hooked you up: ${qty}x ${name} at ${fmt(halfPrice)} (50% off). Connect used for today.`, 'good');
+    addLog(`Connect hooked you up: ${qty}x ${name} at ${fmt(discountPrice)} (25% off). Connect used for today.`, 'good');
     renderAll();
   }
 
@@ -1440,7 +1441,7 @@
     { id:'gun',      icon:'🔫', short:'Gun',     label:'9mm Pistol',       price:1500, desc:'Halves bust losses. 60% chance to scare off muggers.' },
     { id:'burner',   icon:'📱', short:'Burner',  label:'Burner Phone',     price:500,  desc:'Better connect info — nearly full drug selection every market.' },
     { id:'car',      icon:'🚗', short:'Car',     label:'Stolen Honda',     price:3000, desc:'1 free trip per day — travel once without losing a day or accruing interest.' },
-    { id:'supplier', icon:'📞', short:'Connect', label:'Supplier Contact', price:2000, desc:'Once per day, buy any drug at 50% of market price.' },
+    { id:'supplier', icon:'📞', short:'Connect', label:'Supplier Contact', price:2000, desc:'Once per day, buy any drug at 25% off (up to half the available supply).' },
   ];
 
   function renderShop() {
@@ -1763,11 +1764,11 @@
       const hasSpace  = (G.coat - carried()) > 0;
       const canBuy    = canAfford && hasSpace && (G.market[d.name] || 0) > 0;
       const disabledAttr = canBuy ? '' : 'disabled';
-      const halfPrice = Math.round(price / 2);
+      const discountPrice = Math.round(price * 0.75);
       const isBurned   = G.supplierBurnedUntil >= G.day;
-      const canConnect = G.hasSupplier && !G.supplierUsedToday && !isBurned && hasSpace && G.cash >= halfPrice;
+      const canConnect = G.hasSupplier && !G.supplierUsedToday && !isBurned && hasSpace && G.cash >= discountPrice;
       const connectBtn = G.hasSupplier
-        ? `<button class="qty-btn" onclick="supplierBuy('${d.name}')" style="border-color:#4a3a7a;color:#b090f0" ${canConnect ? '' : 'disabled'} title="Buy at 50% via connect">${isBurned ? 'BURNED' : G.supplierUsedToday ? 'USED' : 'CONNECT'}</button>`
+        ? `<button class="qty-btn" onclick="supplierBuy('${d.name}')" style="border-color:#4a3a7a;color:#b090f0" ${canConnect ? '' : 'disabled'} title="Buy at 25% off via connect">${isBurned ? 'BURNED' : G.supplierUsedToday ? 'USED' : 'CONNECT'}</button>`
         : '';
 
       const row = document.createElement('div');
