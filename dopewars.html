@@ -475,6 +475,15 @@
   <div class="modal-box" style="max-width:500px;text-align:left">
     <div class="modal-title" style="margin-bottom:16px">SETTINGS</div>
 
+    <div class="setting-row" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <label class="setting-label">Difficulty Preset</label>
+      <div class="setting-opts" id="set-difficulty">
+        <button class="sopt" data-preset="easy"   onclick="applyPreset('easy')">Easy<br><span>Tourist</span></button>
+        <button class="sopt" data-preset="medium" onclick="applyPreset('medium')">Medium<br><span>Hustler</span></button>
+        <button class="sopt" data-preset="hard"   onclick="applyPreset('hard')">Hard<br><span>Street Legend</span></button>
+      </div>
+    </div>
+
     <div class="setting-row">
       <label class="setting-label">Game Length</label>
       <div class="setting-opts" id="set-days">
@@ -699,8 +708,31 @@
       const group = btn.closest('.setting-opts');
       group.querySelectorAll('.sopt').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      // deselect difficulty preset when any individual setting is changed manually
+      if (!btn.dataset.preset) {
+        document.querySelectorAll('#set-difficulty .sopt').forEach(b => b.classList.remove('active'));
+      }
     });
   });
+  const PRESETS = {
+    easy:   { days: 60,  cash: 5000, debt: 0,     interest: 1.05, events: 0.20, coat: 200 },
+    medium: { days: 30,  cash: 2000, debt: 5000,  interest: 1.10, events: 0.38, coat: 100 },
+    hard:   { days: 30,  cash: 500,  debt: 15000, interest: 1.20, events: 0.60, coat: 50  },
+  };
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    syncSopt('set-days',     p.days);
+    syncSopt('set-cash',     p.cash);
+    syncSopt('set-debt',     p.debt);
+    syncSopt('set-interest', p.interest);
+    syncSopt('set-events',   p.events);
+    syncSopt('set-coat',     p.coat);
+    document.querySelectorAll('#set-difficulty .sopt').forEach(b =>
+      b.classList.toggle('active', b.dataset.preset === name)
+    );
+  }
+
   function readSettings() {
     const pick = id => parseFloat(document.querySelector('#' + id + ' .sopt.active').dataset.val);
     SETTINGS.days     = pick('set-days');
