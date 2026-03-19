@@ -1,6 +1,6 @@
 # Dope Wars
 
-A browser-based remake of the classic 1984 drug trading game. Buy low, sell high, pay off your debt, and survive 30 days on the streets of New York City.
+A browser-based remake of the classic drug trading game. Buy low, sell high, pay off your debt, and make your fortune before time runs out. Choose from four themes: NYC (1984), Miami (1986), London, and the Frontier West.
 
 ![Game Screenshot](https://via.placeholder.com/800x400/0a0a0a/e8c840?text=DOPE+WARS)
 
@@ -40,13 +40,32 @@ Click the **Cash** or **Debt** labels in the Finances panel to deposit, withdraw
 | 🚗 Stolen Honda | $3,000 | 1 free trip/day — no day lost, no interest accrued |
 | 📞 Supplier Contact | $2,000 | Once per day, buy any drug at 25% off (up to half the available supply) |
 
+### City Specialties
+
+Each city has a specialty drug that is always available, priced ~20% cheaper, and stocked in larger quantities. The specialty is shown on each city button (★).
+
 ### Random Events
 
 Every time you travel there's a chance something happens — police raids, price surges, droughts, muggers, found stashes, loan shark visits, and tips from snitches. The Gun upgrade mitigates busts and muggings. Paying off your debt eliminates shark visits.
 
+The loan shark won't visit before day 6. After day 15 the visits become increasingly frequent.
+
+After day 15, late-game events can also occur:
+
+| Event | Effect |
+|---|---|
+| Fire Sale | A dealer dumps bulk product cheap — one-time buy opportunity |
+| Market Cornered | A rival buys out a drug citywide for 2–3 days |
+| Tip-Off | Word that cops are planning a sweep of a specific city |
+| Contact Burned | Your supplier gets picked up; unavailable for 3 days |
+
 ### Coat Offers
 
 Occasionally a street vendor will offer extra carry capacity for a price. More space means bigger buys.
+
+### Final Day
+
+On the last day you cannot travel. A popup prompts you to sell your stash, settle your accounts, and end the game. You'll also receive a warning popup 3 days before the end.
 
 ---
 
@@ -67,18 +86,7 @@ Presets are available in the Settings screen. Individual settings can be customi
 
 ## Drugs
 
-| Drug | Street Name | Base Price | Variance |
-|---|---|---|---|
-| Cocaine | Snow | $15,000 | ±50% |
-| Heroin | Horse | $5,000 | ±60% |
-| Acid | Blotter | $1,000 | ±80% |
-| Shrooms | Caps | $750 | ±60% |
-| PCP | Dust | $1,000 | ±70% |
-| Weed | Grass | $300 | ±50% |
-| Speed | Crank | $90 | ±70% |
-| Ludes | Buttons | $15 | ±80% |
-
-Prices vary wildly between cities. The Burner Phone upgrade ensures nearly all drugs are available in every market.
+Each theme has its own set of drugs with different price ranges and volatility. The NYC theme (default) uses Cocaine, Heroin, Acid, Shrooms, PCP, Weed, Speed, and Ludes. Prices vary wildly between cities. The Burner Phone upgrade ensures nearly all drugs are available in every market.
 
 ---
 
