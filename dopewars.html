@@ -993,6 +993,7 @@
       borrowedToday: 0,
       carTripsToday: 0,
       supplierUsedToday: false,
+      supplierBoughtDrug: null,
       heatDay: false,
       coatsBought: 0,
       lastVisit: {},
@@ -1213,8 +1214,7 @@
     executeBuy(name, qty);
     G.prices[name]  = realPrice;
     G.supplierUsedToday = true;
-    delete G.prices[name];
-    delete G.market[name];
+    G.supplierBoughtDrug = name;
     addLog(`Connect hooked you up: ${qty}x ${name} at ${fmt(discountPrice)} (25% off). Connect used for today.`, 'good');
     renderAll();
   }
@@ -1226,6 +1226,7 @@
     const price = G.prices[name];
     if (!have)  { addLog("You don't have that.", 'bad'); return; }
     if (!price) { addLog('No buyers here for that.', 'bad'); return; }
+    if (G.supplierBoughtDrug === name) { addLog(`Can't sell connect supply in the same city. Travel first.`, 'bad'); return; }
     qty = Math.min(qty, have);
     G.cash += price * qty;
     G.stash[name] -= qty;
@@ -1354,6 +1355,7 @@
       G.borrowedToday = 0;
       G.carTripsToday = 0;
       G.supplierUsedToday = false;
+      G.supplierBoughtDrug = null;
       G.heatDay = false;
       if (G.hasSafehouse) {
         const paid = Math.min(200, G.cash);
