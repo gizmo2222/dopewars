@@ -998,6 +998,9 @@
       hasGun: false, hasBurner: false, hasCar: false, hasSupplier: false,
     };
     document.getElementById('gameOver').classList.add('hidden');
+    document.getElementById('eventOverlay').classList.add('hidden');
+    document.getElementById('eventOkBtn').style.display = '';
+    document.getElementById('eventEndBtn').style.display = 'none';
     const interestPct = Math.round((SETTINGS.interest - 1) * 100);
     const T = THEMES[SETTINGS.theme] || THEMES.nyc;
     document.getElementById('headerSub').textContent =
