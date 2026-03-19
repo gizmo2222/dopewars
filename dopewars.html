@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOPE WARS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0a;
+      --bg2: #111;
+      --bg3: #1a1a1a;
+      --accent: #e8c840;
+      --accent2: #e05c2a;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --text: #f5f0e8;
+      --muted: #999;
+      --border: #2a2a2a;
+    }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 30px;
+      line-height: 1.4;
+      overflow: hidden;
+    }
+    h1, .bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; }
+
+    /* HEADER */
+    .header {
+      background: var(--bg2);
+      border-bottom: 2px solid var(--accent);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 { font-size: 28px; color: var(--accent); font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; }
+    .header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .stat { text-align: center; }
+    .stat-clickable { cursor: pointer; }
+    .stat-clickable:hover .stat-val { opacity: 0.8; }
+    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+    .stat-val { font-size: 16px; color: var(--accent); font-weight: bold; }
+    .stat-val.danger { color: var(--red); }
+    .stat-hint { font-size: 12px; color: var(--muted); }
+    .stat-tray {
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 6px;
+    }
+    .stat-tray.visible { display: flex; }
+    .stat-tray button {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      padding: 4px 6px;
+      cursor: pointer;
+    }
+    .stat-tray button:hover { background: var(--accent); color: #000; }
+    .stat-tray button.danger { border-color: var(--red); color: var(--red); }
+    .stat-tray button.danger:hover { background: var(--red); color: #fff; }
+
+    /* LAYOUT */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: calc(100vh - 52px);
+      overflow: hidden;
+    }
+    .panel {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 12px 14px;
+    }
+    .panel:last-child { border-right: none; }
+    .top-section { }
+    .panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      letter-spacing: 2px;
+    }
+
+    /* MARKET */
+    .drug-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .drug-name { font-size: 18px; font-weight: bold; color: var(--text); }
+    .drug-alias { color: var(--muted); font-size: 15px; }
+    .drug-avail { font-size: 15px; color: var(--muted); }
+    .drug-price { font-size: 18px; color: var(--green); min-width: 75px; text-align: right; }
+    .drug-price.high { color: var(--red); }
+    .buy-group { display: flex; align-items: center; gap: 3px; }
+    .qty-in {
+      width: 40px;
+      text-align: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      padding: 3px 2px;
+    }
+    .qty-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 3px 9px;
+      cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .qty-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .qty-btn:disabled { opacity: 0.3; cursor: default; }
+    .qty-btn:disabled:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .trend { font-size: 15px; margin-left: 3px; }
+    .trend-up { color: var(--red); }
+    .trend-down { color: var(--green); }
+
+    /* STASH */
+    .owned-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pill {
+      display: inline-block;
+      padding: 1px 7px;
+      font-size: 10px;
+      border-radius: 2px;
+    }
+    .pill-good { background: #1a3a1a; color: var(--green); border: 1px solid #2d5a2d; }
+    .pill-bad  { background: #3a1a1a; color: var(--red);   border: 1px solid #5a2d2d; }
+
+    /* CITY GRID */
+    .top-section {
+      min-height: 200px;
+      margin-bottom: 0;
+    }
+    .city-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .city-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 9px 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.1s, color 0.1s, background 0.1s;
+      user-select: none;
+    }
+    .city-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .city-btn.current { border-color: var(--accent); background: #1a1600; color: var(--accent); cursor: default; }
+    .city-name { font-size: 13px; font-weight: bold; }
+    .city-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .city-btn.current .city-desc { color: var(--accent); opacity: 0.6; }
+
+    /* ACTIONS */
+    .action-bar { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+    .action-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      cursor: pointer;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      letter-spacing: 1px;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+    }
+    .action-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .action-btn.danger { border-color: #5a2020; }
+    .action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+    .loan-info {
+      background: var(--bg3);
+      border: 1px solid var(--accent2);
+      padding: 8px 10px;
+      margin: 8px 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .loan-info .debt-num { color: var(--red); font-weight: bold; }
+
+    /* LOG */
+    .log {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 8px;
+      min-height: 90px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 17px;
+    }
+    .log-entry { padding: 2px 0; border-bottom: 1px solid #161616; }
+    .log-entry.good { color: var(--green); }
+    .log-entry.bad  { color: var(--red); }
+    .log-entry.warn { color: var(--accent); }
+    .log-entry.headline { color: var(--muted); font-style: italic; }
+
+    /* DIVIDER */
+    hr.div { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+    /* MODAL OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .overlay.hidden { display: none; }
+    .modal-box {
+      background: var(--bg2);
+      border: 2px solid var(--accent2);
+      padding: 28px 24px;
+      max-width: 380px;
+      width: 92%;
+      text-align: center;
+    }
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px;
+      color: var(--accent2);
+      margin-bottom: 12px;
+    }
+    .modal-msg { margin-bottom: 20px; line-height: 1.7; color: var(--text); }
+    .modal-ok {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 9px 28px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .modal-ok:hover { background: #f0d050; }
+
+    /* GAME OVER */
+    .gameover { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .gameover.hidden { display: none; }
+    .go-box {
+      background: var(--bg2);
+      border: 2px solid var(--accent);
+      padding: 36px 28px;
+      max-width: 420px;
+      width: 92%;
+      text-align: center;
+    }
+    .go-title { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+    .go-score { font-size: 13px; line-height: 2; margin-bottom: 24px; color: var(--text); }
+    .go-score strong { color: var(--accent); font-size: 16px; }
+
+    /* INPUT DIALOG */
+    .input-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 150;
+    }
+    .input-overlay.hidden { display: none; }
+    .input-box {
+      background: var(--bg2);
+      border: 2px solid var(--accent);
+      padding: 24px;
+      max-width: 320px;
+      width: 90%;
+      text-align: center;
+    }
+    .input-box label {
+      display: block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .input-box input[type=number] {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      padding: 8px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .input-box .btn-row { display: flex; gap: 8px; justify-content: center; }
+    .input-confirm {
+      background: var(--accent); color: #000;
+      border: none; padding: 7px 22px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 18px; cursor: pointer;
+    }
+    .input-cancel {
+      background: var(--bg3); color: var(--text);
+      border: 1px solid var(--border); padding: 7px 22px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 18px; cursor: pointer;
+    }
+    .input-cancel:hover { background: var(--red); color: #fff; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+    /* SETTINGS */
+    .setting-row { margin-bottom: 16px; }
+    .setting-label { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; margin-bottom:6px; }
+    .setting-opts { display:flex; gap:6px; }
+    .sopt {
+      flex:1; background:var(--bg3); border:1px solid var(--border);
+      color:var(--muted); font-family:'Share Tech Mono',monospace;
+      font-size:13px; padding:8px 4px; cursor:pointer; text-align:center; line-height:1.4;
+    }
+    .sopt span { font-size:11px; color:var(--muted); }
+    .sopt:hover { border-color:var(--accent); color:var(--text); }
+    .sopt.active { border-color:var(--accent); background:#1a1600; color:var(--accent); }
+    .sopt.active span { color:var(--accent); opacity:0.7; }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .main { grid-template-columns: 1fr; height: auto; overflow: visible; }
+      html, body { overflow: auto; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .panel { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>DOPE WARS</h1>
+    <div class="header-sub" id="headerSub">NEW YORK CITY &bull; 1984</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="action-btn" onclick="openSettings()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">⚙ SETTINGS</button>
+    <div style="text-align:right">
+      <div style="font-size:10px;color:var(--muted)">DAY</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);line-height:1" id="dayDisplay">1</div>
+      <div style="font-size:10px;color:var(--muted)" id="daysLeft">29 days left</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main">
+
+  <!-- LEFT: TRAVEL + MARKET -->
+  <div class="panel">
+    <div class="top-section" id="topLeft">
+      <div class="panel-title" id="travelTitle">Travel — <span id="cityDisplay">Bronx</span></div>
+      <div class="city-grid" id="cityGrid"></div>
+    </div>
+
+    <hr class="div">
+    <div class="panel-title">Market</div>
+    <div id="marketList"></div>
+  </div>
+
+  <!-- RIGHT: STATS + STASH + ACTIONS + LOG -->
+  <div class="panel">
+
+    <div class="top-section" id="topRight">
+      <div class="panel-title">Finances</div>
+      <!-- stats: cash / bank / debt / coat -->
+      <div class="stats-bar">
+        <div class="stat stat-clickable" onclick="toggleTray('cash')">
+          <div class="stat-label">Cash <span class="stat-hint">▾</span></div>
+          <div class="stat-val" id="cashDisplay">$2,000</div>
+          <div class="stat-tray" id="tray-cash">
+            <button onclick="closeTray();openInput('deposit','Deposit how much?')">Deposit</button>
+            <button onclick="closeTray();openInput('withdraw','Withdraw how much?')">Withdraw</button>
+            <button onclick="closeTray();withdrawAll()">Withdraw all</button>
+          </div>
+        </div>
+        <div class="stat"><div class="stat-label">Bank</div><div class="stat-val" id="bankDisplay">$0</div></div>
+        <div class="stat stat-clickable" onclick="toggleTray('debt')">
+          <div class="stat-label">Debt <span class="stat-hint">▾</span></div>
+          <div class="stat-val danger" id="debtDisplay">$5,000</div>
+          <div class="stat-tray" id="tray-debt">
+            <button onclick="closeTray();openInput('borrow','Borrow how much?')">Borrow more</button>
+            <button class="danger" onclick="closeTray();openInput('loan','Pay how much on debt?')">Pay partial</button>
+            <button class="danger" onclick="closeTray();payAllLoan()">Pay all</button>
+          </div>
+        </div>
+        <div class="stat"><div class="stat-label">Coat / Space</div><div class="stat-val" id="coatDisplay">0 / 100</div></div>
+      </div>
+    </div>
+
+    <hr class="div">
+    <div class="panel-title">Your Stash</div>
+    <div id="stashList" style="color:var(--muted)">Empty pockets.</div>
+
+    <hr class="div">
+    <div class="panel-title">Black Market</div>
+    <div id="shopList"></div>
+    <div id="upgradeStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px"></div>
+
+    <div class="panel-title">Street News</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="overlay hidden" id="eventOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="eventTitle">EVENT</div>
+    <div class="modal-msg" id="eventMsg"></div>
+    <button class="modal-ok" onclick="dismissEvent()">OK, GOT IT</button>
+  </div>
+</div>
+
+<!-- COAT OFFER MODAL -->
+<div class="overlay hidden" id="coatOverlay">
+  <div class="modal-box">
+    <div class="modal-title">STREET OFFER</div>
+    <div class="modal-msg" id="coatOfferMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="modal-ok" onclick="acceptCoatOffer()">BUY IT</button>
+      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="declineCoatOffer()">PASS</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAFEHOUSE MODAL -->
+<div class="overlay hidden" id="safehouseOverlay">
+  <div class="modal-box" style="max-width:520px;text-align:left">
+    <div class="modal-title" style="margin-bottom:12px">SAFE HOUSE</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Store product off your body. Safehouse never gets busted.</div>
+    <div id="safehouseList"></div>
+    <button class="modal-ok" style="margin-top:14px;width:100%" onclick="closeSafehouse()">CLOSE</button>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay hidden" id="settingsOverlay">
+  <div class="modal-box" style="max-width:500px;text-align:left">
+    <div class="modal-title" style="margin-bottom:16px">SETTINGS</div>
+
+    <div class="setting-row">
+      <label class="setting-label">Game Length</label>
+      <div class="setting-opts" id="set-days">
+        <button class="sopt active" data-val="30">30 days<br><span>Standard</span></button>
+        <button class="sopt" data-val="60">60 days<br><span>Extended</span></button>
+        <button class="sopt" data-val="90">90 days<br><span>Marathon</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Starting Cash</label>
+      <div class="setting-opts" id="set-cash">
+        <button class="sopt active" data-val="2000">$2,000<br><span>Standard</span></button>
+        <button class="sopt" data-val="5000">$5,000<br><span>Head start</span></button>
+        <button class="sopt" data-val="500">$500<br><span>Hardcore</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Starting Debt</label>
+      <div class="setting-opts" id="set-debt">
+        <button class="sopt active" data-val="5000">$5,000<br><span>Standard</span></button>
+        <button class="sopt" data-val="0">$0<br><span>Clean slate</span></button>
+        <button class="sopt" data-val="15000">$15,000<br><span>Deep in it</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Daily Interest Rate</label>
+      <div class="setting-opts" id="set-interest">
+        <button class="sopt active" data-val="1.10">10%<br><span>Standard</span></button>
+        <button class="sopt" data-val="1.05">5%<br><span>Relaxed</span></button>
+        <button class="sopt" data-val="1.20">20%<br><span>Brutal</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Event Frequency</label>
+      <div class="setting-opts" id="set-events">
+        <button class="sopt active" data-val="0.38">Normal<br><span>38% chance</span></button>
+        <button class="sopt" data-val="0.20">Quiet<br><span>20% chance</span></button>
+        <button class="sopt" data-val="0.60">Chaotic<br><span>60% chance</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Starting Carry Capacity</label>
+      <div class="setting-opts" id="set-coat">
+        <button class="sopt active" data-val="100">100<br><span>Standard</span></button>
+        <button class="sopt" data-val="50">50<br><span>Tight</span></button>
+        <button class="sopt" data-val="200">200<br><span>Loaded</span></button>
+      </div>
+    </div>
+
+    <button class="modal-ok" style="width:100%;margin-top:18px;font-size:20px" onclick="startFromSettings()">START GAME</button>
+  </div>
+</div>
+
+<!-- CUSTOM INPUT DIALOG -->
+<div class="input-overlay hidden" id="inputOverlay">
+  <div class="input-box">
+    <label id="inputLabel">Amount</label>
+    <input type="number" id="inputField" min="0" value="0">
+    <div class="btn-row">
+      <button class="input-confirm" onclick="confirmInput()">CONFIRM</button>
+      <button class="input-cancel" onclick="closeInput()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="gameover hidden" id="gameOver">
+  <div class="go-box" style="max-width:520px">
+    <div class="go-title" id="goTitle">GAME OVER</div>
+    <div class="go-score" id="goScore"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
+      <button class="modal-ok" onclick="newGame()">PLAY AGAIN</button>
+      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="document.getElementById('gameOver').classList.add('hidden');openSettings()">CHANGE SETTINGS</button>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:2px;margin-bottom:8px">HIGH SCORES</div>
+      <div id="highScoreTable"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── DATA ─── */
+  const DRUGS = [
+    { name:'Cocaine', base:15000, variance:0.5, street:'Snow'    },
+    { name:'Heroin',  base:5000,  variance:0.6, street:'Horse'   },
+    { name:'Acid',    base:1000,  variance:0.8, street:'Blotter' },
+    { name:'Weed',    base:300,   variance:0.5, street:'Grass'   },
+    { name:'Speed',   base:90,    variance:0.7, street:'Crank'   },
+    { name:'Ludes',   base:15,    variance:0.8, street:'Buttons' },
+    { name:'Shrooms', base:750,   variance:0.6, street:'Caps'    },
+    { name:'PCP',     base:1000,  variance:0.7, street:'Dust'    },
+  ];
+  const CITIES = [
+    { name:'Bronx',     desc:'Home turf'   },
+    { name:'Manhattan', desc:'Big money'   },
+    { name:'Brooklyn',  desc:'Rough crowd' },
+    { name:'Queens',    desc:'Quiet spots' },
+    { name:'Harlem',    desc:'Hot market'  },
+    { name:'Staten Is.',desc:'Slow days'   },
+  ];
+  const EVENTS = [
+    { title:'POLICE RAID!',     msg:"Cops bust your stash! You lose half your drugs.",                              type:'bust'    },
+    { title:'PRICE SURGE',      msg:"Someone cornered the market. Drug prices are WILD today.",                     type:'surge'   },
+    { title:'DROUGHT',          msg:"Supply dried up. Half the market is empty.",                                   type:'drought' },
+    { title:'MUGGER',           msg:"Someone jacked you on the street. They took your cash.",                       type:'mug'     },
+    { title:'FOUND STASH',      msg:"You find a stash hidden in an abandoned lot. Score!",                          type:'find'    },
+    { title:'CHEAP SUPPLY',     msg:"Prices crashed — a dealer is desperate to move product.",                      type:'cheap'   },
+    { title:'LOAN SHARK VISIT', msg:"The shark's boys paid you a visit. They took $500 as a 'reminder'.",           type:'shark'   },
+    { title:'COPS ON THE TAKE', msg:"You slip a cop $200 to look the other way. Smart move.",                       type:'bribe'   },
+    { title:'STREET TIP',       msg:"A snitch whispers something useful in your ear.",                               type:'tip'     },
+  ];
+
+  const HEADLINES = [
+    'NYPD REPORTS SURGE IN STREET DRUG ACTIVITY',
+    'MAYOR PLEDGES CRACKDOWN ON BRONX DEALERS',
+    'MYSTERIOUS SHORTAGE HITS CITY DRUG SUPPLY',
+    'WALL ST. EXECS FUEL COCAINE DEMAND: SOURCES',
+    'BROOKLYN TURF WAR LEAVES THREE HOSPITALIZED',
+    'POLICE COMMISSIONER WARNS OF NEW TASK FORCE',
+    'HARLEM RESIDENTS DEMAND END TO OPEN-AIR DEALING',
+    'FEDS SEIZE RECORD HEROIN SHIPMENT AT PORT',
+    'QUEENS DRUG PRICES HIT ALL-TIME HIGH',
+    'UNDERCOVER OPERATION SWEEPS MANHATTAN SOUTH',
+    'CITY COUNCIL DEBATES MANDATORY MINIMUMS BILL',
+    'STATEN ISLAND FERRY USED IN SMUGGLING RING',
+    'INFORMANT NETWORK EXPANDING, SAYS NYPD CHIEF',
+    'DROUGHT CONDITIONS STRAIN SUPPLY LINES CITYWIDE',
+    'LOCAL DEALER NETWORK DISRUPTED BY RIVAL CREW',
+    'PRICES EXPECTED TO SPIKE FOLLOWING BORDER SEIZURE',
+  ];
+  let G = {};
+  let inputAction = null;
+
+  /* ─── SETTINGS ─── */
+  const SETTINGS = {
+    days:     30,
+    cash:     2000,
+    debt:     5000,
+    interest: 1.10,
+    events:   0.38,
+    coat:     100,
+  };
+
+  function openSettings() {
+    document.getElementById('settingsOverlay').classList.remove('hidden');
+    // sync button states to current SETTINGS
+    syncSopt('set-days',     SETTINGS.days);
+    syncSopt('set-cash',     SETTINGS.cash);
+    syncSopt('set-debt',     SETTINGS.debt);
+    syncSopt('set-interest', SETTINGS.interest);
+    syncSopt('set-events',   SETTINGS.events);
+    syncSopt('set-coat',     SETTINGS.coat);
+  }
+  function syncSopt(groupId, val) {
+    document.querySelectorAll('#' + groupId + ' .sopt').forEach(b => {
+      b.classList.toggle('active', parseFloat(b.dataset.val) === parseFloat(val));
+    });
+  }
+  // wire up all sopt buttons
+  document.querySelectorAll('.sopt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.closest('.setting-opts');
+      group.querySelectorAll('.sopt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+  function readSettings() {
+    const pick = id => parseFloat(document.querySelector('#' + id + ' .sopt.active').dataset.val);
+    SETTINGS.days     = pick('set-days');
+    SETTINGS.cash     = pick('set-cash');
+    SETTINGS.debt     = pick('set-debt');
+    SETTINGS.interest = pick('set-interest');
+    SETTINGS.events   = pick('set-events');
+    SETTINGS.coat     = pick('set-coat');
+  }
+  function startFromSettings() {
+    readSettings();
+    document.getElementById('settingsOverlay').classList.add('hidden');
+    newGame();
+  }
+
+  /* ─── HELPERS ─── */
+  const rnd   = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const fmt   = n      => '$' + Math.abs(Math.round(n)).toLocaleString();
+  const carried = ()   => Object.values(G.stash).reduce((a, b) => a + b, 0);
+
+  /* ─── GAME INIT ─── */
+  function newGame() {
+    G = {
+      day: 1, maxDays: SETTINGS.days,
+      cash: SETTINGS.cash, bank: 0, debt: SETTINGS.debt,
+      city: 'Bronx', coat: SETTINGS.coat,
+      stash: {}, safehouse: {}, prices: {}, prevPrices: {}, market: {},
+      avgCost: {},
+      borrowedToday: 0,
+      carTripsToday: 0,
+      supplierUsedToday: false,
+      hasGun: false, hasBurner: false, hasCar: false, hasSupplier: false,
+    };
+    document.getElementById('gameOver').classList.add('hidden');
+    const interestPct = Math.round((SETTINGS.interest - 1) * 100);
+    document.getElementById('headerSub').textContent =
+      `${SETTINGS.days} DAYS TO MAKE YOUR FORTUNE \u2022 NEW YORK CITY \u2022 1984 \u2022 ${interestPct}%/DAY INTEREST`;
+    generateMarket();
+    renderAll();
+    addLog(`Welcome to Dope Wars. ${SETTINGS.days} days. Make your fortune.`, 'warn');
+    if (SETTINGS.debt > 0) addLog(`You owe ${fmt(SETTINGS.debt)} to the loan shark at ${interestPct}%/day.`, 'bad');
+  }
+
+  /* ─── MARKET GENERATION ─── */
+  function generateMarket() {
+    G.prevPrices = { ...G.prices };
+    G.prices = {};
+    G.market = {};
+    const skipChance = G.hasBurner ? 0.05 : 0.15;
+    DRUGS.forEach(d => {
+      if (Math.random() < skipChance) return;
+      let price;
+      if (d.name === 'Cocaine' && Math.random() < 0.05) {
+        // classic spike: $80k–$120k
+        price = rnd(80000, 120000);
+      } else {
+        price = Math.round(d.base * (0.5 + Math.random() * d.variance * 2));
+      }
+      G.prices[d.name] = price;
+      G.market[d.name] = rnd(5, 60);
+    });
+  }
+
+  /* ─── EVENTS ─── */
+  function maybeEvent() {
+    if (Math.random() > SETTINGS.events) return;
+    const ev = EVENTS[rnd(0, EVENTS.length - 1)];
+    applyEvent(ev.type);
+    showEvent(ev.title, ev.msg);
+  }
+
+  function applyEvent(type) {
+    if (type === 'bust') {
+      let lost = 0;
+      const fraction = G.hasGun ? 0.25 : 0.5;
+      Object.keys(G.stash).forEach(k => {
+        const take = Math.floor(G.stash[k] * fraction);
+        G.stash[k] -= take;
+        lost += take;
+        if (G.stash[k] <= 0) delete G.stash[k];
+      });
+      addLog(`BUST! Lost ${lost} units to the cops${G.hasGun ? ' (gun reduced losses)' : ''}.`, 'bad');
+    } else if (type === 'surge') {
+      Object.keys(G.prices).forEach(k => {
+        G.prices[k] = Math.round(G.prices[k] * (1.5 + Math.random()));
+      });
+      addLog('Prices surged across the board!', 'bad');
+    } else if (type === 'drought') {
+      const keys = Object.keys(G.market);
+      for (let i = 0; i < Math.floor(keys.length / 2); i++) {
+        delete G.market[keys[i]];
+        delete G.prices[keys[i]];
+      }
+      addLog('Drought hit — half the supply vanished.', 'bad');
+    } else if (type === 'mug') {
+      if (G.hasGun && Math.random() < 0.6) {
+        addLog('Mugger tried you — you flashed the piece and they ran.', 'good');
+        return;
+      }
+      const take = Math.min(G.cash, rnd(300, 1500));
+      G.cash -= take;
+      addLog(`Mugged for ${fmt(take)}!`, 'bad');
+    } else if (type === 'find') {
+      const d = DRUGS[rnd(0, DRUGS.length - 1)];
+      let qty = rnd(5, 25);
+      qty = Math.min(qty, G.coat - carried());
+      if (qty > 0) {
+        G.stash[d.name] = (G.stash[d.name] || 0) + qty;
+        addLog(`Found ${qty}x ${d.name} in an alley!`, 'good');
+      }
+    } else if (type === 'cheap') {
+      Object.keys(G.prices).forEach(k => {
+        G.prices[k] = Math.round(G.prices[k] * 0.35);
+      });
+      addLog('Prices crashed — buy now!', 'good');
+    } else if (type === 'shark') {
+      if (G.debt <= 0) {
+        addLog("Loan shark's boys came by — nothing to collect.", 'warn');
+        return;
+      }
+      const take = Math.min(G.cash, 500);
+      G.cash -= take;
+      addLog(`Loan shark took ${fmt(take)} from you.`, 'bad');
+    } else if (type === 'bribe') {
+      const take = Math.min(G.cash, 200);
+      G.cash -= take;
+      addLog(`Paid a cop ${fmt(take)} to look away.`, 'warn');
+    } else if (type === 'tip') {
+      // find the drug with the lowest price relative to its base (best deal)
+      let bestDrug = null, bestRatio = Infinity;
+      DRUGS.forEach(d => {
+        if (G.prices[d.name]) {
+          const ratio = G.prices[d.name] / d.base;
+          if (ratio < bestRatio) { bestRatio = ratio; bestDrug = d; }
+        }
+      });
+      if (bestDrug) {
+        addLog(`Snitch tip: ${bestDrug.name} is going for ${fmt(G.prices[bestDrug.name])} here — that's a steal.`, 'good');
+      } else {
+        addLog('Snitch had nothing useful to say.', '');
+      }
+    }
+  }
+
+  function showEvent(title, msg) {
+    document.getElementById('eventTitle').textContent = title;
+    document.getElementById('eventMsg').textContent   = msg;
+    document.getElementById('eventOverlay').classList.remove('hidden');
+  }
+  function dismissEvent() {
+    document.getElementById('eventOverlay').classList.add('hidden');
+    renderAll();
+  }
+
+  /* ─── BUY / SELL ─── */
+  function calcMaxQty(name) {
+    const price = G.prices[name];
+    if (!price) return 0;
+    const avail = G.market[name] || 0;
+    const space = G.coat - carried();
+    return Math.min(avail, space, Math.floor(G.cash / price));
+  }
+
+  function executeBuy(name, qty) {
+    const price = G.prices[name];
+    if (!price || qty <= 0) { addLog('Cannot buy — no cash, space, or supply.', 'bad'); return; }
+    // update weighted average cost
+    const prevQty  = G.stash[name] || 0;
+    const prevAvg  = G.avgCost[name] || 0;
+    G.avgCost[name] = Math.round((prevAvg * prevQty + price * qty) / (prevQty + qty));
+    G.cash -= price * qty;
+    G.stash[name] = prevQty + qty;
+    G.market[name] -= qty;
+    if (G.market[name] <= 0) delete G.market[name];
+    addLog(`Bought ${qty}x ${name} @ ${fmt(price)} ea. (avg cost: ${fmt(G.avgCost[name])})`, 'good');
+    renderAll();
+  }
+
+  function buyDrug(name) {
+    const qtyEl = document.getElementById('qty_' + name);
+    let qty = parseInt(qtyEl.value) || 1;
+    qty = Math.min(qty, calcMaxQty(name));
+    executeBuy(name, qty);
+  }
+
+  function buyMax(name) {
+    const qty = calcMaxQty(name);
+    if (qty <= 0) { addLog('Cannot buy — no cash, space, or supply.', 'bad'); return; }
+    executeBuy(name, qty);
+  }
+
+  function supplierBuy(name) {
+    if (!G.hasSupplier)          { addLog('No supplier contact.', 'bad'); return; }
+    if (G.supplierUsedToday)     { addLog('Already used the connect today.', 'bad'); return; }
+    const price = G.prices[name];
+    if (!price)                  { addLog('No market price for that here.', 'bad'); return; }
+    const halfPrice = Math.round(price / 2);
+    const space     = G.coat - carried();
+    let qty         = Math.min(space, Math.floor(G.cash / halfPrice));
+    if (qty <= 0)                { addLog('Not enough cash or space for the connect deal.', 'bad'); return; }
+    // use executeBuy but at half price — temporarily patch price
+    const realPrice = G.prices[name];
+    G.prices[name]  = halfPrice;
+    executeBuy(name, qty);
+    G.prices[name]  = realPrice;
+    G.supplierUsedToday = true;
+    addLog(`Connect hooked you up: ${qty}x ${name} at ${fmt(halfPrice)} (50% off). Connect used for today.`, 'good');
+    renderAll();
+  }
+
+  function sellDrug(name) {
+    const qtyEl = document.getElementById('sqty_' + name);
+    let qty     = parseInt(qtyEl.value) || 1;
+    const have  = G.stash[name] || 0;
+    const price = G.prices[name];
+    if (!have)  { addLog("You don't have that.", 'bad'); return; }
+    if (!price) { addLog('No buyers here for that.', 'bad'); return; }
+    qty = Math.min(qty, have);
+    G.cash += price * qty;
+    G.stash[name] -= qty;
+    if (G.stash[name] <= 0) { delete G.stash[name]; delete G.avgCost[name]; }
+    addLog(`Sold ${qty}x ${name} @ ${fmt(price)} ea.`, 'good');
+    renderAll();
+  }
+
+  /* ─── TRAVEL ─── */
+  const CAR_FREE_TRIPS = 3;
+
+  function travel(city) {
+    if (city === G.city) return;
+    G.city = city;
+
+    const freeTrip = G.hasCar && G.carTripsToday < CAR_FREE_TRIPS;
+    if (freeTrip) {
+      G.carTripsToday++;
+      addLog(`Drove to ${city} (free trip ${G.carTripsToday}/${CAR_FREE_TRIPS} today).`, 'good');
+    } else {
+      G.day++;
+      G.debt = Math.round(G.debt * SETTINGS.interest);
+      G.borrowedToday = 0;
+      G.carTripsToday = 0;
+      G.supplierUsedToday = false;
+      if (G.hasSafehouse) {
+        const paid = Math.min(200, G.cash);
+        G.cash -= paid;
+        addLog(`Safe house rent: ${fmt(paid)} deducted.`, 'bad');
+      }
+      addLog(`Traveled to ${city}. Day ${G.day}.`, 'warn');
+      // random headline
+      const hl = HEADLINES[rnd(0, HEADLINES.length - 1)];
+      addLog(`📰 ${hl}`, 'headline');
+    }
+
+    generateMarket();
+    if (Math.random() < SETTINGS.events) {
+      let ev = EVENTS[rnd(0, EVENTS.length - 1)];
+      // skip shark popup entirely if debt is cleared
+      if (ev.type === 'shark' && G.debt <= 0) ev = null;
+      if (ev) {
+        applyEvent(ev.type);
+        showEvent(ev.title, ev.msg);
+      }
+    }
+    if (G.day > G.maxDays) { endGame(); return; }
+    maybeCoatOffer();
+    renderAll();
+  }
+
+  /* ─── COAT OFFER ─── */
+  const COAT_OFFERS = [
+    { desc:'A guy on the corner is selling a trench coat with deep pockets', capacity: 50,  price: 400  },
+    { desc:'A vendor has a military surplus duffel — fits a lot of product',  capacity: 75,  price: 600  },
+    { desc:'Someone\'s hawking a custom-lined jacket out of a van',           capacity: 40,  price: 300  },
+    { desc:'A tailor offers to line your coat with hidden compartments',      capacity: 100, price: 900  },
+    { desc:'A street kid is selling a stolen messenger bag',                  capacity: 30,  price: 150  },
+    { desc:'A dock worker has an oversized work vest for sale',               capacity: 60,  price: 500  },
+  ];
+  let pendingCoatOffer = null;
+
+  function maybeCoatOffer() {
+    if (Math.random() > 0.10) return;
+    const offer = COAT_OFFERS[Math.floor(Math.random() * COAT_OFFERS.length)];
+    pendingCoatOffer = offer;
+    document.getElementById('coatOfferMsg').textContent =
+      `${offer.desc}. +${offer.capacity} carry capacity for ${fmt(offer.price)}. Interested?`;
+    document.getElementById('coatOverlay').classList.remove('hidden');
+  }
+
+  function acceptCoatOffer() {
+    document.getElementById('coatOverlay').classList.add('hidden');
+    if (!pendingCoatOffer) return;
+    const offer = pendingCoatOffer;
+    pendingCoatOffer = null;
+    if (G.cash < offer.price) {
+      addLog(`Couldn't afford the coat offer (${fmt(offer.price)}).`, 'bad');
+      return;
+    }
+    G.cash -= offer.price;
+    G.coat += offer.capacity;
+    addLog(`Bought a new carry (+${offer.capacity} capacity) for ${fmt(offer.price)}.`, 'good');
+    renderAll();
+  }
+
+  function declineCoatOffer() {
+    document.getElementById('coatOverlay').classList.add('hidden');
+    pendingCoatOffer = null;
+    addLog('Passed on the carry offer.', '');
+  }
+
+  /* ─── UPGRADES ─── */
+  const UPGRADES = [
+    { id:'gun',       label:'9mm Pistol',       price:1500,  desc:'Halves bust losses. 60% chance to scare off muggers.' },
+    { id:'burner',    label:'Burner Phone',     price:500,   desc:'Better connect info — nearly full drug selection every market.' },
+    { id:'car',       label:'Stolen Honda',     price:3000,  desc:'3 free trips per day — travel without losing a day. Interest still accrues normally.' },
+    { id:'supplier',  label:'Supplier Contact', price:2000,  desc:'Once per day, buy any drug at 50% of market price.' },
+  ];
+
+  function renderShop() {
+    const list = document.getElementById('shopList');
+    list.innerHTML = '';
+    UPGRADES.forEach(u => {
+      const owned    = G['has' + u.id.charAt(0).toUpperCase() + u.id.slice(1)];
+      const canAfford = G.cash >= u.price;
+      const row = document.createElement('div');
+      row.className = 'drug-row';
+      row.innerHTML = `
+        <div>
+          <div class="drug-name">${u.label}</div>
+          <div class="drug-avail">${u.desc}</div>
+        </div>
+        <div class="drug-price${canAfford && !owned ? '' : ''}">${fmt(u.price)}</div>
+        <div class="buy-group">
+          <button class="qty-btn" onclick="buyUpgrade('${u.id}')" ${owned || !canAfford ? 'disabled' : ''}>${owned ? 'OWNED' : 'BUY'}</button>
+        </div>`;
+      list.appendChild(row);
+    });
+  }
+
+  function buyUpgrade(id) {
+    const u = UPGRADES.find(x => x.id === id);
+    const key = 'has' + id.charAt(0).toUpperCase() + id.slice(1);
+    if (G[key]) { addLog('Already own that.', 'bad'); return; }
+    if (G.cash < u.price) { addLog(`Need ${fmt(u.price)} to buy ${u.label}.`, 'bad'); return; }
+    G.cash -= u.price;
+    G[key] = true;
+    addLog(`Bought: ${u.label}.`, 'good');
+    renderAll();
+  }
+
+  /* ─── SAFEHOUSE ─── */
+  function openSafehouse() {
+    if (!G.hasSafehouse) { addLog('No safe house yet — buy one from the shop.', 'bad'); return; }
+    const overlay = document.getElementById('safehouseOverlay');
+    renderSafehouseModal();
+    overlay.classList.remove('hidden');
+  }
+  function closeSafehouse() {
+    document.getElementById('safehouseOverlay').classList.add('hidden');
+  }
+  function renderSafehouseModal() {
+    const list = document.getElementById('safehouseList');
+    list.innerHTML = '';
+    const allDrugs = new Set([...Object.keys(G.stash), ...Object.keys(G.safehouse)]);
+    if (!allDrugs.size) { list.innerHTML = '<div style="color:var(--muted);padding:8px 0">Nothing stashed yet.</div>'; return; }
+    allDrugs.forEach(name => {
+      const onBody = G.stash[name] || 0;
+      const stored = G.safehouse[name] || 0;
+      const row = document.createElement('div');
+      row.style.cssText = 'border-bottom:1px solid var(--border);padding:8px 0;display:grid;grid-template-columns:1fr auto auto auto auto;gap:6px;align-items:center;font-size:14px';
+      row.innerHTML = `
+        <div>${name}</div>
+        <div style="color:var(--muted)">on you: ${onBody}</div>
+        <div style="color:var(--accent)">stored: ${stored}</div>
+        <button class="qty-btn" style="font-size:12px" onclick="shStash('${name}')">STORE ALL</button>
+        <button class="qty-btn" style="font-size:12px" onclick="shRetrieve('${name}')">TAKE ALL</button>`;
+      list.appendChild(row);
+    });
+  }
+  function shStash(name) {
+    const qty = G.stash[name] || 0;
+    if (!qty) return;
+    G.safehouse[name] = (G.safehouse[name] || 0) + qty;
+    delete G.stash[name]; delete G.avgCost[name];
+    addLog(`Stashed ${qty}x ${name} at the safe house.`, 'good');
+    renderSafehouseModal(); renderAll();
+  }
+  function shStashOne(name) { shStash(name); }
+  function shRetrieve(name) {
+    const qty = G.safehouse[name] || 0;
+    if (!qty) return;
+    const space = G.coat - carried();
+    const take = Math.min(qty, space);
+    if (!take) { addLog('No carry space.', 'bad'); return; }
+    G.stash[name] = (G.stash[name] || 0) + take;
+    G.safehouse[name] -= take;
+    if (!G.safehouse[name]) delete G.safehouse[name];
+    addLog(`Retrieved ${take}x ${name} from safe house.`, 'good');
+    renderSafehouseModal(); renderAll();
+  }
+  function shRetrieveOne(name) { shRetrieve(name); }
+
+  /* ─── CUSTOM INPUT DIALOG ─── */
+  function openInput(action, labelText) {
+    inputAction = action;
+    document.getElementById('inputLabel').textContent = labelText;
+    document.getElementById('inputField').value = 0;
+    document.getElementById('inputOverlay').classList.remove('hidden');
+    document.getElementById('inputField').focus();
+  }
+  function closeInput() {
+    inputAction = null;
+    document.getElementById('inputOverlay').classList.add('hidden');
+  }
+  function confirmInput() {
+    const amt    = parseInt(document.getElementById('inputField').value) || 0;
+    const action = inputAction;   // capture BEFORE closeInput() clears it
+    closeInput();
+    if (amt <= 0) return;
+    if (action === 'deposit') {
+      const a = Math.min(amt, G.cash);
+      G.cash -= a; G.bank += a;
+      addLog(`Deposited ${fmt(a)}.`, 'good');
+    } else if (action === 'withdraw') {
+      const a = Math.min(amt, G.bank);
+      G.cash += a; G.bank -= a;
+      addLog(`Withdrew ${fmt(a)}.`, 'good');
+    } else if (action === 'loan') {
+      const a = Math.min(amt, G.cash, G.debt);
+      G.cash -= a; G.debt -= a;
+      if (G.debt < 0) G.debt = 0;
+      addLog(`Paid ${fmt(a)} on debt. Remaining: ${fmt(G.debt)}.`, 'good');
+      if (G.debt === 0) addLog('DEBT CLEARED! You are free!', 'good');
+    } else if (action === 'borrow') {
+      const remaining = 10000 - (G.borrowedToday || 0);
+      if (remaining <= 0) { addLog("Loan shark won't lend any more today.", 'bad'); return; }
+      const a = Math.min(amt, remaining);
+      G.cash += a; G.debt += a; G.borrowedToday += a;
+      addLog(`Borrowed ${fmt(a)} from the loan shark. Total debt: ${fmt(G.debt)}. Remaining today: ${fmt(remaining - a)}.`, 'warn');
+    }
+    renderAll();
+  }
+
+  function payAllLoan() {
+    const a = Math.min(G.cash, G.debt);
+    if (a <= 0) { addLog('No cash to pay debt with.', 'bad'); return; }
+    G.cash -= a; G.debt -= a;
+    if (G.debt < 0) G.debt = 0;
+    addLog(`Paid ${fmt(a)} on debt. Remaining: ${fmt(G.debt)}.`, 'good');
+    if (G.debt === 0) addLog('DEBT CLEARED! You are free!', 'good');
+    renderAll();
+  }
+
+  function withdrawAll() {
+    if (G.bank <= 0) { addLog('Nothing in the bank to withdraw.', 'bad'); return; }
+    const a = G.bank;
+    G.cash += a; G.bank = 0;
+    addLog(`Withdrew all ${fmt(a)} from the bank.`, 'good');
+    renderAll();
+  }
+
+  /* ─── PERSISTENCE ─── */
+  function saveGame() {
+    try {
+      localStorage.setItem('dopewars_game',     JSON.stringify(G));
+      localStorage.setItem('dopewars_settings', JSON.stringify(SETTINGS));
+    } catch(e) {}
+  }
+
+  function loadSavedGame() {
+    try {
+      const raw = localStorage.getItem('dopewars_game');
+      if (!raw) return false;
+      const saved = JSON.parse(raw);
+      if (saved.day > saved.maxDays) return false; // finished game — don't resume
+      const savedSettings = localStorage.getItem('dopewars_settings');
+      if (savedSettings) Object.assign(SETTINGS, JSON.parse(savedSettings));
+      G = saved;
+      document.getElementById('gameOver').classList.add('hidden');
+      const interestPct = Math.round((SETTINGS.interest - 1) * 100);
+      document.getElementById('headerSub').textContent =
+        `${SETTINGS.days} DAYS TO MAKE YOUR FORTUNE \u2022 NEW YORK CITY \u2022 1984 \u2022 ${interestPct}%/DAY INTEREST`;
+      addLog('Session restored. Welcome back.', 'warn');
+      renderAll();
+      return true;
+    } catch(e) { return false; }
+  }
+
+  /* ─── HIGH SCORES ─── */
+  function loadScores() {
+    try { return JSON.parse(localStorage.getItem('dopewars_scores') || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveScore(net) {
+    const scores = loadScores();
+    scores.push({
+      net,
+      days:     SETTINGS.days,
+      cash:     SETTINGS.cash,
+      debt:     SETTINGS.debt,
+      interest: SETTINGS.interest,
+      date:     new Date().toLocaleDateString(),
+    });
+    scores.sort((a, b) => b.net - a.net);
+    scores.splice(10); // keep top 10
+    try { localStorage.setItem('dopewars_scores', JSON.stringify(scores)); } catch(e) {}
+    return scores;
+  }
+  function renderHighScores(scores) {
+    const el = document.getElementById('highScoreTable');
+    if (!scores.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No scores yet.</div>'; return; }
+    el.innerHTML = scores.map((s, i) => {
+      const rank  = i === 0 ? '👑' : `#${i + 1}`;
+      const color = s.net > 0 ? 'var(--green)' : 'var(--red)';
+      const interestPct = Math.round((s.interest - 1) * 100);
+      return `<div style="display:grid;grid-template-columns:28px 1fr auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="font-size:14px">${rank}</span>
+        <span style="color:var(--muted)">${s.days}d · $${s.cash.toLocaleString()} start · ${interestPct}% int · ${s.date}</span>
+        <span style="color:${color};font-weight:bold">${fmt(s.net)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* ─── GAME OVER ─── */
+  function endGame() {
+    const net = G.cash + G.bank - G.debt;
+    let title, flavor;
+    if (net > 100000)     { title = 'KINGPIN!';        flavor = 'You OWN these streets. Nobody moves product without your say-so.'; }
+    else if (net > 50000) { title = 'MADE MAN';        flavor = 'Big earner. The bosses are watching. Keep it up.'; }
+    else if (net > 10000) { title = 'STREET HUSTLER';  flavor = 'Not bad. You survived and came out ahead.'; }
+    else if (net > 0)     { title = 'SURVIVOR';        flavor = 'You made it out alive — barely. Try harder next time.'; }
+    else                  { title = 'BROKE & BURIED';  flavor = 'The loan shark owns everything you had. Game over for real.'; }
+
+    document.getElementById('goTitle').textContent = title;
+    document.getElementById('goScore').innerHTML =
+      `Cash on hand: ${fmt(G.cash)}<br>` +
+      `Bank: ${fmt(G.bank)}<br>` +
+      `Debt owed: −${fmt(G.debt)}<br><br>` +
+      `<strong>Net Worth: ${fmt(net)}</strong><br><br>` +
+      flavor;
+
+    const scores = saveScore(net);
+    renderHighScores(scores);
+    document.getElementById('gameOver').classList.remove('hidden');
+  }
+
+  /* ─── LOG ─── */
+  function addLog(msg, cls = '') {
+    const log = document.getElementById('log');
+    const d   = document.createElement('div');
+    d.className = 'log-entry ' + cls;
+    d.textContent = msg;
+    log.prepend(d);
+    while (log.children.length > 50) log.removeChild(log.lastChild);
+  }
+
+  /* ─── RENDER ─── */
+  function renderAll() {
+    document.getElementById('dayDisplay').textContent  = G.day;
+    document.getElementById('daysLeft').textContent    = (G.maxDays - G.day) + ' days left';
+    document.getElementById('cashDisplay').textContent = fmt(G.cash);
+    document.getElementById('bankDisplay').textContent = fmt(G.bank);
+    document.getElementById('debtDisplay').textContent = fmt(G.debt);
+    document.getElementById('coatDisplay').textContent = carried() + ' / ' + G.coat;
+
+    const badges = [
+      G.hasGun      && '🔫 Gun',
+      G.hasBurner   && '📱 Burner',
+      G.hasCar      && '🚗 Car',
+      G.hasSupplier && ('📞 Connect' + (G.supplierUsedToday ? ' (used)' : ' (ready)')),
+    ].filter(Boolean);
+    document.getElementById('upgradeStatus').textContent = badges.length ? 'Owned: ' + badges.join(' · ') : '';
+
+    renderMarket();
+    renderStash();
+    renderShop();
+    renderCities();
+    syncTopSections();
+    saveGame();
+  }
+
+  function syncTopSections() {
+    const left  = document.getElementById('topLeft');
+    const right = document.getElementById('topRight');
+    if (!left || !right) return;
+    left.style.minHeight  = '';
+    right.style.minHeight = '';
+    const h = Math.max(left.offsetHeight, right.offsetHeight);
+    left.style.minHeight  = h + 'px';
+    right.style.minHeight = h + 'px';
+  }
+
+  function renderMarket() {
+    const ml = document.getElementById('marketList');
+    ml.innerHTML = '';
+    let count = 0;
+    DRUGS.forEach(d => {
+      if (!G.prices[d.name]) return;
+      count++;
+      const price  = G.prices[d.name];
+      const prev   = G.prevPrices[d.name];
+      const isHigh = price > d.base * 1.5;
+      let trendHTML = '';
+      if (prev && price > prev) trendHTML = '<span class="trend trend-up">▲</span>';
+      else if (prev && price < prev) trendHTML = '<span class="trend trend-down">▼</span>';
+
+      const canAfford = G.cash >= price;
+      const hasSpace  = (G.coat - carried()) > 0;
+      const canBuy    = canAfford && hasSpace && (G.market[d.name] || 0) > 0;
+      const disabledAttr = canBuy ? '' : 'disabled';
+      const halfPrice = Math.round(price / 2);
+      const canConnect = G.hasSupplier && !G.supplierUsedToday && hasSpace && G.cash >= halfPrice;
+      const connectBtn = G.hasSupplier
+        ? `<button class="qty-btn" onclick="supplierBuy('${d.name}')" style="border-color:#4a3a7a;color:#b090f0" ${canConnect ? '' : 'disabled'} title="Buy at 50% via connect">${G.supplierUsedToday ? 'USED' : 'CONNECT'}</button>`
+        : '';
+
+      const row = document.createElement('div');
+      row.className = 'drug-row';
+      row.innerHTML = `
+        <div>
+          <div class="drug-name">${d.name} <span class="drug-alias">${d.street}</span></div>
+          <div class="drug-avail">${G.market[d.name] || 0} available</div>
+        </div>
+        <div class="drug-price${isHigh ? ' high' : ''}">${fmt(price)}${trendHTML}</div>
+        <div class="buy-group">
+          <input class="qty-in" id="qty_${d.name}" type="number" value="1" min="1" max="${G.market[d.name] || 1}" ${disabledAttr}>
+          <button class="qty-btn" onclick="buyDrug('${d.name}')" ${disabledAttr}>BUY</button>
+          <button class="qty-btn" onclick="buyMax('${d.name}')" style="border-color:#3a5a2a;color:var(--green)" title="Buy as much as possible" ${disabledAttr}>MAX</button>
+          ${connectBtn}
+        </div>`;
+      ml.appendChild(row);
+    });
+    if (count === 0) {
+      ml.innerHTML = '<div style="color:var(--muted);padding:10px 0">No supply here today. Travel somewhere.</div>';
+    }
+  }
+
+  function renderStash() {
+    const sl   = document.getElementById('stashList');
+    // merge on-body stash and safehouse keys
+    const allKeys = new Set([
+      ...Object.keys(G.stash).filter(k => G.stash[k] > 0),
+      ...(G.hasSafehouse ? Object.keys(G.safehouse).filter(k => G.safehouse[k] > 0) : [])
+    ]);
+    if (!allKeys.size) {
+      sl.innerHTML = '';
+      sl.style.color = 'var(--muted)';
+      sl.textContent  = 'Empty pockets.';
+      return;
+    }
+    sl.innerHTML  = '';
+    sl.style.color = 'var(--text)';
+    allKeys.forEach(name => {
+      const qty       = G.stash[name] || 0;
+      const sellPrice = G.prices[name];
+      const avg       = G.avgCost[name];
+      let profitHTML  = '';
+      if (avg && sellPrice) {
+        const pct   = Math.round(((sellPrice - avg) / avg) * 100);
+        const color = pct >= 0 ? 'var(--green)' : 'var(--red)';
+        const sign  = pct >= 0 ? '+' : '';
+        profitHTML  = ` <span style="color:${color};font-size:11px">(${sign}${pct}%)</span>`;
+      }
+      const avgLine = avg
+        ? `avg cost: ${fmt(avg)}${profitHTML}`
+        : '';
+      const stored  = G.hasSafehouse ? (G.safehouse[name] || 0) : 0;
+      const shBtns  = G.hasSafehouse
+        ? `<button class="qty-btn" style="font-size:11px;padding:2px 6px" onclick="shStashOne('${name}')" title="Store in safe house">STORE</button>
+           <button class="qty-btn" style="font-size:11px;padding:2px 6px" onclick="shRetrieveOne('${name}')" ${stored ? '' : 'disabled'} title="Retrieve from safe house">TAKE${stored ? ' ('+stored+')' : ''}</button>`
+        : '';
+      const row = document.createElement('div');
+      row.className = 'owned-row';
+      row.style.gridTemplateColumns = G.hasSafehouse ? '1fr auto auto auto auto' : '1fr auto auto';
+      row.innerHTML = `
+        <div>
+          ${name} <span class="pill pill-good">x${qty}</span>
+          <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px">${sellPrice ? 'sell @ ' + fmt(sellPrice) : 'no buyers here'}${avgLine ? ' &mdash; ' + avgLine : ''}</span>
+        </div>
+        <input class="qty-in" id="sqty_${name}" type="number" value="${qty}" min="1" max="${qty}">
+        <button class="qty-btn" onclick="sellDrug('${name}')" ${sellPrice ? '' : 'disabled'}>SELL</button>
+        ${shBtns}`;
+      sl.appendChild(row);
+    });
+  }
+
+  function renderCities() {
+    const cg = document.getElementById('cityGrid');
+    cg.innerHTML = '';
+    const freeLeft = G.hasCar ? Math.max(0, CAR_FREE_TRIPS - G.carTripsToday) : 0;
+    const travelTitle = document.getElementById('travelTitle');
+    if (travelTitle) {
+      travelTitle.innerHTML = `Travel — <span id="cityDisplay">${G.city}</span>`
+        + (G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '');
+    }
+    CITIES.forEach(c => {
+      const btn = document.createElement('div');
+      btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
+      btn.innerHTML = `
+        <div class="city-name">${c.name}</div>
+        <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>`;
+      if (c.name !== G.city) btn.onclick = () => travel(c.name);
+      cg.appendChild(btn);
+    });
+  }
+
+  /* ─── TRAYS ─── */
+  function closeTray() {
+    document.querySelectorAll('.stat-tray').forEach(t => t.classList.remove('visible'));
+  }
+  function toggleTray(name) {
+    const tray = document.getElementById('tray-' + name);
+    const isOpen = tray.classList.contains('visible');
+    closeTray();
+    if (!isOpen) tray.classList.add('visible');
+  }
+
+  /* ─── KEYBOARD SHORTCUT ─── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const overlay = document.getElementById('inputOverlay');
+      if (!overlay.classList.contains('hidden')) confirmInput();
+      const ev = document.getElementById('eventOverlay');
+      if (!ev.classList.contains('hidden')) dismissEvent();
+    }
+  });
+
+  /* ─── START ─── */
+  if (!loadSavedGame()) {
+    newGame();
+    openSettings();
+  }
+</script>
+</body>
+</html>
