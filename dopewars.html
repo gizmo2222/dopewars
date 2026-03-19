@@ -19,6 +19,17 @@
       --text: #f5f0e8;
       --muted: #b0b0b0;
       --border: #2a2a2a;
+      --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+      --duration-fast: 120ms;
+      --duration-mid: 220ms;
+      --duration-slow: 350ms;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
     html, body {
       height: 100%;
@@ -73,7 +84,10 @@
       gap: 3px;
       margin-top: 6px;
     }
-    .stat-tray.visible { display: flex; }
+    .stat-tray.visible {
+      display: flex;
+      animation: fade-in-up var(--duration-mid) var(--ease-out) both;
+    }
     .stat-tray button {
       width: 100%;
       background: var(--bg2);
@@ -146,9 +160,13 @@
       cursor: pointer;
       font-family: 'Share Tech Mono', monospace;
       font-size: 14px;
-      transition: background 0.1s, color 0.1s;
+      transition: background var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  border-color var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
     }
     .qty-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .qty-btn:active:not(:disabled) { transform: scale(0.96); }
     .qty-btn:disabled { opacity: 0.3; cursor: default; }
     .qty-btn:disabled:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
     .qty-btn-max { border-color: #3a5a2a; color: var(--green); }
@@ -191,7 +209,10 @@
       padding: 9px 8px;
       cursor: pointer;
       text-align: center;
-      transition: border-color 0.1s, color 0.1s, background 0.1s;
+      transition: border-color var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  background var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
       user-select: none;
       font-family: inherit;
       color: inherit;
@@ -199,6 +220,7 @@
       line-height: inherit;
     }
     .city-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .city-btn:active:not(:disabled) { transform: scale(0.97); }
     .city-btn:disabled { cursor: default; opacity: 1; }
     .city-btn.current { border-color: var(--accent); background: #1a1600; color: var(--accent); cursor: default; }
     .city-name { font-size: 13px; font-weight: bold; }
@@ -216,9 +238,13 @@
       font-family: 'Bebas Neue', sans-serif;
       font-size: 16px;
       letter-spacing: 1px;
-      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      transition: background var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  border-color var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
     }
     .action-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .action-btn:active { transform: scale(0.96); }
     .action-btn.danger { border-color: #5a2020; }
     .action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
     .loan-info {
@@ -241,11 +267,25 @@
       overflow-y: auto;
       font-size: 17px;
     }
-    .log-entry { padding: 2px 0; border-bottom: 1px solid #161616; }
+    .log-entry {
+      padding: 2px 0; border-bottom: 1px solid #161616;
+      animation: fade-in-up var(--duration-mid) var(--ease-out) both;
+    }
     .log-entry.good { color: var(--green); }
     .log-entry.bad  { color: var(--red); }
     .log-entry.warn { color: var(--accent); }
     .log-entry.headline { color: var(--muted); font-style: italic; }
+
+    /* ANIMATIONS */
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes flash-good { 0%,100% { background: transparent; } 50% { background: rgba(46,204,113,0.12); } }
+    @keyframes flash-bad  { 0%,100% { background: transparent; } 50% { background: rgba(231,76,60,0.12); } }
+    .animate-in { animation: fade-in-up var(--duration-mid) var(--ease-out) both; }
+    .flash-good { animation: flash-good 400ms var(--ease-out); }
+    .flash-bad  { animation: flash-bad 400ms var(--ease-out); }
 
     /* DIVIDER */
     hr.div { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
@@ -254,11 +294,16 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.88);
+      background: rgba(0,0,0,0);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 100;
+      animation: overlay-in var(--duration-mid) var(--ease-out) forwards;
+    }
+    @keyframes overlay-in {
+      from { background: rgba(0,0,0,0); }
+      to   { background: rgba(0,0,0,0.88); }
     }
     .overlay.hidden { display: none; }
     .modal-box {
@@ -268,6 +313,11 @@
       max-width: 380px;
       width: 92%;
       text-align: center;
+      animation: modal-in var(--duration-slow) var(--ease-out) forwards;
+    }
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .modal-title {
       font-family: 'Bebas Neue', sans-serif;
@@ -287,9 +337,18 @@
       letter-spacing: 1px;
     }
     .modal-ok:hover { background: #f0d050; }
+    .modal-ok:active { transform: scale(0.96); }
 
     /* GAME OVER */
-    .gameover { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .gameover {
+      position: fixed; inset: 0; background: rgba(0,0,0,0);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      animation: gameover-in 600ms var(--ease-out) forwards;
+    }
+    @keyframes gameover-in {
+      from { background: rgba(0,0,0,0); }
+      to   { background: rgba(0,0,0,0.96); }
+    }
     .gameover.hidden { display: none; }
     .go-box {
       background: var(--bg2);
@@ -299,16 +358,24 @@
       width: 92%;
       text-align: center;
     }
-    .go-title { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+    .go-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--accent); line-height: 1; margin-bottom: 10px;
+      animation: go-title-in 500ms var(--ease-out) 300ms both;
+    }
+    @keyframes go-title-in {
+      from { opacity: 0; transform: scale(0.9); }
+      to   { opacity: 1; transform: scale(1); }
+    }
     .go-score { font-size: 13px; line-height: 2; margin-bottom: 24px; color: var(--text); }
     .go-score strong { color: var(--accent); font-size: 16px; }
 
     /* INPUT DIALOG */
     .input-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.88);
+      background: rgba(0,0,0,0);
       display: flex; align-items: center; justify-content: center;
       z-index: 150;
+      animation: overlay-in var(--duration-mid) var(--ease-out) forwards;
     }
     .input-overlay.hidden { display: none; }
     .input-box {
@@ -318,6 +385,7 @@
       max-width: 320px;
       width: 90%;
       text-align: center;
+      animation: modal-in var(--duration-slow) var(--ease-out) forwards;
     }
     .input-box label {
       display: block;
@@ -382,6 +450,9 @@
       flex:1; background:var(--bg3); border:1px solid var(--border);
       color:var(--muted); font-family:'Share Tech Mono',monospace;
       font-size:13px; padding:8px 4px; cursor:pointer; text-align:center; line-height:1.4;
+      transition: border-color var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  background var(--duration-fast) var(--ease-out);
     }
     .sopt span { font-size:11px; color:var(--muted); }
     .sopt:hover { border-color:var(--accent); color:var(--text); }
@@ -1091,6 +1162,14 @@
   const rnd   = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
   const fmt   = n      => '$' + Math.abs(Math.round(n)).toLocaleString();
   const carried = ()   => Object.values(G.stash).reduce((a, b) => a + b, 0);
+  function flashEl(id, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth; // force reflow to restart animation
+    el.classList.add(cls);
+    el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+  }
 
   /* ─── GAME INIT ─── */
   function newGame() {
@@ -1290,6 +1369,7 @@
     if (G.market[name] <= 0) delete G.market[name];
     addLog(`Bought ${qty}x ${name} @ ${fmt(price)} ea. (avg cost: ${fmt(G.avgCost[name])})`, 'good');
     renderAll();
+    flashEl('cashDisplay', 'flash-bad');
   }
 
   function buyDrug(name) {
@@ -1343,6 +1423,7 @@
     if (G.stash[name] <= 0) { delete G.stash[name]; delete G.avgCost[name]; }
     addLog(`Sold ${qty}x ${name} @ ${fmt(price)} ea.`, 'good');
     renderAll();
+    flashEl('cashDisplay', 'flash-good');
   }
 
   /* ─── LATE-GAME EVENTS ─── */
@@ -1920,7 +2001,8 @@
         : '';
 
       const row = document.createElement('div');
-      row.className = 'drug-row';
+      row.className = 'drug-row animate-in';
+      row.style.animationDelay = (count * 40) + 'ms';
       row.innerHTML = `
         <div>
           <div class="drug-name">${d.name} <span class="drug-alias">${d.street}</span></div>
