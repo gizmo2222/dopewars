@@ -989,6 +989,7 @@
       heatDay: false,
       coatsBought: 0,
       lastVisit: {},
+      shown3DayWarning: false,
       supplierBurnedUntil: 0,
       corneredDrug: null, corneredUntil: 0,
       tippedCity: null,   tippedExpiry: 0,
@@ -1189,6 +1190,8 @@
     executeBuy(name, qty);
     G.prices[name]  = realPrice;
     G.supplierUsedToday = true;
+    delete G.prices[name];
+    delete G.market[name];
     addLog(`Connect hooked you up: ${qty}x ${name} at ${fmt(halfPrice)} (50% off). Connect used for today.`, 'good');
     renderAll();
   }
@@ -1367,7 +1370,8 @@
     }
     if (!freeTrip && G.day > 15) maybeLateEvent();
     // 3-day warning
-    if (!freeTrip && G.day === G.maxDays - 2) {
+    if (!G.shown3DayWarning && G.day >= G.maxDays - 2) {
+      G.shown3DayWarning = true;
       showEvent('3 DAYS LEFT', 'Time is running out. Start selling your stash and pay off your debt before the final day.');
     }
     if (G.day > G.maxDays) { endGame(); return; }
@@ -1835,10 +1839,8 @@
     }
     if (isLastDay) {
       cg.style.opacity = '0.35';
-      cg.style.pointerEvents = 'none';
     } else {
       cg.style.opacity = '';
-      cg.style.pointerEvents = '';
     }
     CITIES.forEach(c => {
       const btn = document.createElement('div');
