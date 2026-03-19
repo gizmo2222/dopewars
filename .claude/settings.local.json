@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import dopewars; print\\(''Import OK''\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \":*)",
+      "Bash(gh auth:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh --version)",
+      "Bash(gh api:*)",
+      "Bash(gh repo:*)",
+      "Bash(powershell.exe -Command \"cd ''F:\\\\OneDrive\\\\Claude\\\\zork''; gh repo create gizmo2222/zork --public --source=. --remote=origin --push\")",
+      "Bash(powershell.exe -Command \"Get-Command gh* | Select-Object Name, Source\")",
+      "Bash(powershell.exe -Command \"\\(Get-Command ghy\\).Source\")",
+      "Bash(powershell.exe -Command \"Get-Command ghy | Format-List *\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Program Files\\\\GitHub CLI\\\\'' -ErrorAction SilentlyContinue; Get-ChildItem ''C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\GitHub CLI\\\\'' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell.exe -Command \"cd ''F:\\\\OneDrive\\\\Claude\\\\zork''; & ''C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'' repo create gizmo2222/zork --public --source=. --remote=origin --push\")"
+    ]
+  }
+}
