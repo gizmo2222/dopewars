@@ -416,7 +416,7 @@
           <div class="stat-label">Debt <span class="stat-hint">▾</span></div>
           <div class="stat-val danger" id="debtDisplay">$5,000</div>
           <div class="stat-tray" id="tray-debt">
-            <button onclick="closeTray();openInput('borrow','Borrow how much?')">Borrow more</button>
+            <button onclick="closeTray();openInput('borrow',`Borrow how much? (max ${fmt(Math.max(0,10000-G.borrowedToday))} today)`)">Borrow more</button>
             <button class="danger" onclick="closeTray();openInput('loan','Pay how much on debt?')">Pay partial</button>
             <button class="danger" onclick="closeTray();payAllLoan()">Pay all</button>
           </div>
