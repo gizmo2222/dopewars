@@ -477,6 +477,16 @@
     <div class="modal-title" style="margin-bottom:16px">SETTINGS</div>
 
     <div class="setting-row" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <label class="setting-label">Theme</label>
+      <div class="setting-opts" id="set-theme">
+        <button class="sopt active" data-theme="nyc"   onclick="selectTheme('nyc')">NYC Classic<br><span>1984</span></button>
+        <button class="sopt"        data-theme="miami" onclick="selectTheme('miami')">Miami Vice<br><span>1986</span></button>
+        <button class="sopt"        data-theme="london" onclick="selectTheme('london')">London<br><span>Now</span></button>
+        <button class="sopt"        data-theme="west"  onclick="selectTheme('west')">Wild West<br><span>1881</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <label class="setting-label">Difficulty Preset</label>
       <div class="setting-opts" id="set-difficulty">
         <button class="sopt" data-preset="easy"   onclick="applyPreset('easy')">Easy<br><span>Tourist</span></button>
@@ -624,24 +634,170 @@
 
 <script>
   /* ─── DATA ─── */
-  const DRUGS = [
-    { name:'Cocaine', base:15000, variance:0.5, street:'Snow'    },
-    { name:'Heroin',  base:5000,  variance:0.6, street:'Horse'   },
-    { name:'Acid',    base:1000,  variance:0.8, street:'Blotter' },
-    { name:'Weed',    base:300,   variance:0.5, street:'Grass'   },
-    { name:'Speed',   base:90,    variance:0.7, street:'Crank'   },
-    { name:'Ludes',   base:15,    variance:0.8, street:'Buttons' },
-    { name:'Shrooms', base:750,   variance:0.6, street:'Caps'    },
-    { name:'PCP',     base:1000,  variance:0.7, street:'Dust'    },
-  ];
-  const CITIES = [
-    { name:'Bronx',     desc:'Home turf'   },
-    { name:'Manhattan', desc:'Big money'   },
-    { name:'Brooklyn',  desc:'Rough crowd' },
-    { name:'Queens',    desc:'Quiet spots' },
-    { name:'Harlem',    desc:'Hot market'  },
-    { name:'Staten Is.',desc:'Slow days'   },
-  ];
+  let DRUGS, CITIES, HEADLINES;
+
+  const THEMES = {
+    nyc: {
+      label: 'NYC Classic', sub: '1984',
+      location: 'NEW YORK CITY', year: '1984',
+      cities: [
+        { name:'Bronx',      desc:'Home turf'    },
+        { name:'Manhattan',  desc:'Big money'    },
+        { name:'Brooklyn',   desc:'Rough crowd'  },
+        { name:'Queens',     desc:'Quiet spots'  },
+        { name:'Harlem',     desc:'Hot market'   },
+        { name:'Staten Is.', desc:'Slow days'    },
+      ],
+      drugs: [
+        { name:'Cocaine', street:'Snow',    base:15000, variance:0.50, spike:true  },
+        { name:'Heroin',  street:'Horse',   base:5000,  variance:0.60              },
+        { name:'Acid',    street:'Blotter', base:1000,  variance:0.80              },
+        { name:'Shrooms', street:'Caps',    base:750,   variance:0.60              },
+        { name:'PCP',     street:'Dust',    base:1000,  variance:0.70              },
+        { name:'Weed',    street:'Grass',   base:300,   variance:0.50              },
+        { name:'Speed',   street:'Crank',   base:90,    variance:0.70              },
+        { name:'Ludes',   street:'Buttons', base:15,    variance:0.80              },
+      ],
+      headlines: [
+        'NYPD REPORTS SURGE IN STREET DRUG ACTIVITY',
+        'MAYOR PLEDGES CRACKDOWN ON BRONX DEALERS',
+        'MYSTERIOUS SHORTAGE HITS CITY DRUG SUPPLY',
+        'WALL ST. EXECS FUEL COCAINE DEMAND: SOURCES',
+        'BROOKLYN TURF WAR LEAVES THREE HOSPITALIZED',
+        'POLICE COMMISSIONER WARNS OF NEW TASK FORCE',
+        'HARLEM RESIDENTS DEMAND END TO OPEN-AIR DEALING',
+        'FEDS SEIZE RECORD HEROIN SHIPMENT AT PORT',
+        'QUEENS DRUG PRICES HIT ALL-TIME HIGH',
+        'UNDERCOVER OPERATION SWEEPS MANHATTAN SOUTH',
+        'CITY COUNCIL DEBATES MANDATORY MINIMUMS BILL',
+        'STATEN ISLAND FERRY USED IN SMUGGLING RING',
+        'INFORMANT NETWORK EXPANDING, SAYS NYPD CHIEF',
+        'DROUGHT CONDITIONS STRAIN SUPPLY LINES CITYWIDE',
+        'LOCAL DEALER NETWORK DISRUPTED BY RIVAL CREW',
+        'PRICES EXPECTED TO SPIKE FOLLOWING BORDER SEIZURE',
+      ],
+    },
+    miami: {
+      label: 'Miami Vice', sub: '1986',
+      location: 'MIAMI', year: '1986',
+      cities: [
+        { name:'South Beach',   desc:'Tourist trap'  },
+        { name:'Little Havana', desc:'Connect city'  },
+        { name:'Overtown',      desc:'Hot zone'      },
+        { name:'Coral Gables',  desc:'Rich buyers'   },
+        { name:'Hialeah',       desc:'Import hub'    },
+        { name:'Liberty City',  desc:'Street rules'  },
+      ],
+      drugs: [
+        { name:'Cocaine',    street:'Blow',    base:20000, variance:0.45, spike:true  },
+        { name:'Crack',      street:'Rock',    base:600,   variance:0.65              },
+        { name:'Heroin',     street:'Horse',   base:6500,  variance:0.55              },
+        { name:'Hash',       street:'Brick',   base:800,   variance:0.60              },
+        { name:'Weed',       street:'Colombo', base:400,   variance:0.50              },
+        { name:'Quaaludes',  street:'Ludes',   base:30,    variance:0.80              },
+        { name:'Speed',      street:'Crank',   base:120,   variance:0.70              },
+        { name:'Angel Dust', street:'Dust',    base:1200,  variance:0.65              },
+      ],
+      headlines: [
+        'METRO-DADE REPORTS SURGE IN COCAINE TRAFFICKING',
+        'DEA LAUNCHES OPERATION AGAINST COLOMBIAN CARTEL',
+        'MYSTERIOUS SHIPMENT SEIZED AT PORT OF MIAMI',
+        'VICE SQUAD WARNS OF NEW PLAYERS ON THE STRIP',
+        'OVERTOWN TURF WAR LEAVES TWO IN HOSPITAL',
+        'POLICE COMMISSIONER EXPANDS ANTI-DRUG TASK FORCE',
+        'BRICKELL RESIDENTS REPORT OPEN-AIR DRUG MARKET',
+        'FEDS SEIZE RECORD COCAINE SHIPMENT OFF KEY BISCAYNE',
+        'CORAL GABLES DRUG PRICES HIT ALL-TIME HIGH',
+        'UNDERCOVER OPERATION SWEEPS SOUTH BEACH',
+        'MIAMI HERALD: CRACK EPIDEMIC GRIPS LIBERTY CITY',
+        'SPEEDBOAT USED IN SUSPECTED SMUGGLING RUN',
+        'INFORMANT NETWORK EXPANDING, SAYS VICE SQUAD',
+        'DROUGHT CONDITIONS STRAIN SUPPLY LINES CITYWIDE',
+        'LOCAL DEALER NETWORK DISRUPTED BY RIVAL CREW',
+        'PRICES EXPECTED TO SPIKE FOLLOWING GULF SEIZURE',
+      ],
+    },
+    london: {
+      label: 'London', sub: 'Now',
+      location: 'LONDON', year: 'NOW',
+      cities: [
+        { name:'Camden',     desc:'Late nights'   },
+        { name:'Brixton',    desc:'Street level'  },
+        { name:'Hackney',    desc:'House scene'   },
+        { name:'Peckham',    desc:'Rough ends'    },
+        { name:'Lewisham',   desc:'Overlooked'    },
+        { name:'Shoreditch', desc:'Rich kids'     },
+      ],
+      drugs: [
+        { name:'Cocaine',  street:'Charlie', base:8000, variance:0.50, spike:true  },
+        { name:'MDMA',     street:'Mandy',   base:2500, variance:0.55              },
+        { name:'Heroin',   street:'Brown',   base:4000, variance:0.60              },
+        { name:'Ketamine', street:'Ket',     base:600,  variance:0.70              },
+        { name:'Cannabis', street:'Skunk',   base:200,  variance:0.45              },
+        { name:'Speed',    street:'Whizz',   base:60,   variance:0.70              },
+        { name:'Pills',    street:'Beans',   base:80,   variance:0.75              },
+        { name:'Spice',    street:'Mamba',   base:25,   variance:0.80              },
+      ],
+      headlines: [
+        'MET POLICE REPORT SURGE IN CLASS A DRUG ACTIVITY',
+        'MAYOR PLEDGES CRACKDOWN ON BRIXTON DEALERS',
+        'MYSTERIOUS SHORTAGE HITS LONDON DRUG SUPPLY',
+        'CITY BANKERS FUEL COCAINE DEMAND: SOURCES',
+        'HACKNEY TURF WAR LEAVES THREE IN HOSPITAL',
+        'COMMISSIONER WARNS OF NEW DRUGS TASKFORCE',
+        'PECKHAM RESIDENTS DEMAND END TO STREET DEALING',
+        'BORDER FORCE SEIZE RECORD HEROIN SHIPMENT AT DOVER',
+        'CAMDEN DRUG PRICES HIT ALL-TIME HIGH',
+        'UNDERCOVER OPERATION SWEEPS SHOREDITCH',
+        'GOVERNMENT DEBATES SENTENCING GUIDELINES',
+        'LEWISHAM SPICE EPIDEMIC STRAINS NHS RESOURCES',
+        'INFORMANT NETWORK EXPANDING, SAYS MET',
+        'DROUGHT CONDITIONS STRAIN SUPPLY LINES CITYWIDE',
+        'LOCAL CREW DISRUPTED BY RIVAL GANG',
+        'PRICES EXPECTED TO SPIKE FOLLOWING PORT SEIZURE',
+      ],
+    },
+    west: {
+      label: 'Wild West', sub: '1881',
+      location: 'FRONTIER WEST', year: '1881',
+      cities: [
+        { name:'Tombstone',  desc:'Lawless'       },
+        { name:'Dodge City', desc:'Cattle run'    },
+        { name:'Deadwood',   desc:'Gold rush'     },
+        { name:'Abilene',    desc:'Rail town'     },
+        { name:'El Paso',    desc:'Border cross'  },
+        { name:'Santa Fe',   desc:'Trading post'  },
+      ],
+      drugs: [
+        { name:'Opium',       street:'Dragon', base:5000, variance:0.60, spike:true  },
+        { name:'Gold Dust',   street:'Flake',  base:3000, variance:0.50              },
+        { name:'Laudanum',    street:'Drops',  base:400,  variance:0.65              },
+        { name:'Dynamite',    street:'Sticks', base:800,  variance:0.70              },
+        { name:'Stolen Guns', street:'Irons',  base:250,  variance:0.60              },
+        { name:'Whiskey',     street:'Rotgut', base:60,   variance:0.55              },
+        { name:'Tobacco',     street:'Leaf',   base:20,   variance:0.45              },
+        { name:'Snake Oil',   street:'Tonic',  base:15,   variance:0.80              },
+      ],
+      headlines: [
+        'TOMBSTONE MARSHAL REPORTS SURGE IN OPIUM DENS',
+        'SHERIFF PLEDGES CRACKDOWN ON DEADWOOD TRADERS',
+        'MYSTERIOUS SHORTAGE HITS FRONTIER SUPPLY ROUTES',
+        'RAILROAD MEN FUEL WHISKEY DEMAND: SOURCES',
+        'DODGE CITY GUNFIGHT LEAVES THREE DEAD',
+        'U.S. MARSHAL WARNS OF NEW VIGILANTE SQUAD',
+        'ABILENE CITIZENS DEMAND END TO OUTLAW TRADE',
+        'FEDERAL AGENTS SEIZE RECORD OPIUM SHIPMENT',
+        'EL PASO PRICES HIT ALL-TIME HIGH',
+        'UNDERCOVER OPERATION SWEEPS SANTA FE PLAZA',
+        'CONGRESS DEBATES OPIUM CONTROL LEGISLATION',
+        'BORDER CROSSING USED IN SUSPECTED SMUGGLING RING',
+        'PINKERTON DETECTIVE NETWORK EXPANDING',
+        'DROUGHT CONDITIONS STRAIN SUPPLY ROUTES',
+        'LOCAL GANG DISRUPTED BY RIVAL OUTFIT',
+        'PRICES EXPECTED TO SPIKE FOLLOWING BORDER RAID',
+      ],
+    },
+  };
   const EVENTS = [
     { title:'POLICE RAID!',     msg:"Cops bust your stash! You lose half your drugs.",                              type:'bust'    },
     { title:'PRICE SURGE',      msg:"Someone cornered the market. Drug prices are WILD today.",                     type:'surge'   },
@@ -654,29 +810,12 @@
     { title:'STREET TIP',       msg:"A snitch whispers something useful in your ear.",                               type:'tip'     },
   ];
 
-  const HEADLINES = [
-    'NYPD REPORTS SURGE IN STREET DRUG ACTIVITY',
-    'MAYOR PLEDGES CRACKDOWN ON BRONX DEALERS',
-    'MYSTERIOUS SHORTAGE HITS CITY DRUG SUPPLY',
-    'WALL ST. EXECS FUEL COCAINE DEMAND: SOURCES',
-    'BROOKLYN TURF WAR LEAVES THREE HOSPITALIZED',
-    'POLICE COMMISSIONER WARNS OF NEW TASK FORCE',
-    'HARLEM RESIDENTS DEMAND END TO OPEN-AIR DEALING',
-    'FEDS SEIZE RECORD HEROIN SHIPMENT AT PORT',
-    'QUEENS DRUG PRICES HIT ALL-TIME HIGH',
-    'UNDERCOVER OPERATION SWEEPS MANHATTAN SOUTH',
-    'CITY COUNCIL DEBATES MANDATORY MINIMUMS BILL',
-    'STATEN ISLAND FERRY USED IN SMUGGLING RING',
-    'INFORMANT NETWORK EXPANDING, SAYS NYPD CHIEF',
-    'DROUGHT CONDITIONS STRAIN SUPPLY LINES CITYWIDE',
-    'LOCAL DEALER NETWORK DISRUPTED BY RIVAL CREW',
-    'PRICES EXPECTED TO SPIKE FOLLOWING BORDER SEIZURE',
-  ];
   let G = {};
   let inputAction = null;
 
   /* ─── SETTINGS ─── */
   const SETTINGS = {
+    theme:    'nyc',
     days:     30,
     cash:     2000,
     debt:     5000,
@@ -691,6 +830,8 @@
     const hasGame = G.day && G.day <= G.maxDays;
     document.getElementById('settingsCancelBtn').style.display = hasGame ? '' : 'none';
     // sync button states to current SETTINGS
+    document.querySelectorAll('#set-theme .sopt').forEach(b =>
+      b.classList.toggle('active', b.dataset.theme === SETTINGS.theme));
     syncSopt('set-days',     SETTINGS.days);
     syncSopt('set-cash',     SETTINGS.cash);
     syncSopt('set-debt',     SETTINGS.debt);
@@ -733,8 +874,8 @@
       const group = btn.closest('.setting-opts');
       group.querySelectorAll('.sopt').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      // deselect difficulty preset when any individual setting is changed manually
-      if (!btn.dataset.preset) {
+      // deselect difficulty preset when any individual setting is changed manually (but not when a theme or preset button is clicked)
+      if (!btn.dataset.preset && !btn.dataset.theme) {
         document.querySelectorAll('#set-difficulty .sopt').forEach(b => b.classList.remove('active'));
       }
     });
@@ -758,8 +899,23 @@
     );
   }
 
+  function selectTheme(id) {
+    SETTINGS.theme = id;
+    document.querySelectorAll('#set-theme .sopt').forEach(b =>
+      b.classList.toggle('active', b.dataset.theme === id));
+  }
+
+  function applyTheme(id) {
+    const t = THEMES[id] || THEMES.nyc;
+    DRUGS     = t.drugs;
+    CITIES    = t.cities;
+    HEADLINES = t.headlines;
+  }
+
   function readSettings() {
     const pick = id => parseFloat(document.querySelector('#' + id + ' .sopt.active').dataset.val);
+    const activeTheme = document.querySelector('#set-theme .sopt.active');
+    if (activeTheme) SETTINGS.theme = activeTheme.dataset.theme;
     SETTINGS.days     = pick('set-days');
     SETTINGS.cash     = pick('set-cash');
     SETTINGS.debt     = pick('set-debt');
@@ -780,10 +936,11 @@
 
   /* ─── GAME INIT ─── */
   function newGame() {
+    applyTheme(SETTINGS.theme);
     G = {
       day: 1, maxDays: SETTINGS.days,
       cash: SETTINGS.cash, bank: 0, debt: SETTINGS.debt,
-      city: 'Bronx', coat: SETTINGS.coat,
+      city: CITIES[0].name, coat: SETTINGS.coat,
       stash: {}, safehouse: {}, prices: {}, prevPrices: {}, market: {},
       avgCost: {},
       borrowedToday: 0,
@@ -793,8 +950,9 @@
     };
     document.getElementById('gameOver').classList.add('hidden');
     const interestPct = Math.round((SETTINGS.interest - 1) * 100);
+    const T = THEMES[SETTINGS.theme] || THEMES.nyc;
     document.getElementById('headerSub').textContent =
-      `${SETTINGS.days} DAYS TO MAKE YOUR FORTUNE \u2022 NEW YORK CITY \u2022 1984 \u2022 ${interestPct}%/DAY INTEREST`;
+      `${SETTINGS.days} DAYS TO MAKE YOUR FORTUNE \u2022 ${T.location} \u2022 ${T.year} \u2022 ${interestPct}%/DAY INTEREST`;
     generateMarket();
     renderAll();
     addLog(`Welcome to Dope Wars. ${SETTINGS.days} days. Make your fortune.`, 'warn');
@@ -810,9 +968,8 @@
     DRUGS.forEach(d => {
       if (Math.random() < skipChance) return;
       let price;
-      if (d.name === 'Cocaine' && Math.random() < 0.05) {
-        // classic spike: $80k–$120k
-        price = rnd(30000, 50000);
+      if (d.spike && Math.random() < 0.05) {
+        price = rnd(Math.round(d.base * 2), Math.round(d.base * 3.5));
       } else {
         price = Math.round(d.base * (0.5 + Math.random() * d.variance * 2));
       }
@@ -1236,11 +1393,13 @@
       if (saved.day > saved.maxDays) return false; // finished game — don't resume
       const savedSettings = localStorage.getItem('dopewars_settings');
       if (savedSettings) Object.assign(SETTINGS, JSON.parse(savedSettings));
+      applyTheme(SETTINGS.theme);
       G = saved;
       document.getElementById('gameOver').classList.add('hidden');
       const interestPct = Math.round((SETTINGS.interest - 1) * 100);
+      const T = THEMES[SETTINGS.theme] || THEMES.nyc;
       document.getElementById('headerSub').textContent =
-        `${SETTINGS.days} DAYS TO MAKE YOUR FORTUNE \u2022 NEW YORK CITY \u2022 1984 \u2022 ${interestPct}%/DAY INTEREST`;
+        `${SETTINGS.days} DAYS TO MAKE YOUR FORTUNE \u2022 ${T.location} \u2022 ${T.year} \u2022 ${interestPct}%/DAY INTEREST`;
       addLog('Session restored. Welcome back.', 'warn');
       renderAll();
       return true;
@@ -1493,6 +1652,7 @@
   });
 
   /* ─── START ─── */
+  applyTheme(SETTINGS.theme); // seed arrays before any render
   if (!loadSavedGame()) {
     newGame();
     openSettings();
