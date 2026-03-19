@@ -38,7 +38,7 @@ Click the **Cash** or **Debt** labels in the Finances panel to deposit, withdraw
 | 🔫 9mm Pistol | $1,500 | Halves bust losses · 60% chance to scare off muggers |
 | 📱 Burner Phone | $500 | Nearly full drug selection every market visit |
 | 🚗 Stolen Honda | $3,000 | 1 free trip/day — no day lost, no interest accrued |
-| 📞 Supplier Contact | $2,000 | Once per day, buy any drug at 50% market price |
+| 📞 Supplier Contact | $2,000 | Once per day, buy any drug at 25% off (up to half the available supply) |
 
 ### Random Events
 
