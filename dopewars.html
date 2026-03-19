@@ -635,8 +635,7 @@
     <div class="go-title" id="goTitle">GAME OVER</div>
     <div class="go-score" id="goScore"></div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
-      <button class="modal-ok" onclick="newGame()">PLAY AGAIN</button>
-      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="document.getElementById('gameOver').classList.add('hidden');openSettings()">CHANGE SETTINGS</button>
+      <button class="modal-ok" onclick="document.getElementById('gameOver').classList.add('hidden');openSettings()">PLAY AGAIN</button>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:14px">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:2px;margin-bottom:8px">HIGH SCORES</div>
