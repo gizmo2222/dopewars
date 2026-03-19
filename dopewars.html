@@ -641,12 +641,12 @@
       label: 'NYC Classic', sub: '1984',
       location: 'NEW YORK CITY', year: '1984',
       cities: [
-        { name:'Bronx',      desc:'Home turf'    },
-        { name:'Manhattan',  desc:'Big money'    },
-        { name:'Brooklyn',   desc:'Rough crowd'  },
-        { name:'Queens',     desc:'Quiet spots'  },
-        { name:'Harlem',     desc:'Hot market'   },
-        { name:'Staten Is.', desc:'Slow days'    },
+        { name:'Bronx',      desc:'Home turf',    specialty:'Weed'    },
+        { name:'Manhattan',  desc:'Big money',    specialty:'Cocaine' },
+        { name:'Brooklyn',   desc:'Rough crowd',  specialty:'Speed'   },
+        { name:'Queens',     desc:'Quiet spots',  specialty:'Shrooms' },
+        { name:'Harlem',     desc:'Hot market',   specialty:'Heroin'  },
+        { name:'Staten Is.', desc:'Slow days',    specialty:'PCP'     },
       ],
       drugs: [
         { name:'Cocaine', street:'Snow',    base:15000, variance:0.50, spike:true  },
@@ -687,12 +687,12 @@
       label: 'Miami Vice', sub: '1986',
       location: 'MIAMI', year: '1986',
       cities: [
-        { name:'South Beach',   desc:'Tourist trap'  },
-        { name:'Little Havana', desc:'Connect city'  },
-        { name:'Overtown',      desc:'Hot zone'      },
-        { name:'Coral Gables',  desc:'Rich buyers'   },
-        { name:'Hialeah',       desc:'Import hub'    },
-        { name:'Liberty City',  desc:'Street rules'  },
+        { name:'South Beach',   desc:'Tourist trap',  specialty:'Quaaludes'  },
+        { name:'Little Havana', desc:'Connect city',  specialty:'Cocaine'    },
+        { name:'Overtown',      desc:'Hot zone',      specialty:'Crack'      },
+        { name:'Coral Gables',  desc:'Rich buyers',   specialty:'Angel Dust' },
+        { name:'Hialeah',       desc:'Import hub',    specialty:'Weed'       },
+        { name:'Liberty City',  desc:'Street rules',  specialty:'Heroin'     },
       ],
       drugs: [
         { name:'Cocaine',    street:'Blow',    base:20000, variance:0.45, spike:true  },
@@ -733,12 +733,12 @@
       label: 'London', sub: 'Now',
       location: 'LONDON', year: 'NOW',
       cities: [
-        { name:'Camden',     desc:'Late nights'   },
-        { name:'Brixton',    desc:'Street level'  },
-        { name:'Hackney',    desc:'House scene'   },
-        { name:'Peckham',    desc:'Rough ends'    },
-        { name:'Lewisham',   desc:'Overlooked'    },
-        { name:'Shoreditch', desc:'Rich kids'     },
+        { name:'Camden',     desc:'Late nights',   specialty:'MDMA'     },
+        { name:'Brixton',    desc:'Street level',  specialty:'Cannabis' },
+        { name:'Hackney',    desc:'House scene',   specialty:'Pills'    },
+        { name:'Peckham',    desc:'Rough ends',    specialty:'Heroin'   },
+        { name:'Lewisham',   desc:'Overlooked',    specialty:'Spice'    },
+        { name:'Shoreditch', desc:'Rich kids',     specialty:'Ketamine' },
       ],
       drugs: [
         { name:'Cocaine',  street:'Charlie', base:8000, variance:0.50, spike:true  },
@@ -779,12 +779,12 @@
       label: 'Wild West', sub: '1881',
       location: 'FRONTIER WEST', year: '1881',
       cities: [
-        { name:'Tombstone',  desc:'Lawless'       },
-        { name:'Dodge City', desc:'Cattle run'    },
-        { name:'Deadwood',   desc:'Gold rush'     },
-        { name:'Abilene',    desc:'Rail town'     },
-        { name:'El Paso',    desc:'Border cross'  },
-        { name:'Santa Fe',   desc:'Trading post'  },
+        { name:'Tombstone',  desc:'Lawless',       specialty:'Opium'        },
+        { name:'Dodge City', desc:'Cattle run',    specialty:'Whiskey'      },
+        { name:'Deadwood',   desc:'Gold rush',     specialty:'Gold Dust'    },
+        { name:'Abilene',    desc:'Rail town',     specialty:'Tobacco'      },
+        { name:'El Paso',    desc:'Border cross',  specialty:'Stolen Guns'  },
+        { name:'Santa Fe',   desc:'Trading post',  specialty:'Laudanum'     },
       ],
       drugs: [
         { name:'Opium',       street:'Dragon', base:5000, variance:0.60, spike:true  },
@@ -975,6 +975,7 @@
       carTripsToday: 0,
       supplierUsedToday: false,
       heatDay: false,
+      coatsBought: 0,
       hasGun: false, hasBurner: false, hasCar: false, hasSupplier: false,
     };
     document.getElementById('gameOver').classList.add('hidden');
@@ -993,17 +994,21 @@
     G.prevPrices = { ...G.prices };
     G.prices = {};
     G.market = {};
+    const cityData   = CITIES.find(c => c.name === G.city);
+    const specialty  = cityData ? cityData.specialty : null;
     const skipChance = G.hasBurner ? 0.05 : 0.15;
     DRUGS.forEach(d => {
-      if (Math.random() < skipChance) return;
+      const isSpecialty = d.name === specialty;
+      if (!isSpecialty && Math.random() < skipChance) return;
       let price;
       if (d.spike && Math.random() < 0.05) {
         price = rnd(Math.round(d.base * 2), Math.round(d.base * 3.5));
       } else {
         price = Math.round(d.base * (0.5 + Math.random() * d.variance * 2));
+        if (isSpecialty) price = Math.round(price * 0.8);
       }
       G.prices[d.name] = price;
-      G.market[d.name] = rnd(5, 60);
+      G.market[d.name] = isSpecialty ? rnd(20, 80) : rnd(5, 60);
     });
   }
 
@@ -1290,7 +1295,7 @@
     const list = document.getElementById('shopList');
     list.innerHTML = '';
     UPGRADES.forEach(u => {
-      const owned    = G['has' + u.id.charAt(0).toUpperCase() + u.id.slice(1)];
+      const owned     = G['has' + u.id.charAt(0).toUpperCase() + u.id.slice(1)];
       const canAfford = G.cash >= u.price;
       const row = document.createElement('div');
       row.className = 'drug-row';
@@ -1299,12 +1304,37 @@
           <div class="drug-name">${u.icon} ${u.label}</div>
           <div class="drug-avail">${u.desc}</div>
         </div>
-        <div class="drug-price${canAfford && !owned ? '' : ''}">${fmt(u.price)}</div>
+        <div class="drug-price">${fmt(u.price)}</div>
         <div class="buy-group">
           <button class="qty-btn" onclick="buyUpgrade('${u.id}')" ${owned || !canAfford ? 'disabled' : ''}>${owned ? 'OWNED' : 'BUY'}</button>
         </div>`;
       list.appendChild(row);
     });
+    // Coat upgrade — repeatable, price doubles each purchase
+    const coatPrice  = 1500 * Math.pow(2, G.coatsBought || 0);
+    const canAfford  = G.cash >= coatPrice;
+    const coatRow    = document.createElement('div');
+    coatRow.className = 'drug-row';
+    coatRow.innerHTML = `
+      <div>
+        <div class="drug-name">🧥 Coat Upgrade</div>
+        <div class="drug-avail">+30 carry capacity. Current: ${G.coat}. Price doubles each purchase.</div>
+      </div>
+      <div class="drug-price">${fmt(coatPrice)}</div>
+      <div class="buy-group">
+        <button class="qty-btn" onclick="buyCoatUpgrade()" ${canAfford ? '' : 'disabled'}>BUY</button>
+      </div>`;
+    list.appendChild(coatRow);
+  }
+
+  function buyCoatUpgrade() {
+    const price = 1500 * Math.pow(2, G.coatsBought || 0);
+    if (G.cash < price) { addLog(`Need ${fmt(price)} for the coat upgrade.`, 'bad'); return; }
+    G.cash -= price;
+    G.coat += 30;
+    G.coatsBought = (G.coatsBought || 0) + 1;
+    addLog(`Coat upgraded +30 capacity for ${fmt(price)}. Now ${G.coat} max carry.`, 'good');
+    renderAll();
   }
 
   function buyUpgrade(id) {
@@ -1669,9 +1699,12 @@
     CITIES.forEach(c => {
       const btn = document.createElement('div');
       btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
+      const specialtyLine = c.specialty && c.name !== G.city
+        ? `<div style="font-size:10px;color:var(--green);margin-top:2px">★ ${c.specialty}</div>` : '';
       btn.innerHTML = `
         <div class="city-name">${c.name}</div>
-        <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>`;
+        <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>
+        ${specialtyLine}`;
       if (c.name !== G.city) btn.onclick = () => travel(c.name);
       cg.appendChild(btn);
     });
