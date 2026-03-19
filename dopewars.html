@@ -1818,7 +1818,7 @@
       const btn = document.createElement('div');
       btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
       const specialtyLine = c.specialty
-        ? `<div style="font-size:10px;color:var(--green);margin-top:2px">★ ${c.specialty}</div>` : '';
+        ? `<div style="font-size:10px;color:#2ecc71;margin-top:2px">★ ${c.specialty}</div>` : '';
       btn.innerHTML = `
         <div class="city-name">${c.name}</div>
         <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>
