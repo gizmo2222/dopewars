@@ -569,7 +569,7 @@
       <div style="margin-bottom:12px;padding-left:10px">
         🔫 <strong>9mm Pistol ($1,500)</strong> — Halves losses in a bust. 60% chance to scare off muggers.<br>
         📱 <strong>Burner Phone ($500)</strong> — Nearly full drug selection every market visit.<br>
-        🚗 <strong>Stolen Honda ($3,000)</strong> — 3 free trips per day (no day lost, interest still accrues).<br>
+        🚗 <strong>Stolen Honda ($3,000)</strong> — 3 free trips per day (no day lost, no interest accrued).<br>
         📞 <strong>Supplier Contact ($2,000)</strong> — Once per day, buy any drug at 50% market price.
       </div>
 
@@ -639,7 +639,7 @@
     { title:'MUGGER',           msg:"Someone jacked you on the street. They took your cash.",                       type:'mug'     },
     { title:'FOUND STASH',      msg:"You find a stash hidden in an abandoned lot. Score!",                          type:'find'    },
     { title:'CHEAP SUPPLY',     msg:"Prices crashed — a dealer is desperate to move product.",                      type:'cheap'   },
-    { title:'LOAN SHARK VISIT', msg:"The shark's boys paid you a visit. They took $500 as a 'reminder'.",           type:'shark'   },
+    { title:'LOAN SHARK VISIT', msg:"The shark's boys paid you a visit and collected their 'reminder' fee.",        type:'shark'   },
     { title:'COPS ON THE TAKE', msg:"You slip a cop $200 to look the other way. Smart move.",                       type:'bribe'   },
     { title:'STREET TIP',       msg:"A snitch whispers something useful in your ear.",                               type:'tip'     },
   ];
@@ -717,7 +717,7 @@
   const PRESETS = {
     easy:   { days: 60,  cash: 5000, debt: 0,     interest: 1.05, events: 0.20, coat: 200 },
     medium: { days: 30,  cash: 2000, debt: 5000,  interest: 1.10, events: 0.38, coat: 100 },
-    hard:   { days: 30,  cash: 500,  debt: 15000, interest: 1.20, events: 0.60, coat: 50  },
+    hard:   { days: 30,  cash: 1000, debt: 10000, interest: 1.15, events: 0.50, coat: 50  },
   };
 
   function applyPreset(name) {
@@ -787,7 +787,7 @@
       let price;
       if (d.name === 'Cocaine' && Math.random() < 0.05) {
         // classic spike: $80k–$120k
-        price = rnd(80000, 120000);
+        price = rnd(30000, 50000);
       } else {
         price = Math.round(d.base * (0.5 + Math.random() * d.variance * 2));
       }
@@ -853,7 +853,7 @@
         addLog("Loan shark's boys came by — nothing to collect.", 'warn');
         return;
       }
-      const take = Math.min(G.cash, 500);
+      const take = Math.min(G.cash, rnd(500, 1200));
       G.cash -= take;
       addLog(`Loan shark took ${fmt(take)} from you.`, 'bad');
     } else if (type === 'bribe') {
@@ -1046,7 +1046,7 @@
   const UPGRADES = [
     { id:'gun',       label:'9mm Pistol',       price:1500,  desc:'Halves bust losses. 60% chance to scare off muggers.' },
     { id:'burner',    label:'Burner Phone',     price:500,   desc:'Better connect info — nearly full drug selection every market.' },
-    { id:'car',       label:'Stolen Honda',     price:3000,  desc:'3 free trips per day — travel without losing a day. Interest still accrues normally.' },
+    { id:'car',       label:'Stolen Honda',     price:3000,  desc:'3 free trips per day — travel without losing a day or accruing interest.' },
     { id:'supplier',  label:'Supplier Contact', price:2000,  desc:'Once per day, buy any drug at 50% of market price.' },
   ];
 
