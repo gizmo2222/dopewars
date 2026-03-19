@@ -1349,11 +1349,20 @@
     }
     if (Math.random() < SETTINGS.events) {
       let ev = EVENTS[rnd(0, EVENTS.length - 1)];
-      // skip shark popup entirely if debt is cleared
-      if (ev.type === 'shark' && G.debt <= 0) ev = null;
+      // block shark before day 6, and when debt is cleared
+      if (ev.type === 'shark' && (G.day <= 5 || G.debt <= 0)) ev = null;
       if (ev) {
         applyEvent(ev.type);
         showEvent(ev.title, ev.msg);
+      }
+    }
+    // escalating shark visits after day 15
+    if (G.debt > 0 && G.day > 15) {
+      const extraChance = Math.min((G.day - 15) * 0.02, 0.30);
+      if (Math.random() < extraChance) {
+        const sharkEv = EVENTS.find(e => e.type === 'shark');
+        applyEvent('shark');
+        showEvent(sharkEv.title, sharkEv.msg);
       }
     }
     if (!freeTrip && G.day > 15) maybeLateEvent();
