@@ -370,6 +370,7 @@
     <div class="header-sub" id="headerSub">NEW YORK CITY &bull; 1984</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
+    <button class="action-btn" onclick="openHighScores()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">🏆 SCORES</button>
     <button class="action-btn" onclick="openHelp()"     style="font-size:13px;padding:4px 10px;border-color:var(--muted)">? HELP</button>
     <button class="action-btn" onclick="openSettings()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">⚙ SETTINGS</button>
     <div style="text-align:right">
@@ -416,7 +417,7 @@
           <div class="stat-label">Debt <span class="stat-hint">▾</span></div>
           <div class="stat-val danger" id="debtDisplay">$5,000</div>
           <div class="stat-tray" id="tray-debt">
-            <button onclick="closeTray();openInput('borrow',`Borrow how much? (max ${fmt(Math.max(0,10000-G.borrowedToday))} today)`)">Borrow more</button>
+            <button onclick="closeTray();openBorrow()">Borrow more</button>
             <button class="danger" onclick="closeTray();openInput('loan','Pay how much on debt?')">Pay partial</button>
             <button class="danger" onclick="closeTray();payAllLoan()">Pay all</button>
           </div>
@@ -584,6 +585,15 @@
   </div>
 </div>
 
+<!-- HIGH SCORES MODAL -->
+<div class="overlay hidden" id="highScoresOverlay">
+  <div class="modal-box" style="max-width:520px;text-align:left">
+    <div class="modal-title" style="margin-bottom:14px">HIGH SCORES</div>
+    <div id="highScoreTableModal"></div>
+    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHighScores()">CLOSE</button>
+  </div>
+</div>
+
 <!-- CUSTOM INPUT DIALOG -->
 <div class="input-overlay hidden" id="inputOverlay">
   <div class="input-box">
@@ -696,6 +706,21 @@
   }
   function closeHelp() {
     document.getElementById('helpOverlay').classList.add('hidden');
+  }
+  function openHighScores() {
+    renderHighScores(loadScores(), 'highScoreTableModal');
+    document.getElementById('highScoresOverlay').classList.remove('hidden');
+  }
+  function closeHighScores() {
+    document.getElementById('highScoresOverlay').classList.add('hidden');
+  }
+  function openBorrow() {
+    if (G.day < 3) {
+      addLog("The loan shark doesn't trust you yet. Come back on day 3.", 'bad');
+      return;
+    }
+    const remaining = Math.max(0, 10000 - G.borrowedToday);
+    openInput('borrow', `Borrow how much? (max ${fmt(remaining)} today)`);
   }
   function syncSopt(groupId, val) {
     document.querySelectorAll('#' + groupId + ' .sopt').forEach(b => {
@@ -1241,8 +1266,8 @@
     try { localStorage.setItem('dopewars_scores', JSON.stringify(scores)); } catch(e) {}
     return scores;
   }
-  function renderHighScores(scores) {
-    const el = document.getElementById('highScoreTable');
+  function renderHighScores(scores, elId = 'highScoreTable') {
+    const el = document.getElementById(elId);
     if (!scores.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No scores yet.</div>'; return; }
     el.innerHTML = scores.map((s, i) => {
       const rank  = i === 0 ? '👑' : `#${i + 1}`;
@@ -1462,6 +1487,7 @@
       closeInput();
       if (G.day && G.day <= G.maxDays) closeSettings();
       closeHelp();
+      closeHighScores();
     }
   });
 
