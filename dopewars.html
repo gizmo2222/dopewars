@@ -446,7 +446,6 @@
     <div class="modal-title" id="eventTitle">EVENT</div>
     <div class="modal-msg" id="eventMsg"></div>
     <button class="modal-ok" id="eventOkBtn" onclick="dismissEvent()">OK, GOT IT</button>
-    <button class="modal-ok" id="eventEndBtn" onclick="endGame()" style="display:none">WRAP UP &amp; END GAME</button>
   </div>
 </div>
 
@@ -1007,8 +1006,6 @@
     };
     document.getElementById('gameOver').classList.add('hidden');
     document.getElementById('eventOverlay').classList.add('hidden');
-    document.getElementById('eventOkBtn').style.display = '';
-    document.getElementById('eventEndBtn').style.display = 'none';
     const interestPct = Math.round((SETTINGS.interest - 1) * 100);
     const T = THEMES[SETTINGS.theme] || THEMES.nyc;
     document.getElementById('headerSub').textContent =
@@ -1145,20 +1142,12 @@
   function showEvent(title, msg) {
     document.getElementById('eventTitle').textContent = title;
     document.getElementById('eventMsg').textContent   = msg;
-    document.getElementById('eventOkBtn').style.display = '';
-    document.getElementById('eventEndBtn').style.display = 'none';
     document.getElementById('eventOverlay').classList.remove('hidden');
   }
   function showEndGameModal() {
-    document.getElementById('eventTitle').textContent = 'FINAL DAY';
-    document.getElementById('eventMsg').textContent   = "Time's up. Sell what you have, settle your accounts, and wrap up.";
-    document.getElementById('eventOkBtn').style.display = 'none';
-    document.getElementById('eventEndBtn').style.display = '';
-    document.getElementById('eventOverlay').classList.remove('hidden');
+    showEvent('FINAL DAY', "Time's up. Sell what you have and settle your accounts. When you're ready, hit END GAME.");
   }
   function dismissEvent() {
-    document.getElementById('eventOkBtn').style.display = '';
-    document.getElementById('eventEndBtn').style.display = 'none';
     document.getElementById('eventOverlay').classList.add('hidden');
     renderAll();
   }
@@ -1863,7 +1852,7 @@
     const travelTitle = document.getElementById('travelTitle');
     if (travelTitle) {
       travelTitle.innerHTML = isLastDay
-        ? `Travel — <span id="cityDisplay">${G.city}</span> <span style="color:var(--accent2);font-size:13px;cursor:pointer;text-decoration:underline" onclick="showEndGameModal()">— END GAME</span>`
+        ? `Travel — <span id="cityDisplay">${G.city}</span> <span style="color:var(--accent2);font-size:13px">— FINAL DAY</span>`
         : `Travel — <span id="cityDisplay">${G.city}</span>`
           + (G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '');
     }
@@ -1884,9 +1873,15 @@
       if (c.name !== G.city && !isLastDay) btn.onclick = () => travel(c.name);
       cg.appendChild(btn);
     });
-    if (isLastDay && !G.shownEndGamePopup) {
-      G.shownEndGamePopup = true;
-      setTimeout(showEndGameModal, 50);
+    if (isLastDay) {
+      const endBtn = document.createElement('div');
+      endBtn.style.cssText = 'grid-column:1/-1;text-align:center;padding:12px 4px';
+      endBtn.innerHTML = `<button class="modal-ok" onclick="endGame()" style="font-size:14px;padding:8px 24px">END GAME</button>`;
+      cg.appendChild(endBtn);
+      if (!G.shownEndGamePopup) {
+        G.shownEndGamePopup = true;
+        setTimeout(showEndGameModal, 50);
+      }
     }
   }
 
