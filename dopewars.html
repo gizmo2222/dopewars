@@ -370,6 +370,7 @@
     <div class="header-sub" id="headerSub">NEW YORK CITY &bull; 1984</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
+    <button class="action-btn" onclick="openHelp()"     style="font-size:13px;padding:4px 10px;border-color:var(--muted)">? HELP</button>
     <button class="action-btn" onclick="openSettings()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">⚙ SETTINGS</button>
     <div style="text-align:right">
       <div style="font-size:10px;color:var(--muted)">DAY</div>
@@ -528,7 +529,49 @@
       </div>
     </div>
 
-    <button class="modal-ok" style="width:100%;margin-top:18px;font-size:20px" onclick="startFromSettings()">START GAME</button>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="modal-ok" style="flex:1;font-size:20px" onclick="startFromSettings()">START NEW GAME</button>
+      <button class="modal-ok" id="settingsCancelBtn" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-size:16px;padding:9px 18px" onclick="closeSettings()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="overlay hidden" id="helpOverlay">
+  <div class="modal-box" style="max-width:540px;text-align:left;max-height:90vh;overflow-y:auto">
+    <div class="modal-title" style="margin-bottom:14px">HOW TO PLAY</div>
+
+    <div style="font-size:13px;line-height:1.9;color:var(--text)">
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">THE GOAL</div>
+      <div style="margin-bottom:12px">You have 30 days (default) to make as much money as possible. Buy drugs cheap, sell them high, and pay off your debt before time runs out. Your final score is <strong>cash + bank &minus; debt</strong>.</div>
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">TRAVEL</div>
+      <div style="margin-bottom:12px">Each trip to a new borough uses up one day and generates a fresh market. Prices vary wildly by location — shop around. Traveling also applies daily interest to your debt.</div>
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">BUYING &amp; SELLING</div>
+      <div style="margin-bottom:12px">Enter a quantity and hit <strong>BUY</strong>, or hit <strong>MAX</strong> to buy as much as your cash and coat space allow. To sell, use the quantity field in Your Stash and hit <strong>SELL</strong>. Your average cost and profit/loss % are shown for each drug you're holding.</div>
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">DEBT &amp; THE BANK</div>
+      <div style="margin-bottom:12px">You start with a loan shark debt that compounds daily. Pay it off fast — at 10%/day it snowballs quickly. The bank keeps your cash safe from muggers and events. Click <strong>Cash</strong> or <strong>Debt</strong> in the Finances panel to deposit, withdraw, borrow, or pay.</div>
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">UPGRADES</div>
+      <div style="margin-bottom:4px">Buy these from the <strong>Black Market</strong> panel when you can afford them:</div>
+      <div style="margin-bottom:12px;padding-left:10px">
+        🔫 <strong>9mm Pistol ($1,500)</strong> — Halves losses in a bust. 60% chance to scare off muggers.<br>
+        📱 <strong>Burner Phone ($500)</strong> — Nearly full drug selection every market visit.<br>
+        🚗 <strong>Stolen Honda ($3,000)</strong> — 3 free trips per day (no day lost, interest still accrues).<br>
+        📞 <strong>Supplier Contact ($2,000)</strong> — Once per day, buy any drug at 50% market price.
+      </div>
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">RANDOM EVENTS</div>
+      <div style="margin-bottom:12px">Every time you travel there's a chance something happens — a police raid, a price surge, a drought, a mugger, a found stash, or a tip from a snitch. Some events can be mitigated with upgrades.</div>
+
+      <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">COAT OFFERS</div>
+      <div style="margin-bottom:4px">Occasionally after traveling you'll be offered extra carry capacity for a price. More space means bigger buys.</div>
+    </div>
+
+    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT</button>
   </div>
 </div>
 
@@ -625,6 +668,9 @@
 
   function openSettings() {
     document.getElementById('settingsOverlay').classList.remove('hidden');
+    // show Cancel only when a game is already in progress
+    const hasGame = G.day && G.day <= G.maxDays;
+    document.getElementById('settingsCancelBtn').style.display = hasGame ? '' : 'none';
     // sync button states to current SETTINGS
     syncSopt('set-days',     SETTINGS.days);
     syncSopt('set-cash',     SETTINGS.cash);
@@ -632,6 +678,15 @@
     syncSopt('set-interest', SETTINGS.interest);
     syncSopt('set-events',   SETTINGS.events);
     syncSopt('set-coat',     SETTINGS.coat);
+  }
+  function closeSettings() {
+    document.getElementById('settingsOverlay').classList.add('hidden');
+  }
+  function openHelp() {
+    document.getElementById('helpOverlay').classList.remove('hidden');
+  }
+  function closeHelp() {
+    document.getElementById('helpOverlay').classList.add('hidden');
   }
   function syncSopt(groupId, val) {
     document.querySelectorAll('#' + groupId + ' .sopt').forEach(b => {
@@ -1369,6 +1424,11 @@
       if (!overlay.classList.contains('hidden')) confirmInput();
       const ev = document.getElementById('eventOverlay');
       if (!ev.classList.contains('hidden')) dismissEvent();
+    }
+    if (e.key === 'Escape') {
+      closeInput();
+      if (G.day && G.day <= G.maxDays) closeSettings();
+      closeHelp();
     }
   });
 
