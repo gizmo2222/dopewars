@@ -358,6 +358,12 @@
       html, body { overflow: auto; }
       .stats-bar { grid-template-columns: repeat(2, 1fr); }
       .panel { border-right: none; border-bottom: 1px solid var(--border); }
+      /* settings modal: scrollable overlay, compact rows */
+      .overlay { align-items: flex-start; padding: 8px; overflow-y: auto; }
+      .modal-box { width: 100%; }
+      .setting-row { margin-bottom: 10px; }
+      #set-theme { flex-wrap: wrap; }
+      #set-theme .sopt { flex: 1 1 calc(50% - 3px); }
     }
   </style>
 </head>
