@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CANDY WARS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0a1e;
+      --bg2: #1a1035;
+      --bg3: #25174a;
+      --accent: #ff79c6;
+      --accent2: #ffb86c;
+      --green: #50fa7b;
+      --red: #ff5555;
+      --text: #f8f8f2;
+      --muted: #bd93f9;
+      --border: #44475a;
+    }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 30px;
+      line-height: 1.4;
+      overflow: hidden;
+    }
+    h1, .fredoka { font-family: 'Fredoka One', cursive; letter-spacing: 1px; }
+
+    /* HEADER */
+    .header {
+      background: var(--bg2);
+      border-bottom: 2px solid var(--accent);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 { font-size: 28px; color: var(--accent); font-family: 'Fredoka One', cursive; letter-spacing: 2px; }
+    .header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .stat { text-align: center; }
+    .stat-clickable { cursor: pointer; }
+    .stat-clickable:hover .stat-val { opacity: 0.8; }
+    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+    .stat-val { font-size: 16px; color: var(--accent); font-weight: bold; }
+    .stat-val.danger { color: var(--red); }
+    .stat-hint { font-size: 12px; color: var(--muted); }
+    .stat-tray {
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 6px;
+    }
+    .stat-tray.visible { display: flex; }
+    .stat-tray button {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      padding: 4px 6px;
+      cursor: pointer;
+    }
+    .stat-tray button:hover { background: var(--accent); color: #000; }
+    .stat-tray button.danger { border-color: var(--red); color: var(--red); }
+    .stat-tray button.danger:hover { background: var(--red); color: #fff; }
+
+    /* LAYOUT */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: calc(100vh - 52px);
+      overflow: hidden;
+    }
+    .panel {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 12px 14px;
+    }
+    .panel:last-child { border-right: none; }
+    .top-section { }
+    .panel-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 18px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    /* MARKET */
+    .drug-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .drug-name { font-size: 18px; font-weight: bold; color: var(--text); }
+    .drug-alias { color: var(--muted); font-size: 15px; }
+    .drug-avail { font-size: 15px; color: var(--muted); }
+    .drug-price { font-size: 18px; color: var(--green); min-width: 75px; text-align: right; }
+    .drug-price.high { color: var(--red); }
+    .buy-group { display: flex; align-items: center; gap: 3px; }
+    .qty-in {
+      width: 40px;
+      text-align: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      padding: 3px 2px;
+    }
+    .qty-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 3px 9px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      transition: background 0.1s, color 0.1s;
+    }
+    .qty-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .qty-btn:disabled { opacity: 0.3; cursor: default; }
+    .qty-btn:disabled:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .trend { font-size: 15px; margin-left: 3px; }
+    .trend-up { color: var(--red); }
+    .trend-down { color: var(--green); }
+
+    /* STASH */
+    .owned-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pill {
+      display: inline-block;
+      padding: 1px 7px;
+      font-size: 10px;
+      border-radius: 2px;
+    }
+    .pill-good { background: #1a3a1a; color: var(--green); border: 1px solid #2d5a2d; }
+    .pill-bad  { background: #3a1a1a; color: var(--red);   border: 1px solid #5a2d2d; }
+
+    /* CITY GRID */
+    .top-section {
+      min-height: 200px;
+      margin-bottom: 0;
+    }
+    .city-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .city-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 9px 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.1s, color 0.1s, background 0.1s;
+      user-select: none;
+    }
+    .city-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .city-btn.current { border-color: var(--accent); background: #2a1040; color: var(--accent); cursor: default; }
+    .city-name { font-size: 13px; font-weight: bold; }
+    .city-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .city-btn.current .city-desc { color: var(--accent); opacity: 0.6; }
+
+    /* ACTIONS */
+    .action-bar { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+    .action-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      cursor: pointer;
+      font-family: 'Fredoka One', cursive;
+      font-size: 16px;
+      letter-spacing: 1px;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+    }
+    .action-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .action-btn.danger { border-color: #5a2020; }
+    .action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+    .loan-info {
+      background: var(--bg3);
+      border: 1px solid var(--accent2);
+      padding: 8px 10px;
+      margin: 8px 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .loan-info .debt-num { color: var(--red); font-weight: bold; }
+
+    /* LOG */
+    .log {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 8px;
+      min-height: 90px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 17px;
+    }
+    .log-entry { padding: 2px 0; border-bottom: 1px solid #161616; }
+    .log-entry.good { color: var(--green); }
+    .log-entry.bad  { color: var(--red); }
+    .log-entry.warn { color: var(--accent); }
+    .log-entry.headline { color: var(--muted); font-style: italic; }
+
+    /* DIVIDER */
+    hr.div { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+    /* MODAL OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .overlay.hidden { display: none; }
+    .modal-box {
+      background: var(--bg2);
+      border: 2px solid var(--accent2);
+      padding: 28px 24px;
+      max-width: 380px;
+      width: 92%;
+      text-align: center;
+    }
+    .modal-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 30px;
+      color: var(--accent2);
+      margin-bottom: 12px;
+    }
+    .modal-msg { margin-bottom: 20px; line-height: 1.7; color: var(--text); }
+    .modal-ok {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 9px 28px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 18px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .modal-ok:hover { opacity: 0.85; }
+
+    /* GAME OVER */
+    .gameover { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .gameover.hidden { display: none; }
+    .go-box {
+      background: var(--bg2);
+      border: 2px solid var(--accent);
+      padding: 36px 28px;
+      max-width: 420px;
+      width: 92%;
+      text-align: center;
+    }
+    .go-title { font-family: 'Fredoka One', cursive; font-size: 52px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+    .go-score { font-size: 13px; line-height: 2; margin-bottom: 24px; color: var(--text); }
+    .go-score strong { color: var(--accent); font-size: 16px; }
+
+    /* INPUT DIALOG */
+    .input-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 150;
+    }
+    .input-overlay.hidden { display: none; }
+    .input-box {
+      background: var(--bg2);
+      border: 2px solid var(--accent);
+      padding: 24px;
+      max-width: 320px;
+      width: 90%;
+      text-align: center;
+    }
+    .input-box label {
+      display: block;
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .input-box input[type=number] {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      padding: 8px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .input-box .btn-row { display: flex; gap: 8px; justify-content: center; }
+    .input-confirm {
+      background: var(--accent); color: #000;
+      border: none; padding: 7px 22px;
+      font-family: 'Fredoka One', cursive; font-size: 18px; cursor: pointer;
+    }
+    .input-cancel {
+      background: var(--bg3); color: var(--text);
+      border: 1px solid var(--border); padding: 7px 22px;
+      font-family: 'Fredoka One', cursive; font-size: 18px; cursor: pointer;
+    }
+    .input-cancel:hover { background: var(--red); color: #fff; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+    /* SETTINGS */
+    .setting-row { margin-bottom: 16px; }
+    .setting-label { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; margin-bottom:6px; }
+    .setting-opts { display:flex; gap:6px; }
+    .sopt {
+      flex:1; background:var(--bg3); border:1px solid var(--border);
+      color:var(--muted); font-family:'Nunito',sans-serif;
+      font-size:13px; padding:8px 4px; cursor:pointer; text-align:center; line-height:1.4;
+    }
+    .sopt span { font-size:11px; color:var(--muted); }
+    .sopt:hover { border-color:var(--accent); color:var(--text); }
+    .sopt.active { border-color:var(--accent); background:#2a1040; color:var(--accent); }
+    .sopt.active span { color:var(--accent); opacity:0.7; }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .main { grid-template-columns: 1fr; height: auto; overflow: visible; }
+      html, body { overflow: auto; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .panel { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>🍬 CANDY WARS</h1>
+    <div class="header-sub" id="headerSub">THE NEIGHBORHOOD &bull; THIS SUMMER</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="action-btn" onclick="openHighScores()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">🏆 SCORES</button>
+    <button class="action-btn" onclick="openHelp()"     style="font-size:13px;padding:4px 10px;border-color:var(--muted)">? HELP</button>
+    <button class="action-btn" onclick="openSettings()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">⚙ SETTINGS</button>
+    <div style="text-align:right">
+      <div style="font-size:10px;color:var(--muted)">DAY</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:32px;color:var(--accent);line-height:1" id="dayDisplay">1</div>
+      <div style="font-size:10px;color:var(--muted)" id="daysLeft">29 days left</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main">
+
+  <!-- LEFT: TRAVEL + MARKET -->
+  <div class="panel">
+    <div class="top-section" id="topLeft">
+      <div class="panel-title" id="travelTitle">Go To — <span id="cityDisplay">Playground</span></div>
+      <div class="city-grid" id="cityGrid"></div>
+    </div>
+
+    <hr class="div">
+    <div class="panel-title">Today's Prices</div>
+    <div id="marketList"></div>
+  </div>
+
+  <!-- RIGHT: STATS + STASH + ACTIONS + LOG -->
+  <div class="panel">
+
+    <div class="top-section" id="topRight">
+      <div class="panel-title">Finances</div>
+      <div class="stats-bar">
+        <div class="stat stat-clickable" onclick="toggleTray('cash')">
+          <div class="stat-label">Coins <span class="stat-hint">▾</span></div>
+          <div class="stat-val" id="cashDisplay">$2,000</div>
+          <div class="stat-tray" id="tray-cash">
+            <button onclick="closeTray();openInput('deposit','Save how much to piggy bank?')">Save to Bank</button>
+            <button onclick="closeTray();openInput('withdraw','Take how much from piggy bank?')">Take from Bank</button>
+            <button onclick="closeTray();withdrawAll()">Empty Bank</button>
+          </div>
+        </div>
+        <div class="stat"><div class="stat-label">Piggy Bank</div><div class="stat-val" id="bankDisplay">$0</div></div>
+        <div class="stat stat-clickable" onclick="toggleTray('debt')">
+          <div class="stat-label">Owe Parents <span class="stat-hint">▾</span></div>
+          <div class="stat-val danger" id="debtDisplay">$5,000</div>
+          <div class="stat-tray" id="tray-debt">
+            <button onclick="closeTray();openBorrow()">Ask for advance</button>
+            <button class="danger" onclick="closeTray();openInput('loan','Pay how much back?')">Pay some back</button>
+            <button class="danger" onclick="closeTray();payAllLoan()">Pay in full</button>
+          </div>
+        </div>
+        <div class="stat"><div class="stat-label">Bag / Space</div><div class="stat-val" id="coatDisplay">0 / 100</div></div>
+      </div>
+    </div>
+
+    <hr class="div">
+    <div class="panel-title">Your Bag</div>
+    <div id="stashList" style="color:var(--muted)">Your bag is empty.</div>
+
+    <hr class="div">
+    <div class="panel-title">Gear Shop</div>
+    <div id="shopList"></div>
+    <div id="upgradeStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px"></div>
+
+    <div class="panel-title">Neighborhood Buzz</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div class="overlay hidden" id="eventOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="eventTitle">EVENT</div>
+    <div class="modal-msg" id="eventMsg"></div>
+    <button class="modal-ok" id="eventOkBtn" onclick="dismissEvent()">OK, GOT IT</button>
+  </div>
+</div>
+
+<!-- BAG OFFER MODAL -->
+<div class="overlay hidden" id="coatOverlay">
+  <div class="modal-box">
+    <div class="modal-title">BACKPACK DEAL</div>
+    <div class="modal-msg" id="coatOfferMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="modal-ok" onclick="acceptCoatOffer()">BUY IT</button>
+      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="declineCoatOffer()">PASS</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOING-HOME SALE MODAL -->
+<div class="overlay hidden" id="fireSaleOverlay">
+  <div class="modal-box">
+    <div class="modal-title">GOING-HOME SALE!</div>
+    <div class="modal-msg" id="fireSaleMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="modal-ok" onclick="acceptFireSale()">TAKE IT</button>
+      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="declineFireSale()">PASS</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay hidden" id="settingsOverlay">
+  <div class="modal-box" style="max-width:500px;text-align:left">
+    <div class="modal-title" style="margin-bottom:16px">SETTINGS</div>
+
+    <div class="setting-row" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <label class="setting-label">Theme</label>
+      <div class="setting-opts" id="set-theme">
+        <button class="sopt active" data-theme="neighborhood" onclick="selectTheme('neighborhood')">The Hood<br><span>Summer</span></button>
+        <button class="sopt"        data-theme="fair"         onclick="selectTheme('fair')">Summer Fair<br><span>4th of July</span></button>
+        <button class="sopt"        data-theme="school"       onclick="selectTheme('school')">School Days<br><span>Lunchtime</span></button>
+        <button class="sopt"        data-theme="halloween"    onclick="selectTheme('halloween')">Halloween<br><span>Oct 31</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <label class="setting-label">Difficulty Preset</label>
+      <div class="setting-opts" id="set-difficulty">
+        <button class="sopt" data-preset="easy"   onclick="applyPreset('easy')">Easy<br><span>Explorer</span></button>
+        <button class="sopt" data-preset="medium" onclick="applyPreset('medium')">Medium<br><span>Trader</span></button>
+        <button class="sopt" data-preset="hard"   onclick="applyPreset('hard')">Hard<br><span>Entrepreneur</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Game Length</label>
+      <div class="setting-opts" id="set-days">
+        <button class="sopt active" data-val="30">30 days<br><span>Standard</span></button>
+        <button class="sopt" data-val="60">60 days<br><span>Extended</span></button>
+        <button class="sopt" data-val="90">90 days<br><span>Marathon</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Starting Coins</label>
+      <div class="setting-opts" id="set-cash">
+        <button class="sopt active" data-val="2000">$2,000<br><span>Standard</span></button>
+        <button class="sopt" data-val="5000">$5,000<br><span>Head start</span></button>
+        <button class="sopt" data-val="1000">$1,000<br><span>Hardcore</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Allowance Advance</label>
+      <div class="setting-opts" id="set-debt">
+        <button class="sopt active" data-val="5000">$5,000<br><span>Standard</span></button>
+        <button class="sopt" data-val="0">$0<br><span>Clean slate</span></button>
+        <button class="sopt" data-val="10000">$10,000<br><span>Deep in it</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Daily Interest Rate</label>
+      <div class="setting-opts" id="set-interest">
+        <button class="sopt active" data-val="1.10">10%<br><span>Standard</span></button>
+        <button class="sopt" data-val="1.05">5%<br><span>Relaxed</span></button>
+        <button class="sopt" data-val="1.15">15%<br><span>Brutal</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Event Frequency</label>
+      <div class="setting-opts" id="set-events">
+        <button class="sopt active" data-val="0.38">Normal<br><span>38% chance</span></button>
+        <button class="sopt" data-val="0.20">Quiet<br><span>20% chance</span></button>
+        <button class="sopt" data-val="0.50">Chaotic<br><span>50% chance</span></button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-label">Starting Bag Size</label>
+      <div class="setting-opts" id="set-coat">
+        <button class="sopt active" data-val="100">100<br><span>Standard</span></button>
+        <button class="sopt" data-val="50">50<br><span>Tight</span></button>
+        <button class="sopt" data-val="200">200<br><span>Loaded</span></button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="modal-ok" style="flex:1;font-size:20px" onclick="startFromSettings()">START NEW GAME</button>
+      <button class="modal-ok" id="settingsCancelBtn" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-size:16px;padding:9px 18px" onclick="closeSettings()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="overlay hidden" id="helpOverlay">
+  <div class="modal-box" style="max-width:540px;text-align:left;max-height:90vh;overflow-y:auto">
+    <div class="modal-title" style="margin-bottom:14px">HOW TO PLAY</div>
+
+    <div style="font-size:13px;line-height:1.9;color:var(--text)">
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">THE GOAL</div>
+      <div style="margin-bottom:12px">You're a candy entrepreneur! Buy candy cheap in one spot and sell it for more somewhere else. You have 30 days (default) to make as much money as possible. Your final score is <strong>coins + piggy bank &minus; what you owe your parents</strong>.</div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">TRAVELING</div>
+      <div style="margin-bottom:12px">Each trip to a new location uses up one day and brings new prices. Different places have different deals — shop around! Traveling also adds daily interest to your allowance advance.</div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">BUYING &amp; SELLING</div>
+      <div style="margin-bottom:12px">Enter a quantity and hit <strong>BUY</strong>, or hit <strong>MAX</strong> to buy as much as your coins and bag space allow. To sell, use the quantity field in Your Bag and hit <strong>SELL</strong>. Your average cost and profit/loss % are shown for each item you're holding.</div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">ALLOWANCE DEBT &amp; PIGGY BANK</div>
+      <div style="margin-bottom:12px">You may start with an allowance advance from your parents that compounds daily. Pay it off fast — at 10%/day it grows quickly! The piggy bank keeps your coins safe from random events. Click <strong>Coins</strong> or <strong>Owe Parents</strong> in the Finances panel to deposit, withdraw, borrow, or pay.</div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">GEAR</div>
+      <div style="margin-bottom:4px">Buy these from the <strong>Gear Shop</strong> when you can afford them:</div>
+      <div style="margin-bottom:12px;padding-left:10px">
+        🎫 <strong>Hall Pass ($1,500)</strong> — Reduces inspection losses. 60% chance to scare off bullies.<br>
+        📻 <strong>Walkie-Talkie ($500)</strong> — Better market info — nearly full selection every visit.<br>
+        🛹 <strong>Skateboard ($3,000)</strong> — 1 free trip per day with no day lost or interest charged.<br>
+        🏷️ <strong>Club Card ($2,000)</strong> — Once per day, buy any item at 25% off (up to half the supply).
+      </div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">LOCATION SPECIALTIES</div>
+      <div style="margin-bottom:12px">Each location has a specialty item (shown as ★) that's always available, priced ~20% cheaper, and stocked in larger quantities.</div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">RANDOM EVENTS</div>
+      <div style="margin-bottom:12px">Every time you travel there's a chance something happens — a principal inspection, a price surge, a shortage, a bully, a found stash, or a neighborhood tip. Gear can help reduce losses. After day 15, bigger events can happen too: a <strong>Going-Home Sale</strong>, a <strong>Buyout</strong>, an <strong>Inspection Warning</strong>, or a <strong>Club Card Declined</strong>.</div>
+
+      <div style="color:var(--accent);font-family:'Fredoka One',cursive;font-size:16px;letter-spacing:1px;margin-bottom:4px">LAST DAY</div>
+      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your candy, settle your accounts, then hit <strong>END GAME</strong>. You'll get a warning 3 days before the end.</div>
+    </div>
+
+    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT!</button>
+  </div>
+</div>
+
+<!-- HIGH SCORES MODAL -->
+<div class="overlay hidden" id="highScoresOverlay">
+  <div class="modal-box" style="max-width:520px;text-align:left">
+    <div class="modal-title" style="margin-bottom:14px">HIGH SCORES</div>
+    <div id="highScoreTableModal"></div>
+    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHighScores()">CLOSE</button>
+  </div>
+</div>
+
+<!-- CUSTOM INPUT DIALOG -->
+<div class="input-overlay hidden" id="inputOverlay">
+  <div class="input-box">
+    <label id="inputLabel">Amount</label>
+    <input type="number" id="inputField" min="0" value="0">
+    <div class="btn-row">
+      <button class="input-confirm" onclick="confirmInput()">CONFIRM</button>
+      <button class="input-cancel" onclick="closeInput()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="gameover hidden" id="gameOver">
+  <div class="go-box" style="max-width:520px">
+    <div class="go-title" id="goTitle">GAME OVER</div>
+    <div class="go-score" id="goScore"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
+      <button class="modal-ok" onclick="document.getElementById('gameOver').classList.add('hidden');openSettings()">PLAY AGAIN</button>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-family:'Fredoka One',cursive;font-size:20px;color:var(--accent);letter-spacing:2px;margin-bottom:8px">HIGH SCORES</div>
+      <div id="highScoreTable"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── DATA ─── */
+  let DRUGS, CITIES, HEADLINES;
+
+  const THEMES = {
+    neighborhood: {
+      label: 'The Neighborhood', sub: 'Summer Break',
+      location: 'THE NEIGHBORHOOD', year: 'THIS SUMMER',
+      cities: [
+        { name:'Playground',   desc:'Home turf',      specialty:'Bubble Gum'    },
+        { name:'The Mall',     desc:'Big spenders',   specialty:'Chocolate Bar'  },
+        { name:'School Yard',  desc:'Daily rush',     specialty:'Chips'          },
+        { name:'Corner Store', desc:'Quick stop',     specialty:'Lollipop'       },
+        { name:'The Park',     desc:'Weekend crowd',  specialty:'Gummy Bears'    },
+        { name:'Arcade',       desc:'Competitive',    specialty:'Jawbreaker'     },
+      ],
+      drugs: [
+        { name:'Chocolate Bar', street:'Choco',   base:15000, variance:0.50, spike:true  },
+        { name:'Gummy Bears',   street:'Gummies', base:5000,  variance:0.60              },
+        { name:'Jawbreaker',    street:'Jaw-B',   base:1000,  variance:0.80              },
+        { name:'Lollipop',      street:'Lolli',   base:750,   variance:0.60              },
+        { name:'Sour Worms',    street:'Sours',   base:1000,  variance:0.70              },
+        { name:'Bubble Gum',    street:'Bubbly',  base:300,   variance:0.50              },
+        { name:'Chips',         street:'Crinkles',base:90,    variance:0.70              },
+        { name:'Candy Corn',    street:'Corny',   base:15,    variance:0.80              },
+      ],
+      upgrades: [
+        { id:'gun',      icon:'🎫', short:'Hall Pass', label:'Hall Pass',       desc:'Reduces inspection losses. 60% chance to scare off bullies.' },
+        { id:'burner',   icon:'📻', short:'Walkie-T',  label:'Walkie-Talkie',   desc:'Better market info — nearly full selection every visit.' },
+        { id:'car',      icon:'🛹', short:'Skate',     label:'Skateboard',      desc:'1 free trip per day — travel once without losing a day or interest.' },
+        { id:'supplier', icon:'🏷️', short:'Club Card', label:'Club Card',       desc:'Once per day, buy any item at 25% off (up to half the available supply).' },
+      ],
+      headlines: [
+        { text:'PLAYGROUND MONITOR CRACKS DOWN ON CANDY TRADING — HEAT IS ON',  type:'heat'    },
+        { text:'PRINCIPAL BANS ALL SNACKS FROM SCHOOL PREMISES',                 type:'heat'    },
+        { text:'WAREHOUSE CLUB RUNS OUT OF GUMMY BEARS — SHORTAGE AHEAD',        type:'drought' },
+        { text:'BIRTHDAY PARTY SEASON DRIVES UP CHOCOLATE DEMAND',               type:'surge'   },
+        { text:'RIVAL TRADING CREW MOVES INTO THE PARK',                         type:'neutral' },
+        { text:'VICE PRINCIPAL EXPANDING LUNCHBOX INSPECTION PROGRAM',           type:'heat'    },
+        { text:'NEIGHBORHOOD KIDS DEMAND END TO CANDY MONOPOLY',                 type:'heat'    },
+        { text:'DELIVERY TRUCK LATE — CORNER STORE STOCKS RUNNING LOW',          type:'drought' },
+        { text:'MALL CANDY SHOP RUNS HUGE BLOWOUT SALE',                         type:'surge'   },
+        { text:'UNDERCOVER SCHOOL AIDE SPOTTED NEAR ARCADE',                     type:'heat'    },
+        { text:'CITY COUNCIL DEBATES NEW SUGAR TAX',                             type:'neutral' },
+        { text:'LOCAL KIDS LAUNCH SECRET TRADING RING IN PARK',                  type:'neutral' },
+        { text:'PLAYGROUND INFORMANT NETWORK GROWS',                             type:'heat'    },
+        { text:'DRY SPELL HITS NEIGHBORHOOD SNACK SUPPLY',                       type:'drought' },
+        { text:'RIVAL TRADER DISRUPTED BY OLDER SIBLING',                        type:'neutral' },
+        { text:'PRICES EXPECTED TO SPIKE AFTER HOLIDAY WEEKEND',                 type:'surge'   },
+      ],
+    },
+    fair: {
+      label: 'Summer Fair', sub: '4th of July',
+      location: 'THE COUNTY FAIR', year: 'SUMMER',
+      cities: [
+        { name:'Main Gate',    desc:'Tourist trap',  specialty:'Mini Donuts'   },
+        { name:'Ferris Wheel', desc:'High view',     specialty:'Cotton Candy'  },
+        { name:'Food Court',   desc:'Central hub',   specialty:'Corn Dog'      },
+        { name:'Midway Games', desc:'Competitive',   specialty:'Kettle Corn'   },
+        { name:'Prize Booth',  desc:'Big winners',   specialty:'Snow Cone'     },
+        { name:'Petting Zoo',  desc:'Family zone',   specialty:'Funnel Cake'   },
+      ],
+      drugs: [
+        { name:'Cotton Candy', street:'Floss',    base:20000, variance:0.45, spike:true  },
+        { name:'Funnel Cake',  street:'Funnie',   base:600,   variance:0.65              },
+        { name:'Caramel Apple',street:'C-Apple',  base:6500,  variance:0.55              },
+        { name:'Kettle Corn',  street:'Kettle',   base:800,   variance:0.60              },
+        { name:'Corn Dog',     street:'Doggie',   base:400,   variance:0.50              },
+        { name:'Mini Donuts',  street:'Donnies',  base:30,    variance:0.80              },
+        { name:'Lemonade',     street:'Lemmy',    base:120,   variance:0.70              },
+        { name:'Snow Cone',    street:'Coney',    base:1200,  variance:0.65              },
+      ],
+      upgrades: [
+        { id:'gun',      icon:'🎟️', short:'VIP Band',  label:'VIP Wristband',  desc:'Reduces inspection losses. 60% chance to scare off troublemakers.' },
+        { id:'burner',   icon:'📣', short:'Megaphone', label:'Megaphone',       desc:'Better vendor info — nearly full selection every market.' },
+        { id:'car',      icon:'🚗', short:'Golf Cart', label:'Golf Cart',       desc:'1 free trip per day across the fairgrounds.' },
+        { id:'supplier', icon:'🤝', short:'Vendor Pass',label:'Vendor Pass',   desc:'Once per day, buy any item at 25% off (up to half the available supply).' },
+      ],
+      headlines: [
+        { text:'FAIR SECURITY REPORTS SURGE IN UNAUTHORIZED TRADING',            type:'heat'    },
+        { text:'FAIR MANAGER PLEDGES CRACKDOWN ON FOOD RESELLERS',               type:'heat'    },
+        { text:'COTTON CANDY SUPPLIER DELAYED — SHORTAGES EXPECTED',             type:'drought' },
+        { text:'HOLIDAY WEEKEND DRIVES UP DEMAND FOR FAIR FOOD',                 type:'surge'   },
+        { text:'MIDWAY RIVALRY BREAKS OUT BETWEEN VENDOR CREWS',                 type:'neutral' },
+        { text:'FAIR INSPECTOR WARNS OF NEW FOOD SAFETY PATROLS',                type:'heat'    },
+        { text:'FAMILIES COMPLAIN ABOUT RISING FAIR FOOD PRICES',                type:'neutral' },
+        { text:'SUPPLY TRUCK BREAKS DOWN — FOOD COURT STOCKS DWINDLING',         type:'drought' },
+        { text:'FERRIS WHEEL CROWD PUSHES COTTON CANDY PRICES HIGHER',           type:'surge'   },
+        { text:'UNDERCOVER INSPECTOR SPOTTED AT MIDWAY GAMES',                   type:'heat'    },
+        { text:'COUNTY DEBATES NEW FAIR FOOD REGULATIONS',                       type:'neutral' },
+        { text:'VENDORS SUSPECTED OF PRICE FIXING AT PRIZE BOOTH',               type:'neutral' },
+        { text:'FAIR INFORMANT TIPPING OFF SECURITY',                            type:'heat'    },
+        { text:'HEAT WAVE STRAINS COLD TREAT SUPPLY LINES',                      type:'drought' },
+        { text:'LOCAL VENDOR NETWORK DISRUPTED BY COMPETING CREW',               type:'neutral' },
+        { text:'PRICES EXPECTED TO SPIKE ON FINAL FAIR WEEKEND',                 type:'surge'   },
+      ],
+    },
+    school: {
+      label: 'School Days', sub: 'Lunchtime',
+      location: 'WESTSIDE MIDDLE SCHOOL', year: 'LUNCHTIME',
+      cities: [
+        { name:'Cafeteria',    desc:'Daily rush',    specialty:'Pudding Cup'   },
+        { name:'Library',      desc:'Quiet zone',    specialty:'Animal Crackers'},
+        { name:'Gym',          desc:'Active crowd',  specialty:'Apple Juice'   },
+        { name:'Art Room',     desc:'Creative scene',specialty:'Pretzels'      },
+        { name:'Computer Lab', desc:'Tech kids',     specialty:'Fruit Snacks'  },
+        { name:'Playground',   desc:'Outdoor crowd', specialty:'Granola Bar'   },
+      ],
+      drugs: [
+        { name:'Chocolate Milk', street:'Choco-Milk', base:8000, variance:0.50, spike:true  },
+        { name:'Fruit Snacks',   street:'Fruities',   base:2500, variance:0.55              },
+        { name:'Pizza Slice',    street:'Za',         base:4000, variance:0.60              },
+        { name:'Granola Bar',    street:'Granny',     base:600,  variance:0.70              },
+        { name:'Pudding Cup',    street:'Puddy',      base:200,  variance:0.45              },
+        { name:'Apple Juice',    street:'AJ',         base:60,   variance:0.70              },
+        { name:'Pretzels',       street:'Pretzy',     base:80,   variance:0.75              },
+        { name:'Animal Crackers',street:'Animais',    base:25,   variance:0.80              },
+      ],
+      upgrades: [
+        { id:'gun',      icon:'🎫', short:'Hall Pass',  label:'Hall Pass',      desc:'Reduces confiscation losses. 60% chance to scare off bullies.' },
+        { id:'burner',   icon:'📚', short:'Yearbook',   label:'Yearbook',       desc:'Better cafeteria info — nearly full selection every lunch.' },
+        { id:'car',      icon:'🚲', short:'Bicycle',    label:'Bicycle',        desc:'1 free trip per day — get there without losing a day.' },
+        { id:'supplier', icon:'📖', short:'Study Buddy',label:'Study Buddy',    desc:'Once per day, buy any item at 25% off (up to half the available supply).' },
+      ],
+      headlines: [
+        { text:'PRINCIPAL ANNOUNCES SURPRISE LUNCHBOX INSPECTIONS',              type:'heat'    },
+        { text:'TEACHERS ON ALERT FOR UNAUTHORIZED FOOD TRADING',                type:'heat'    },
+        { text:'CHOCOLATE MILK SUPPLIER RUNNING LOW — SHORTAGE COMING',          type:'drought' },
+        { text:'PIZZA DAY DRIVES MASSIVE CAFETERIA DEMAND',                      type:'surge'   },
+        { text:'RIVAL TRADING CREW MOVES INTO THE COMPUTER LAB',                 type:'neutral' },
+        { text:'VICE PRINCIPAL EXPANDING CAFETERIA MONITORING PROGRAM',          type:'heat'    },
+        { text:'STUDENTS DEMAND END TO LUNCH MONOPOLY',                          type:'heat'    },
+        { text:'CAFETERIA DELIVERY LATE — SUPPLIES RUNNING LOW',                 type:'drought' },
+        { text:'FIELD TRIP WEEK SENDS SNACK PRICES HIGHER',                      type:'surge'   },
+        { text:'UNDERCOVER AIDE SPOTTED IN LIBRARY WING',                        type:'heat'    },
+        { text:'SCHOOL BOARD DEBATES NEW NUTRITION POLICY',                      type:'neutral' },
+        { text:'TRADING RING UNCOVERED IN ART ROOM',                             type:'neutral' },
+        { text:'STUDENT INFORMANT NETWORK EXPANDING',                            type:'heat'    },
+        { text:'SUPPLY DROUGHT HITS SCHOOL SNACK STANDS',                        type:'drought' },
+        { text:'LOCAL TRADER DISRUPTED BY HALL MONITOR',                         type:'neutral' },
+        { text:'PRICES SPIKE AHEAD OF END-OF-YEAR PARTY',                        type:'surge'   },
+      ],
+    },
+    halloween: {
+      label: 'Halloween Night', sub: 'Trick or Treat',
+      location: 'HAUNTED NEIGHBORHOOD', year: 'OCTOBER 31',
+      cities: [
+        { name:'Spooky Street',  desc:'Dark and eerie',  specialty:'Candy Corn'    },
+        { name:'Haunted House',  desc:'Brave souls only',specialty:'Reeses Cup'    },
+        { name:'Candy Lane',     desc:'Sweet spot',      specialty:'Kit Kat'       },
+        { name:'Pumpkin Patch',  desc:'Fall vibes',      specialty:'M&Ms'          },
+        { name:'Gym Dance',      desc:'School party',    specialty:'Skittles'      },
+        { name:'Pine Avenue',    desc:'Rich houses',     specialty:'Full Size Bar'  },
+      ],
+      drugs: [
+        { name:'Reeses Cup',   street:'PB-Cup',  base:5000, variance:0.60, spike:true  },
+        { name:'Kit Kat',      street:'Kit-K',   base:3000, variance:0.50              },
+        { name:'Full Size Bar',street:'Big Bar', base:400,  variance:0.65              },
+        { name:'M&Ms',         street:'Emems',   base:800,  variance:0.70              },
+        { name:'Skittles',     street:'Skitts',  base:250,  variance:0.60              },
+        { name:'Twizzlers',    street:'Twizz',   base:60,   variance:0.55              },
+        { name:'Nerds',        street:'Nerdy',   base:20,   variance:0.45              },
+        { name:'Candy Corn',   street:'C-Corn',  base:15,   variance:0.80              },
+      ],
+      upgrades: [
+        { id:'gun',      icon:'👻', short:'Costume',    label:'Scary Costume',   desc:'Reduces theft losses. 60% chance to scare off candy thieves.' },
+        { id:'burner',   icon:'🔦', short:'Flashlight', label:'Flashlight',      desc:'See all the candy at each stop — nearly full selection every visit.' },
+        { id:'car',      icon:'👟', short:'Sneakers',   label:'Running Shoes',   desc:'1 free trip per night — dash to new streets without losing time.' },
+        { id:'supplier', icon:'🗺️', short:'T-or-T Map', label:'Trick-or-Treat Map', desc:'Once per day, buy any candy at 25% off (up to half the available supply).' },
+      ],
+      headlines: [
+        { text:'NEIGHBORHOOD WATCH REPORTS SURGE IN CANDY TRADING',              type:'heat'    },
+        { text:'PARENTS PLEDGE CRACKDOWN ON HALLOWEEN RESELLERS',                type:'heat'    },
+        { text:'REESES CUPS RUNNING SCARCE — SHORTAGE COMING',                   type:'drought' },
+        { text:'POPULAR KID BUYS OUT ALL THE GOOD STUFF EARLY',                  type:'surge'   },
+        { text:'RIVAL TRICK-OR-TREAT CREW MOVES INTO YOUR TERRITORY',            type:'neutral' },
+        { text:'NEIGHBORHOOD WATCH WARNS OF NEW CANDY PATROL',                   type:'heat'    },
+        { text:'RESIDENTS DEMAND END TO HALLOWEEN PRICE GOUGING',                type:'heat'    },
+        { text:'SUPPLY TRUCK LATE — PINE AVENUE STOCKS ALMOST GONE',             type:'drought' },
+        { text:'HAUNTED HOUSE LINES DRIVE UP CANDY DEMAND',                      type:'surge'   },
+        { text:'UNDERCOVER PARENT SPOTTED IN PUMPKIN PATCH AREA',                type:'heat'    },
+        { text:'TOWN COUNCIL DEBATES HALLOWEEN TRADING RULES',                   type:'neutral' },
+        { text:'SECRET CANDY STASH UNCOVERED ON SPOOKY STREET',                  type:'neutral' },
+        { text:'NEIGHBORHOOD INFORMANT NETWORK GROWING FAST',                    type:'heat'    },
+        { text:'DROUGHT OF GOOD CANDY ON THE EAST SIDE',                         type:'drought' },
+        { text:'LOCAL CREW DISRUPTED BY OLDER KID GANG',                         type:'neutral' },
+        { text:'PRICES EXPECTED TO SPIKE ON FINAL TRICK-OR-TREAT HOUR',          type:'surge'   },
+      ],
+    },
+  };
+
+  const EVENTS = [
+    { title:'INSPECTION!',      msg:"The principal checks everyone's bags! You lose some of your candy.",              type:'bust'    },
+    { title:'BUYING FRENZY',    msg:"Everyone wants the same thing. Prices went totally wild!",                        type:'surge'   },
+    { title:'SHORTAGE',         msg:"Supply dried up. Half the market ran out of stock.",                              type:'drought' },
+    { title:'BULLY TROUBLE',    msg:"A bully shook you down on the way here and took some of your coins.",             type:'mug'     },
+    { title:'LUCKY FIND',       msg:"You found a forgotten candy stash behind the bleachers. Score!",                  type:'find'    },
+    { title:'PRICE CRASH',      msg:"A kid needs money fast — everything's on clearance!",                             type:'cheap'   },
+    { title:'PARENT CHECK-IN',  msg:"Your parents dropped by and collected some of their advance money as a reminder.", type:'shark'   },
+    { title:'HALL MONITOR DEAL',msg:"You gave the hall monitor a candy bar and they looked the other way. Smart!",    type:'bribe'   },
+    { title:'PLAYGROUND TIP',   msg:"A friend whispers something useful about today's prices.",                        type:'tip'     },
+  ];
+
+  let G = {};
+  let inputAction = null;
+
+  /* ─── SETTINGS ─── */
+  const SETTINGS = {
+    theme:    'neighborhood',
+    days:     30,
+    cash:     2000,
+    debt:     5000,
+    interest: 1.10,
+    events:   0.38,
+    coat:     100,
+  };
+
+  function openSettings() {
+    document.getElementById('settingsOverlay').classList.remove('hidden');
+    const hasGame = G.day && G.day <= G.maxDays;
+    document.getElementById('settingsCancelBtn').style.display = hasGame ? '' : 'none';
+    document.querySelectorAll('#set-theme .sopt').forEach(b =>
+      b.classList.toggle('active', b.dataset.theme === SETTINGS.theme));
+    syncSopt('set-days',     SETTINGS.days);
+    syncSopt('set-cash',     SETTINGS.cash);
+    syncSopt('set-debt',     SETTINGS.debt);
+    syncSopt('set-interest', SETTINGS.interest);
+    syncSopt('set-events',   SETTINGS.events);
+    syncSopt('set-coat',     SETTINGS.coat);
+  }
+  function closeSettings() {
+    document.getElementById('settingsOverlay').classList.add('hidden');
+  }
+  function openHelp() {
+    document.getElementById('helpOverlay').classList.remove('hidden');
+  }
+  function closeHelp() {
+    document.getElementById('helpOverlay').classList.add('hidden');
+  }
+  function openHighScores() {
+    renderHighScores(loadScores(), 'highScoreTableModal');
+    document.getElementById('highScoresOverlay').classList.remove('hidden');
+  }
+  function closeHighScores() {
+    document.getElementById('highScoresOverlay').classList.add('hidden');
+  }
+  function openBorrow() {
+    if (G.day < 3) {
+      addLog("Your parents won't advance you more yet. Try again on day 3.", 'bad');
+      return;
+    }
+    const remaining = Math.max(0, 10000 - G.borrowedToday);
+    openInput('borrow', `Ask for advance of how much? (max ${fmt(remaining)} today)`);
+  }
+  function syncSopt(groupId, val) {
+    document.querySelectorAll('#' + groupId + ' .sopt').forEach(b => {
+      b.classList.toggle('active', parseFloat(b.dataset.val) === parseFloat(val));
+    });
+  }
+  document.querySelectorAll('.sopt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.closest('.setting-opts');
+      group.querySelectorAll('.sopt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (!btn.dataset.preset && !btn.dataset.theme) {
+        document.querySelectorAll('#set-difficulty .sopt').forEach(b => b.classList.remove('active'));
+      }
+    });
+  });
+  const PRESETS = {
+    easy:   { days: 60,  cash: 5000, debt: 0,     interest: 1.05, events: 0.20, coat: 200 },
+    medium: { days: 30,  cash: 2000, debt: 5000,  interest: 1.10, events: 0.38, coat: 100 },
+    hard:   { days: 30,  cash: 1000, debt: 10000, interest: 1.15, events: 0.50, coat: 50  },
+  };
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    syncSopt('set-days',     p.days);
+    syncSopt('set-cash',     p.cash);
+    syncSopt('set-debt',     p.debt);
+    syncSopt('set-interest', p.interest);
+    syncSopt('set-events',   p.events);
+    syncSopt('set-coat',     p.coat);
+    document.querySelectorAll('#set-difficulty .sopt').forEach(b =>
+      b.classList.toggle('active', b.dataset.preset === name)
+    );
+  }
+
+  function selectTheme(id) {
+    SETTINGS.theme = id;
+    document.querySelectorAll('#set-theme .sopt').forEach(b =>
+      b.classList.toggle('active', b.dataset.theme === id));
+  }
+
+  function applyTheme(id) {
+    const t = THEMES[id] || THEMES.neighborhood;
+    DRUGS     = t.drugs;
+    CITIES    = t.cities;
+    HEADLINES = t.headlines;
+    t.upgrades.forEach(u => {
+      const upg = UPGRADES.find(x => x.id === u.id);
+      if (upg) { upg.icon = u.icon; upg.short = u.short; upg.label = u.label; upg.desc = u.desc; }
+    });
+  }
+
+  function readSettings() {
+    const pick = id => parseFloat(document.querySelector('#' + id + ' .sopt.active').dataset.val);
+    const activeTheme = document.querySelector('#set-theme .sopt.active');
+    if (activeTheme) SETTINGS.theme = activeTheme.dataset.theme;
+    SETTINGS.days     = pick('set-days');
+    SETTINGS.cash     = pick('set-cash');
+    SETTINGS.debt     = pick('set-debt');
+    SETTINGS.interest = pick('set-interest');
+    SETTINGS.events   = pick('set-events');
+    SETTINGS.coat     = pick('set-coat');
+  }
+  function startFromSettings() {
+    readSettings();
+    document.getElementById('settingsOverlay').classList.add('hidden');
+    newGame();
+  }
+
+  /* ─── HELPERS ─── */
+  const rnd   = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const fmt   = n      => '$' + Math.abs(Math.round(n)).toLocaleString();
+  const carried = ()   => Object.values(G.stash).reduce((a, b) => a + b, 0);
+
+  /* ─── GAME INIT ─── */
+  function newGame() {
+    applyTheme(SETTINGS.theme);
+    G = {
+      day: 1, maxDays: SETTINGS.days,
+      cash: SETTINGS.cash, bank: 0, debt: SETTINGS.debt,
+      city: CITIES[0].name, coat: SETTINGS.coat,
+      stash: {}, safehouse: {}, prices: {}, prevPrices: {}, market: {},
+      avgCost: {},
+      borrowedToday: 0,
+      carTripsToday: 0,
+      supplierUsedToday: false,
+      supplierBoughtDrug: null,
+      heatDay: false,
+      coatsBought: 0,
+      lastVisit: {},
+      shown3DayWarning: false,
+      shownEndGamePopup: false,
+      supplierBurnedUntil: 0,
+      corneredDrug: null, corneredUntil: 0,
+      tippedCity: null,   tippedExpiry: 0,
+      pendingFireSale: null,
+      hasGun: false, hasBurner: false, hasCar: false, hasSupplier: false,
+    };
+    document.getElementById('gameOver').classList.add('hidden');
+    document.getElementById('eventOverlay').classList.add('hidden');
+    const interestPct = Math.round((SETTINGS.interest - 1) * 100);
+    const T = THEMES[SETTINGS.theme] || THEMES.neighborhood;
+    document.getElementById('headerSub').textContent =
+      `${SETTINGS.days} DAYS TO BUILD YOUR CANDY EMPIRE \u2022 ${T.location} \u2022 ${T.year} \u2022 ${interestPct}%/DAY INTEREST`;
+    generateMarket();
+    renderAll();
+    addLog(`Welcome to Candy Wars! ${SETTINGS.days} days to build your candy empire.`, 'warn');
+    if (SETTINGS.debt > 0) addLog(`You borrowed ${fmt(SETTINGS.debt)} from your parents at ${interestPct}%/day interest.`, 'bad');
+  }
+
+  /* ─── MARKET GENERATION ─── */
+  function generateMarket() {
+    G.prevPrices = { ...G.prices };
+    G.prices = {};
+    G.market = {};
+    const cityData   = CITIES.find(c => c.name === G.city);
+    const specialty  = cityData ? cityData.specialty : null;
+    if (G.corneredDrug && G.day > G.corneredUntil) { G.corneredDrug = null; G.corneredUntil = 0; }
+    const daysSince   = G.lastVisit[G.city] ? G.day - G.lastVisit[G.city] : 0;
+    const accumNormal = Math.min(daysSince * 8,  80);
+    const accumSpec   = Math.min(daysSince * 12, 120);
+    G.lastVisit[G.city] = G.day;
+    const skipChance = G.hasBurner ? 0.05 : 0.15;
+    DRUGS.forEach(d => {
+      const isSpecialty = d.name === specialty;
+      if (d.name === G.corneredDrug) return;
+      if (!isSpecialty && Math.random() < skipChance) return;
+      let price;
+      if (d.spike && Math.random() < 0.05) {
+        price = rnd(Math.round(d.base * 2), Math.round(d.base * 3.5));
+      } else {
+        price = Math.round(d.base * (0.5 + Math.random() * d.variance * 2));
+        if (isSpecialty) price = Math.round(price * 0.8);
+      }
+      G.prices[d.name] = price;
+      G.market[d.name] = isSpecialty
+        ? rnd(60, 120) + accumSpec
+        : rnd(10, 60)  + accumNormal;
+    });
+  }
+
+  /* ─── EVENTS ─── */
+  function maybeEvent() {
+    if (Math.random() > SETTINGS.events) return;
+    const ev = EVENTS[rnd(0, EVENTS.length - 1)];
+    applyEvent(ev.type);
+    showEvent(ev.title, ev.msg);
+  }
+
+  function applyEvent(type) {
+    if (type === 'bust') {
+      let lost = 0;
+      let fraction = G.hasGun ? 0.25 : 0.5;
+      if (G.heatDay) fraction = Math.min(0.9, fraction + 0.2);
+      Object.keys(G.stash).forEach(k => {
+        const take = Math.floor(G.stash[k] * fraction);
+        G.stash[k] -= take;
+        lost += take;
+        if (G.stash[k] <= 0) delete G.stash[k];
+      });
+      const heatNote = G.heatDay ? ' (heat day)' : '';
+      const gunNote  = G.hasGun  ? ' (hall pass reduced losses)' : '';
+      addLog(`INSPECTION! Lost ${lost} items to the principal${gunNote}${heatNote}.`, 'bad');
+    } else if (type === 'surge') {
+      Object.keys(G.prices).forEach(k => {
+        G.prices[k] = Math.round(G.prices[k] * (1.5 + Math.random()));
+      });
+      addLog('Buying frenzy! Prices jumped everywhere!', 'bad');
+    } else if (type === 'drought') {
+      const citySpec = (CITIES.find(c => c.name === G.city) || {}).specialty;
+      const keys = Object.keys(G.market).filter(k => k !== citySpec);
+      for (let i = 0; i < Math.floor(keys.length / 2); i++) {
+        delete G.market[keys[i]];
+        delete G.prices[keys[i]];
+      }
+      addLog('Shortage! Half the supply ran out.', 'bad');
+    } else if (type === 'mug') {
+      if (G.hasGun && Math.random() < 0.6) {
+        addLog('A bully tried to steal from you — you stood your ground and they backed off!', 'good');
+        return;
+      }
+      const take = Math.min(G.cash, rnd(300, 1500));
+      G.cash -= take;
+      addLog(`Bully took ${fmt(take)} from you!`, 'bad');
+    } else if (type === 'find') {
+      const d = DRUGS[rnd(0, DRUGS.length - 1)];
+      let qty = rnd(5, 25);
+      qty = Math.min(qty, G.coat - carried());
+      if (qty > 0) {
+        G.stash[d.name] = (G.stash[d.name] || 0) + qty;
+        addLog(`Found ${qty}x ${d.name} hidden behind the bleachers!`, 'good');
+      }
+    } else if (type === 'cheap') {
+      Object.keys(G.prices).forEach(k => {
+        G.prices[k] = Math.round(G.prices[k] * 0.35);
+      });
+      addLog('Price crash — stock up now!', 'good');
+    } else if (type === 'shark') {
+      if (G.debt <= 0) {
+        addLog("Parents checked in — you owe them nothing. Nice!", 'warn');
+        return;
+      }
+      const pct  = rnd(10, 25);
+      const take = Math.min(G.cash, Math.max(200, Math.round(G.debt * pct / 100)));
+      G.cash -= take;
+      addLog(`Parents collected ${fmt(take)} (${pct}% of what you owe) as a reminder to pay them back.`, 'bad');
+    } else if (type === 'bribe') {
+      if (G.cash < 200) {
+        applyEvent('bust');
+        addLog(`Couldn't bribe the hall monitor — they reported you anyway!`, 'bad');
+      } else {
+        G.cash -= 200;
+        addLog(`Gave the hall monitor a candy bar ($200) to look away.`, 'warn');
+      }
+    } else if (type === 'tip') {
+      let bestDrug = null, bestRatio = Infinity;
+      DRUGS.forEach(d => {
+        if (G.prices[d.name]) {
+          const ratio = G.prices[d.name] / d.base;
+          if (ratio < bestRatio) { bestRatio = ratio; bestDrug = d; }
+        }
+      });
+      if (bestDrug) {
+        addLog(`Playground tip: ${bestDrug.name} is going for ${fmt(G.prices[bestDrug.name])} here — that's a steal!`, 'good');
+      } else {
+        addLog('Your friend had nothing useful to share.', '');
+      }
+    }
+  }
+
+  function showEvent(title, msg) {
+    document.getElementById('eventTitle').textContent = title;
+    document.getElementById('eventMsg').textContent   = msg;
+    document.getElementById('eventOverlay').classList.remove('hidden');
+  }
+  function showEndGameModal() {
+    showEvent('LAST DAY!', "Time's up! Sell everything and pay back your parents. When you're ready, hit END GAME.");
+  }
+  function dismissEvent() {
+    document.getElementById('eventOverlay').classList.add('hidden');
+    renderAll();
+  }
+
+  /* ─── BUY / SELL ─── */
+  function calcMaxQty(name) {
+    const price = G.prices[name];
+    if (!price) return 0;
+    const avail = G.market[name] || 0;
+    const space = G.coat - carried();
+    return Math.min(avail, space, Math.floor(G.cash / price));
+  }
+
+  function executeBuy(name, qty) {
+    const price = G.prices[name];
+    if (!price || qty <= 0) { addLog("Can't buy — not enough coins, bag space, or supply.", 'bad'); return; }
+    const prevQty  = G.stash[name] || 0;
+    const prevAvg  = G.avgCost[name] || 0;
+    G.avgCost[name] = Math.round((prevAvg * prevQty + price * qty) / (prevQty + qty));
+    G.cash -= price * qty;
+    G.stash[name] = prevQty + qty;
+    G.market[name] -= qty;
+    if (G.market[name] <= 0) delete G.market[name];
+    addLog(`Bought ${qty}x ${name} @ ${fmt(price)} each. (avg cost: ${fmt(G.avgCost[name])})`, 'good');
+    renderAll();
+  }
+
+  function buyDrug(name) {
+    const qtyEl = document.getElementById('qty_' + name);
+    let qty = parseInt(qtyEl.value) || 1;
+    qty = Math.min(qty, calcMaxQty(name));
+    executeBuy(name, qty);
+  }
+
+  function buyMax(name) {
+    const qty = calcMaxQty(name);
+    if (qty <= 0) { addLog("Can't buy — not enough coins, bag space, or supply.", 'bad'); return; }
+    executeBuy(name, qty);
+  }
+
+  function supplierBuy(name) {
+    if (!G.hasSupplier)                       { addLog("You don't have a club card.", 'bad'); return; }
+    if (G.supplierBurnedUntil >= G.day)       { addLog(`Club card is declined — ${G.supplierBurnedUntil - G.day + 1} day(s) left.`, 'bad'); return; }
+    if (G.supplierUsedToday)                  { addLog('Already used the club card today.', 'bad'); return; }
+    const price = G.prices[name];
+    if (!price)                  { addLog("Nobody's trading that here today.", 'bad'); return; }
+    const discountPrice = Math.round(price * 0.75);
+    const space         = G.coat - carried();
+    const avail         = G.market[name] || 0;
+    const maxSupply     = Math.floor(avail / 2);
+    if (maxSupply <= 0)          { addLog('Not enough supply here for a bulk deal.', 'bad'); return; }
+    let qty             = Math.min(maxSupply, space, Math.floor(G.cash / discountPrice));
+    if (qty <= 0)                { addLog('Not enough coins or bag space for a bulk deal.', 'bad'); return; }
+    const realPrice = G.prices[name];
+    G.prices[name]  = discountPrice;
+    executeBuy(name, qty);
+    G.prices[name]  = realPrice;
+    G.supplierUsedToday = true;
+    G.supplierBoughtDrug = name;
+    addLog(`Club card deal: ${qty}x ${name} at ${fmt(discountPrice)} (25% off). Card used for today.`, 'good');
+    renderAll();
+  }
+
+  function sellDrug(name) {
+    const qtyEl = document.getElementById('sqty_' + name);
+    let qty     = parseInt(qtyEl.value) || 1;
+    const have  = G.stash[name] || 0;
+    const price = G.prices[name];
+    if (!have)  { addLog("You don't have that.", 'bad'); return; }
+    if (!price) { addLog("Nobody's buying that here today.", 'bad'); return; }
+    if (G.supplierBoughtDrug === name) { addLog(`Can't sell club card candy here. Travel somewhere first.`, 'bad'); return; }
+    qty = Math.min(qty, have);
+    G.cash += price * qty;
+    G.stash[name] -= qty;
+    if (G.stash[name] <= 0) { delete G.stash[name]; delete G.avgCost[name]; }
+    addLog(`Sold ${qty}x ${name} @ ${fmt(price)} each.`, 'good');
+    renderAll();
+  }
+
+  /* ─── LATE-GAME EVENTS ─── */
+  function maybeLateEvent() {
+    if (Math.random() > 0.28) return;
+    const eligible = [];
+    if (G.hasSupplier && G.supplierBurnedUntil < G.day)
+      eligible.push({ w:1, fn: leBurnedContact });
+    eligible.push({ w:3, fn: leFireSale });
+    if (!G.corneredDrug || G.day > G.corneredUntil)
+      eligible.push({ w:2, fn: leMarketCornered });
+    if (!G.tippedCity)
+      eligible.push({ w:4, fn: leTipOff });
+    if (!eligible.length) return;
+    const total = eligible.reduce((s, e) => s + e.w, 0);
+    let r = Math.random() * total;
+    for (const e of eligible) { r -= e.w; if (r <= 0) { e.fn(); return; } }
+    eligible[eligible.length - 1].fn();
+  }
+
+  function leBurnedContact() {
+    G.supplierBurnedUntil = G.day + 3;
+    showEvent('CLUB CARD DECLINED', 'Your wholesale club card was declined! No bulk deals available for the next 3 days.');
+    addLog('Club card declined — no bulk deals for 3 days.', 'bad');
+  }
+
+  function leFireSale() {
+    const d = DRUGS[rnd(0, DRUGS.length - 1)];
+    const qty   = rnd(80, 150);
+    const price = Math.round(d.base * (0.25 + Math.random() * 0.05));
+    G.pendingFireSale = { drug: d.name, qty, price };
+    const space = G.coat - carried();
+    const canBuy = Math.min(qty, space, Math.floor(G.cash / price));
+    document.getElementById('fireSaleMsg').textContent =
+      `A kid who's moving away is selling ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of normal price). You can take up to ${canBuy} units.`;
+    document.getElementById('fireSaleOverlay').classList.remove('hidden');
+  }
+
+  function acceptFireSale() {
+    document.getElementById('fireSaleOverlay').classList.add('hidden');
+    const offer = G.pendingFireSale;
+    G.pendingFireSale = null;
+    if (!offer) return;
+    const qty = Math.min(offer.qty, G.coat - carried(), Math.floor(G.cash / offer.price));
+    if (qty <= 0) { addLog('Not enough coins or bag space to take the deal.', 'bad'); return; }
+    const prevQty = G.stash[offer.drug] || 0;
+    const prevAvg = G.avgCost[offer.drug] || 0;
+    G.avgCost[offer.drug] = Math.round((prevAvg * prevQty + offer.price * qty) / (prevQty + qty));
+    G.cash -= offer.price * qty;
+    G.stash[offer.drug] = prevQty + qty;
+    addLog(`Going-home sale: bought ${qty}x ${offer.drug} at ${fmt(offer.price)} each.`, 'good');
+    renderAll();
+  }
+
+  function declineFireSale() {
+    document.getElementById('fireSaleOverlay').classList.add('hidden');
+    G.pendingFireSale = null;
+    addLog('Passed on the going-home sale.', '');
+  }
+
+  function leMarketCornered() {
+    const d = DRUGS[rnd(0, DRUGS.length - 1)];
+    const days = rnd(2, 3);
+    G.corneredDrug   = d.name;
+    G.corneredUntil  = G.day + days;
+    showEvent('BOUGHT OUT!', `The popular kid bought out all the ${d.name} in the area. It won't be available for ${days} days.`);
+    addLog(`Popular kid bought out all ${d.name} for ${days} days.`, 'bad');
+  }
+
+  function leTipOff() {
+    const others = CITIES.filter(c => c.name !== G.city);
+    const target = others[rnd(0, others.length - 1)];
+    G.tippedCity   = target.name;
+    G.tippedExpiry = G.day + 2;
+    showEvent('INSPECTION WARNING', `Word spread: the principal is doing surprise bag inspections in ${target.name}. Going there in the next 2 days will guarantee a confiscation!`);
+    addLog(`Warning: avoid ${target.name} for the next 2 days.`, 'warn');
+  }
+
+  /* ─── HEADLINE EFFECTS ─── */
+  function applyHeadline() {
+    const hl = HEADLINES[rnd(0, HEADLINES.length - 1)];
+    const drugs = Object.keys(G.prices);
+    if (hl.type === 'surge' && drugs.length) {
+      const d = drugs[rnd(0, drugs.length - 1)];
+      G.prices[d] = Math.round(G.prices[d] * (1.3 + Math.random() * 0.4));
+      addLog(`📰 ${hl.text} — ${d} prices are up.`, 'headline');
+    } else if (hl.type === 'drought' && drugs.length) {
+      const citySpec = (CITIES.find(c => c.name === G.city) || {}).specialty;
+      const pool = drugs.filter(d => d !== citySpec);
+      const d = (pool.length ? pool : drugs)[rnd(0, (pool.length || drugs.length) - 1)];
+      delete G.prices[d];
+      delete G.market[d];
+      addLog(`📰 ${hl.text} — ${d} is unavailable today.`, 'headline');
+    } else if (hl.type === 'heat') {
+      G.heatDay = true;
+      addLog(`📰 ${hl.text} — Inspections are worse today.`, 'headline');
+    } else {
+      addLog(`📰 ${hl.text}`, 'headline');
+    }
+  }
+
+  /* ─── TRAVEL ─── */
+  const CAR_FREE_TRIPS = 1;
+
+  function travel(city) {
+    if (city === G.city) return;
+    G.city = city;
+
+    const freeTrip = G.hasCar && G.carTripsToday < CAR_FREE_TRIPS;
+    if (freeTrip) {
+      G.carTripsToday++;
+      addLog(`Rode to ${city} for free! (skateboard trip used for today)`, 'good');
+    } else {
+      G.day++;
+      G.debt = Math.round(G.debt * SETTINGS.interest);
+      G.borrowedToday = 0;
+      G.carTripsToday = 0;
+      G.supplierUsedToday = false;
+      G.supplierBoughtDrug = null;
+      G.heatDay = false;
+      addLog(`Traveled to ${city}. Day ${G.day}.`, 'warn');
+    }
+
+    generateMarket();
+    if (!freeTrip) applyHeadline();
+    if (G.tippedCity === city && G.day <= (G.tippedExpiry || 0)) {
+      applyEvent('bust');
+      addLog(`You ignored the warning — the principal was waiting in ${city}!`, 'bad');
+      G.tippedCity = null; G.tippedExpiry = 0;
+    } else if (G.tippedExpiry && G.day > G.tippedExpiry) {
+      G.tippedCity = null; G.tippedExpiry = 0;
+    }
+    if (Math.random() < SETTINGS.events) {
+      let ev = EVENTS[rnd(0, EVENTS.length - 1)];
+      if (ev.type === 'shark' && (G.day <= 5 || G.debt <= 0)) ev = null;
+      if (ev) {
+        applyEvent(ev.type);
+        showEvent(ev.title, ev.msg);
+      }
+    }
+    if (G.debt > 0 && G.day > 15) {
+      const extraChance = Math.min((G.day - 15) * 0.02, 0.30);
+      if (Math.random() < extraChance) {
+        const sharkEv = EVENTS.find(e => e.type === 'shark');
+        applyEvent('shark');
+        showEvent(sharkEv.title, sharkEv.msg);
+      }
+    }
+    if (!freeTrip && G.day > 15) maybeLateEvent();
+    if (!G.shown3DayWarning && G.day >= G.maxDays - 2) {
+      G.shown3DayWarning = true;
+      showEvent('3 DAYS LEFT!', 'Time is running out! Start selling your candy and pay back your parents before the last day.');
+    }
+    if (G.day > G.maxDays) { endGame(); return; }
+    maybeCoatOffer();
+    renderAll();
+  }
+
+  /* ─── BAG OFFER ─── */
+  const COAT_OFFERS = [
+    { desc:'A kid is selling their old backpack with lots of extra pockets',  capacity: 50,  price: 400  },
+    { desc:'You find a bigger lunch bag at the school supply store',           capacity: 75,  price: 600  },
+    { desc:'A street vendor has a cool tote bag with hidden compartments',    capacity: 40,  price: 300  },
+    { desc:'Your older sibling is selling their extra-large hiking pack',      capacity: 100, price: 900  },
+    { desc:'A neighbor kid is selling a lightweight messenger bag',            capacity: 30,  price: 150  },
+    { desc:'The sports store has a sale on oversized equipment bags',          capacity: 60,  price: 500  },
+  ];
+  let pendingCoatOffer = null;
+
+  function maybeCoatOffer() {
+    if (Math.random() > 0.10) return;
+    const offer = COAT_OFFERS[Math.floor(Math.random() * COAT_OFFERS.length)];
+    pendingCoatOffer = offer;
+    document.getElementById('coatOfferMsg').textContent =
+      `${offer.desc}. +${offer.capacity} bag space for ${fmt(offer.price)}. Interested?`;
+    document.getElementById('coatOverlay').classList.remove('hidden');
+  }
+
+  function acceptCoatOffer() {
+    document.getElementById('coatOverlay').classList.add('hidden');
+    if (!pendingCoatOffer) return;
+    const offer = pendingCoatOffer;
+    pendingCoatOffer = null;
+    if (G.cash < offer.price) {
+      addLog(`Couldn't afford the bag offer (${fmt(offer.price)}).`, 'bad');
+      return;
+    }
+    G.cash -= offer.price;
+    G.coat += offer.capacity;
+    addLog(`Got a bigger bag (+${offer.capacity} space) for ${fmt(offer.price)}.`, 'good');
+    renderAll();
+  }
+
+  function declineCoatOffer() {
+    document.getElementById('coatOverlay').classList.add('hidden');
+    pendingCoatOffer = null;
+    addLog('Passed on the bag offer.', '');
+  }
+
+  /* ─── UPGRADES ─── */
+  const UPGRADES = [
+    { id:'gun',      icon:'🎫', short:'Hall Pass', label:'Hall Pass',       price:1500, desc:'Reduces inspection losses. 60% chance to scare off bullies.' },
+    { id:'burner',   icon:'📻', short:'Walkie-T',  label:'Walkie-Talkie',   price:500,  desc:'Better market info — nearly full selection every visit.' },
+    { id:'car',      icon:'🛹', short:'Skate',     label:'Skateboard',      price:3000, desc:'1 free trip per day — travel once without losing a day or interest.' },
+    { id:'supplier', icon:'🏷️', short:'Club Card', label:'Club Card',       price:2000, desc:'Once per day, buy any item at 25% off (up to half the available supply).' },
+  ];
+
+  function renderShop() {
+    const list = document.getElementById('shopList');
+    list.innerHTML = '';
+    UPGRADES.forEach(u => {
+      const owned     = G['has' + u.id.charAt(0).toUpperCase() + u.id.slice(1)];
+      const canAfford = G.cash >= u.price;
+      const row = document.createElement('div');
+      row.className = 'drug-row';
+      row.innerHTML = `
+        <div>
+          <div class="drug-name">${u.icon} ${u.label}</div>
+          <div class="drug-avail">${u.desc}</div>
+        </div>
+        <div class="drug-price">${fmt(u.price)}</div>
+        <div class="buy-group">
+          <button class="qty-btn" onclick="buyUpgrade('${u.id}')" ${owned || !canAfford ? 'disabled' : ''}>${owned ? 'OWNED' : 'BUY'}</button>
+        </div>`;
+      list.appendChild(row);
+    });
+    const coatPrice  = 1500 * Math.pow(2, G.coatsBought || 0);
+    const canAfford  = G.cash >= coatPrice;
+    const coatRow    = document.createElement('div');
+    coatRow.className = 'drug-row';
+    coatRow.innerHTML = `
+      <div>
+        <div class="drug-name">🎒 Backpack Upgrade</div>
+        <div class="drug-avail">+30 bag space. Current: ${G.coat}. Price doubles each time.</div>
+      </div>
+      <div class="drug-price">${fmt(coatPrice)}</div>
+      <div class="buy-group">
+        <button class="qty-btn" onclick="buyCoatUpgrade()" ${canAfford ? '' : 'disabled'}>BUY</button>
+      </div>`;
+    list.appendChild(coatRow);
+  }
+
+  function buyCoatUpgrade() {
+    const price = 1500 * Math.pow(2, G.coatsBought || 0);
+    if (G.cash < price) { addLog(`Need ${fmt(price)} for the backpack upgrade.`, 'bad'); return; }
+    G.cash -= price;
+    G.coat += 30;
+    G.coatsBought = (G.coatsBought || 0) + 1;
+    addLog(`Bag upgraded +30 space for ${fmt(price)}. Now ${G.coat} max capacity.`, 'good');
+    renderAll();
+  }
+
+  function buyUpgrade(id) {
+    const u = UPGRADES.find(x => x.id === id);
+    const key = 'has' + id.charAt(0).toUpperCase() + id.slice(1);
+    if (G[key]) { addLog('Already have that!', 'bad'); return; }
+    if (G.cash < u.price) { addLog(`Need ${fmt(u.price)} to buy ${u.label}.`, 'bad'); return; }
+    G.cash -= u.price;
+    G[key] = true;
+    addLog(`Bought: ${u.label}!`, 'good');
+    renderAll();
+  }
+
+  /* ─── CUSTOM INPUT DIALOG ─── */
+  function openInput(action, labelText) {
+    inputAction = action;
+    document.getElementById('inputLabel').textContent = labelText;
+    document.getElementById('inputField').value = 0;
+    document.getElementById('inputOverlay').classList.remove('hidden');
+    document.getElementById('inputField').focus();
+  }
+  function closeInput() {
+    inputAction = null;
+    document.getElementById('inputOverlay').classList.add('hidden');
+  }
+  function confirmInput() {
+    const amt    = parseInt(document.getElementById('inputField').value) || 0;
+    const action = inputAction;
+    closeInput();
+    if (amt <= 0) return;
+    if (action === 'deposit') {
+      const a = Math.min(amt, G.cash);
+      G.cash -= a; G.bank += a;
+      addLog(`Saved ${fmt(a)} to your piggy bank.`, 'good');
+    } else if (action === 'withdraw') {
+      const a = Math.min(amt, G.bank);
+      G.cash += a; G.bank -= a;
+      addLog(`Took ${fmt(a)} from your piggy bank.`, 'good');
+    } else if (action === 'loan') {
+      const a = Math.min(amt, G.cash, G.debt);
+      G.cash -= a; G.debt -= a;
+      if (G.debt < 0) G.debt = 0;
+      addLog(`Paid ${fmt(a)} back to your parents. Still owe: ${fmt(G.debt)}.`, 'good');
+      if (G.debt === 0) addLog('DEBT CLEARED! You paid it all back!', 'good');
+    } else if (action === 'borrow') {
+      const remaining = 10000 - (G.borrowedToday || 0);
+      if (remaining <= 0) { addLog("Your parents won't advance any more today.", 'bad'); return; }
+      const a = Math.min(amt, remaining);
+      G.cash += a; G.debt += a; G.borrowedToday += a;
+      addLog(`Got ${fmt(a)} advance from parents. Total owed: ${fmt(G.debt)}. Can borrow more today: ${fmt(remaining - a)}.`, 'warn');
+    }
+    renderAll();
+  }
+
+  function payAllLoan() {
+    const a = Math.min(G.cash, G.debt);
+    if (a <= 0) { addLog('Not enough coins to pay your parents.', 'bad'); return; }
+    G.cash -= a; G.debt -= a;
+    if (G.debt < 0) G.debt = 0;
+    addLog(`Paid ${fmt(a)} back to your parents. Still owe: ${fmt(G.debt)}.`, 'good');
+    if (G.debt === 0) addLog('DEBT CLEARED! You paid it all back!', 'good');
+    renderAll();
+  }
+
+  function withdrawAll() {
+    if (G.bank <= 0) { addLog('Your piggy bank is empty.', 'bad'); return; }
+    const a = G.bank;
+    G.cash += a; G.bank = 0;
+    addLog(`Emptied your piggy bank: ${fmt(a)}.`, 'good');
+    renderAll();
+  }
+
+  /* ─── PERSISTENCE ─── */
+  function saveGame() {
+    try {
+      localStorage.setItem('candywars_game',     JSON.stringify(G));
+      localStorage.setItem('candywars_settings', JSON.stringify(SETTINGS));
+    } catch(e) {}
+  }
+
+  function loadSavedGame() {
+    try {
+      const raw = localStorage.getItem('candywars_game');
+      if (!raw) return false;
+      const saved = JSON.parse(raw);
+      if (saved.day > saved.maxDays) return false;
+      const savedSettings = localStorage.getItem('candywars_settings');
+      if (savedSettings) Object.assign(SETTINGS, JSON.parse(savedSettings));
+      applyTheme(SETTINGS.theme);
+      G = saved;
+      document.getElementById('gameOver').classList.add('hidden');
+      const interestPct = Math.round((SETTINGS.interest - 1) * 100);
+      const T = THEMES[SETTINGS.theme] || THEMES.neighborhood;
+      document.getElementById('headerSub').textContent =
+        `${SETTINGS.days} DAYS TO BUILD YOUR CANDY EMPIRE \u2022 ${T.location} \u2022 ${T.year} \u2022 ${interestPct}%/DAY INTEREST`;
+      addLog('Session restored. Welcome back, candy trader!', 'warn');
+      renderAll();
+      return true;
+    } catch(e) { return false; }
+  }
+
+  /* ─── HIGH SCORES ─── */
+  function loadScores() {
+    try { return JSON.parse(localStorage.getItem('candywars_scores') || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveScore(net) {
+    const scores = loadScores();
+    scores.push({
+      net,
+      days:     SETTINGS.days,
+      cash:     SETTINGS.cash,
+      debt:     SETTINGS.debt,
+      interest: SETTINGS.interest,
+      date:     new Date().toLocaleDateString(),
+    });
+    scores.sort((a, b) => b.net - a.net);
+    scores.splice(10);
+    try { localStorage.setItem('candywars_scores', JSON.stringify(scores)); } catch(e) {}
+    return scores;
+  }
+  function renderHighScores(scores, elId = 'highScoreTable') {
+    const el = document.getElementById(elId);
+    if (!scores.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No scores yet.</div>'; return; }
+    el.innerHTML = scores.map((s, i) => {
+      const rank  = i === 0 ? '👑' : `#${i + 1}`;
+      const color = s.net > 0 ? 'var(--green)' : 'var(--red)';
+      const interestPct = Math.round((s.interest - 1) * 100);
+      return `<div style="display:grid;grid-template-columns:28px 1fr auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="font-size:14px">${rank}</span>
+        <span style="color:var(--muted)">${s.days}d · $${s.cash.toLocaleString()} start · ${interestPct}% int · ${s.date}</span>
+        <span style="color:${color};font-weight:bold">${fmt(s.net)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* ─── GAME OVER ─── */
+  function endGame() {
+    const net = G.cash + G.bank - G.debt;
+    let title, flavor;
+    if (net > 100000)     { title = 'CANDY TYCOON!';   flavor = 'You own this neighborhood. Everyone comes to you for candy!'; }
+    else if (net > 50000) { title = 'SUGAR BARON';     flavor = 'Big earner. Everyone knows your name around here.'; }
+    else if (net > 10000) { title = 'SWEET DEALER';    flavor = 'Not bad! You survived and came out ahead.'; }
+    else if (net > 0)     { title = 'SMALL TIMER';     flavor = 'You made it — barely. Try harder next time!'; }
+    else                  { title = 'BROKE KID';       flavor = "You owe your parents everything you had. Better luck next time!"; }
+
+    document.getElementById('goTitle').textContent = title;
+    document.getElementById('goScore').innerHTML =
+      `Coins on hand: ${fmt(G.cash)}<br>` +
+      `Piggy Bank: ${fmt(G.bank)}<br>` +
+      `Owe parents: −${fmt(G.debt)}<br><br>` +
+      `<strong>Net Worth: ${fmt(net)}</strong><br><br>` +
+      flavor;
+
+    const scores = saveScore(net);
+    renderHighScores(scores);
+    document.getElementById('gameOver').classList.remove('hidden');
+  }
+
+  /* ─── LOG ─── */
+  function addLog(msg, cls = '') {
+    const log = document.getElementById('log');
+    const d   = document.createElement('div');
+    d.className = 'log-entry ' + cls;
+    d.textContent = msg;
+    log.prepend(d);
+    while (log.children.length > 50) log.removeChild(log.lastChild);
+  }
+
+  /* ─── RENDER ─── */
+  function renderAll() {
+    document.getElementById('dayDisplay').textContent  = G.day;
+    document.getElementById('daysLeft').textContent    = (G.maxDays - G.day) + ' days left';
+    document.getElementById('cashDisplay').textContent = fmt(G.cash);
+    document.getElementById('bankDisplay').textContent = fmt(G.bank);
+    document.getElementById('debtDisplay').textContent = fmt(G.debt);
+    document.getElementById('coatDisplay').textContent = carried() + ' / ' + G.coat;
+
+    const ug = id => UPGRADES.find(x => x.id === id);
+    const badges = [
+      G.hasGun      && `${ug('gun').icon} ${ug('gun').short}`,
+      G.hasBurner   && `${ug('burner').icon} ${ug('burner').short}`,
+      G.hasCar      && `${ug('car').icon} ${ug('car').short}`,
+      G.hasSupplier && `${ug('supplier').icon} ${ug('supplier').short}${G.supplierBurnedUntil >= G.day ? ` (declined ${G.supplierBurnedUntil - G.day + 1}d)` : G.supplierUsedToday ? ' (used)' : ' (ready)'}`,
+    ].filter(Boolean);
+    document.getElementById('upgradeStatus').textContent = badges.length ? 'Owned: ' + badges.join(' · ') : '';
+
+    renderMarket();
+    renderStash();
+    renderShop();
+    renderCities();
+    syncTopSections();
+    saveGame();
+  }
+
+  function syncTopSections() {
+    const left  = document.getElementById('topLeft');
+    const right = document.getElementById('topRight');
+    if (!left || !right) return;
+    left.style.minHeight  = '';
+    right.style.minHeight = '';
+    const h = Math.max(left.offsetHeight, right.offsetHeight);
+    left.style.minHeight  = h + 'px';
+    right.style.minHeight = h + 'px';
+  }
+
+  function renderMarket() {
+    const ml = document.getElementById('marketList');
+    ml.innerHTML = '';
+    let count = 0;
+    DRUGS.forEach(d => {
+      if (!G.prices[d.name]) return;
+      count++;
+      const price  = G.prices[d.name];
+      const prev   = G.prevPrices[d.name];
+      const isHigh = price > d.base * 1.5;
+      let trendHTML = '';
+      if (prev && price > prev) trendHTML = '<span class="trend trend-up">▲</span>';
+      else if (prev && price < prev) trendHTML = '<span class="trend trend-down">▼</span>';
+
+      const canAfford = G.cash >= price;
+      const hasSpace  = (G.coat - carried()) > 0;
+      const canBuy    = canAfford && hasSpace && (G.market[d.name] || 0) > 0;
+      const disabledAttr = canBuy ? '' : 'disabled';
+      const discountPrice = Math.round(price * 0.75);
+      const isBurned   = G.supplierBurnedUntil >= G.day;
+      const canConnect = G.hasSupplier && !G.supplierUsedToday && !isBurned && hasSpace && G.cash >= discountPrice;
+      const connectBtn = G.hasSupplier
+        ? `<button class="qty-btn" onclick="supplierBuy('${d.name}')" style="border-color:#6a4aaa;color:#c090f0" ${canConnect ? '' : 'disabled'} title="Buy at 25% off via club card">${isBurned ? 'DECLINED' : G.supplierUsedToday ? 'USED' : 'CARD'}</button>`
+        : '';
+
+      const row = document.createElement('div');
+      row.className = 'drug-row';
+      row.innerHTML = `
+        <div>
+          <div class="drug-name">${d.name} <span class="drug-alias">${d.street}</span></div>
+          <div class="drug-avail">${G.market[d.name] || 0} available</div>
+        </div>
+        <div class="drug-price${isHigh ? ' high' : ''}">${fmt(price)}${trendHTML}</div>
+        <div class="buy-group">
+          <input class="qty-in" id="qty_${d.name}" type="number" value="1" min="1" max="${G.market[d.name] || 1}" ${disabledAttr}>
+          <button class="qty-btn" onclick="buyDrug('${d.name}')" ${disabledAttr}>BUY</button>
+          <button class="qty-btn" onclick="buyMax('${d.name}')" style="border-color:#3a5a2a;color:var(--green)" title="Buy as much as possible" ${disabledAttr}>MAX</button>
+          ${connectBtn}
+        </div>`;
+      ml.appendChild(row);
+    });
+    if (count === 0) {
+      ml.innerHTML = '<div style="color:var(--muted);padding:10px 0">Nothing for sale here today. Try another spot!</div>';
+    }
+  }
+
+  function renderStash() {
+    const sl   = document.getElementById('stashList');
+    const allKeys = new Set(Object.keys(G.stash).filter(k => G.stash[k] > 0));
+    if (!allKeys.size) {
+      sl.innerHTML = '';
+      sl.style.color = 'var(--muted)';
+      sl.textContent  = 'Your bag is empty.';
+      return;
+    }
+    sl.innerHTML  = '';
+    sl.style.color = 'var(--text)';
+    allKeys.forEach(name => {
+      const qty       = G.stash[name] || 0;
+      const sellPrice = G.prices[name];
+      const avg       = G.avgCost[name];
+      let profitHTML  = '';
+      if (avg && sellPrice) {
+        const pct   = Math.round(((sellPrice - avg) / avg) * 100);
+        const color = pct >= 0 ? 'var(--green)' : 'var(--red)';
+        const sign  = pct >= 0 ? '+' : '';
+        profitHTML  = ` <span style="color:${color};font-size:11px">(${sign}${pct}%)</span>`;
+      }
+      const avgLine = avg ? `avg cost: ${fmt(avg)}${profitHTML}` : '';
+      const row = document.createElement('div');
+      row.className = 'owned-row';
+      row.innerHTML = `
+        <div>
+          ${name} <span class="pill pill-good">x${qty}</span>
+          <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px">${sellPrice ? 'sell @ ' + fmt(sellPrice) : 'no buyers here'}${avgLine ? ' &mdash; ' + avgLine : ''}</span>
+        </div>
+        <input class="qty-in" id="sqty_${name}" type="number" value="${qty}" min="1" max="${qty}">
+        <button class="qty-btn" onclick="sellDrug('${name}')" ${sellPrice ? '' : 'disabled'}>SELL</button>`;
+      sl.appendChild(row);
+    });
+  }
+
+  function renderCities() {
+    const cg = document.getElementById('cityGrid');
+    cg.innerHTML = '';
+    const isLastDay = G.day >= G.maxDays;
+    const freeLeft  = G.hasCar ? Math.max(0, CAR_FREE_TRIPS - G.carTripsToday) : 0;
+    const travelTitle = document.getElementById('travelTitle');
+    if (travelTitle) {
+      travelTitle.innerHTML = isLastDay
+        ? `Go To — <span id="cityDisplay">${G.city}</span> <span style="color:var(--accent2);font-size:13px">— LAST DAY</span>`
+        : `Go To — <span id="cityDisplay">${G.city}</span>`
+          + (G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '');
+    }
+    if (isLastDay) {
+      cg.style.opacity = '0.35';
+    } else {
+      cg.style.opacity = '';
+    }
+    CITIES.forEach(c => {
+      const btn = document.createElement('div');
+      btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
+      const specialtyLine = c.specialty
+        ? `<div style="font-size:10px;color:#50fa7b;margin-top:2px">★ ${c.specialty}</div>` : '';
+      btn.innerHTML = `
+        <div class="city-name">${c.name}</div>
+        <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>
+        ${specialtyLine}`;
+      if (c.name !== G.city && !isLastDay) btn.onclick = () => travel(c.name);
+      cg.appendChild(btn);
+    });
+    if (isLastDay) {
+      const endBtn = document.createElement('div');
+      endBtn.style.cssText = 'grid-column:1/-1;text-align:center;padding:12px 4px';
+      endBtn.innerHTML = `<button class="modal-ok" onclick="endGame()" style="font-size:14px;padding:8px 24px">END GAME</button>`;
+      cg.appendChild(endBtn);
+      if (!G.shownEndGamePopup) {
+        G.shownEndGamePopup = true;
+        setTimeout(showEndGameModal, 50);
+      }
+    }
+  }
+
+  /* ─── TRAYS ─── */
+  function closeTray() {
+    document.querySelectorAll('.stat-tray').forEach(t => t.classList.remove('visible'));
+  }
+  function toggleTray(name) {
+    const tray = document.getElementById('tray-' + name);
+    const isOpen = tray.classList.contains('visible');
+    closeTray();
+    if (!isOpen) tray.classList.add('visible');
+  }
+
+  /* ─── KEYBOARD SHORTCUT ─── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const overlay = document.getElementById('inputOverlay');
+      if (!overlay.classList.contains('hidden')) confirmInput();
+      const ev = document.getElementById('eventOverlay');
+      if (!ev.classList.contains('hidden')) dismissEvent();
+    }
+    if (e.key === 'Escape') {
+      closeInput();
+      if (G.day && G.day <= G.maxDays) closeSettings();
+      closeHelp();
+      closeHighScores();
+    }
+  });
+
+  /* ─── START ─── */
+  applyTheme(SETTINGS.theme);
+  if (!loadSavedGame()) {
+    newGame();
+    openSettings();
+  }
+</script>
+</body>
+</html>
