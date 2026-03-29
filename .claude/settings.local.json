@@ -15,7 +15,11 @@
       "Bash(powershell.exe -Command \"\\(Get-Command ghy\\).Source\")",
       "Bash(powershell.exe -Command \"Get-Command ghy | Format-List *\")",
       "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Program Files\\\\GitHub CLI\\\\'' -ErrorAction SilentlyContinue; Get-ChildItem ''C:\\\\Users\\\\User1\\\\AppData\\\\Local\\\\GitHub CLI\\\\'' -ErrorAction SilentlyContinue\")",
-      "Bash(powershell.exe -Command \"cd ''F:\\\\OneDrive\\\\Claude\\\\zork''; & ''C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'' repo create gizmo2222/zork --public --source=. --remote=origin --push\")"
+      "Bash(powershell.exe -Command \"cd ''F:\\\\OneDrive\\\\Claude\\\\zork''; & ''C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'' repo create gizmo2222/zork --public --source=. --remote=origin --push\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

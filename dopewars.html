@@ -17,15 +17,26 @@
       --green: #2ecc71;
       --red: #e74c3c;
       --text: #f5f0e8;
-      --muted: #999;
+      --muted: #b0b0b0;
       --border: #2a2a2a;
+      --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+      --duration-fast: 120ms;
+      --duration-mid: 220ms;
+      --duration-slow: 350ms;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
     html, body {
       height: 100%;
       background: var(--bg);
       color: var(--text);
       font-family: 'Share Tech Mono', monospace;
-      font-size: 30px;
+      font-size: 14px;
       line-height: 1.4;
       overflow: hidden;
     }
@@ -51,7 +62,17 @@
       margin-bottom: 4px;
     }
     .stat { text-align: center; }
-    .stat-clickable { cursor: pointer; }
+    .stat-clickable {
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      color: inherit;
+      text-align: center;
+      width: 100%;
+      display: block;
+    }
     .stat-clickable:hover .stat-val { opacity: 0.8; }
     .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
     .stat-val { font-size: 16px; color: var(--accent); font-weight: bold; }
@@ -63,7 +84,10 @@
       gap: 3px;
       margin-top: 6px;
     }
-    .stat-tray.visible { display: flex; }
+    .stat-tray.visible {
+      display: flex;
+      animation: fade-in-up var(--duration-mid) var(--ease-out) both;
+    }
     .stat-tray button {
       width: 100%;
       background: var(--bg2);
@@ -131,15 +155,22 @@
       background: var(--bg3);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 3px 9px;
+      padding: 6px 10px;
+      min-height: 36px;
       cursor: pointer;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 18px;
-      transition: background 0.1s, color 0.1s;
+      font-size: 14px;
+      transition: background var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  border-color var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
     }
     .qty-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .qty-btn:active:not(:disabled) { transform: scale(0.96); }
     .qty-btn:disabled { opacity: 0.3; cursor: default; }
     .qty-btn:disabled:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .qty-btn-max { border-color: #3a5a2a; color: var(--green); }
+    .qty-btn-connect { border-color: #4a3a7a; color: #b090f0; }
     .trend { font-size: 15px; margin-left: 3px; }
     .trend-up { color: var(--red); }
     .trend-down { color: var(--green); }
@@ -178,10 +209,19 @@
       padding: 9px 8px;
       cursor: pointer;
       text-align: center;
-      transition: border-color 0.1s, color 0.1s, background 0.1s;
+      transition: border-color var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  background var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
       user-select: none;
+      font-family: inherit;
+      color: inherit;
+      font-size: inherit;
+      line-height: inherit;
     }
-    .city-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .city-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .city-btn:active:not(:disabled) { transform: scale(0.97); }
+    .city-btn:disabled { cursor: default; opacity: 1; }
     .city-btn.current { border-color: var(--accent); background: #1a1600; color: var(--accent); cursor: default; }
     .city-name { font-size: 13px; font-weight: bold; }
     .city-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
@@ -198,9 +238,13 @@
       font-family: 'Bebas Neue', sans-serif;
       font-size: 16px;
       letter-spacing: 1px;
-      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      transition: background var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  border-color var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
     }
     .action-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .action-btn:active { transform: scale(0.96); }
     .action-btn.danger { border-color: #5a2020; }
     .action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
     .loan-info {
@@ -223,11 +267,27 @@
       overflow-y: auto;
       font-size: 17px;
     }
-    .log-entry { padding: 2px 0; border-bottom: 1px solid #161616; }
+    .log-entry {
+      padding: 2px 0; border-bottom: 1px solid #161616;
+      animation: fade-in-up var(--duration-mid) var(--ease-out) both;
+    }
     .log-entry.good { color: var(--green); }
     .log-entry.bad  { color: var(--red); }
     .log-entry.warn { color: var(--accent); }
     .log-entry.headline { color: var(--muted); font-style: italic; }
+
+    /* ANIMATIONS */
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes flash-good { 0%,100% { background: transparent; } 50% { background: rgba(46,204,113,0.12); } }
+    @keyframes flash-bad  { 0%,100% { background: transparent; } 50% { background: rgba(231,76,60,0.12); } }
+    @keyframes day-tick { 0% { transform: scale(1.3); opacity: 0.6; } 100% { transform: scale(1); opacity: 1; } }
+    .day-tick { animation: day-tick 300ms var(--ease-out); }
+    .animate-in { animation: fade-in-up var(--duration-mid) var(--ease-out) both; }
+    .flash-good { animation: flash-good 400ms var(--ease-out); }
+    .flash-bad  { animation: flash-bad 400ms var(--ease-out); }
 
     /* DIVIDER */
     hr.div { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
@@ -236,11 +296,16 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.88);
+      background: rgba(0,0,0,0);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 100;
+      animation: overlay-in var(--duration-mid) var(--ease-out) forwards;
+    }
+    @keyframes overlay-in {
+      from { background: rgba(0,0,0,0); }
+      to   { background: rgba(0,0,0,0.88); }
     }
     .overlay.hidden { display: none; }
     .modal-box {
@@ -250,6 +315,11 @@
       max-width: 380px;
       width: 92%;
       text-align: center;
+      animation: modal-in var(--duration-slow) var(--ease-out) forwards;
+    }
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .modal-title {
       font-family: 'Bebas Neue', sans-serif;
@@ -269,9 +339,18 @@
       letter-spacing: 1px;
     }
     .modal-ok:hover { background: #f0d050; }
+    .modal-ok:active { transform: scale(0.96); }
 
     /* GAME OVER */
-    .gameover { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: flex; align-items: center; justify-content: center; z-index: 200; }
+    .gameover {
+      position: fixed; inset: 0; background: rgba(0,0,0,0);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      animation: gameover-in 600ms var(--ease-out) forwards;
+    }
+    @keyframes gameover-in {
+      from { background: rgba(0,0,0,0); }
+      to   { background: rgba(0,0,0,0.96); }
+    }
     .gameover.hidden { display: none; }
     .go-box {
       background: var(--bg2);
@@ -281,16 +360,24 @@
       width: 92%;
       text-align: center;
     }
-    .go-title { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+    .go-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--accent); line-height: 1; margin-bottom: 10px;
+      animation: go-title-in 500ms var(--ease-out) 300ms both;
+    }
+    @keyframes go-title-in {
+      from { opacity: 0; transform: scale(0.9); }
+      to   { opacity: 1; transform: scale(1); }
+    }
     .go-score { font-size: 13px; line-height: 2; margin-bottom: 24px; color: var(--text); }
     .go-score strong { color: var(--accent); font-size: 16px; }
 
     /* INPUT DIALOG */
     .input-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.88);
+      background: rgba(0,0,0,0);
       display: flex; align-items: center; justify-content: center;
       z-index: 150;
+      animation: overlay-in var(--duration-mid) var(--ease-out) forwards;
     }
     .input-overlay.hidden { display: none; }
     .input-box {
@@ -300,6 +387,7 @@
       max-width: 320px;
       width: 90%;
       text-align: center;
+      animation: modal-in var(--duration-slow) var(--ease-out) forwards;
     }
     .input-box label {
       display: block;
@@ -333,10 +421,28 @@
     .input-cancel:hover { background: var(--red); color: #fff; }
 
     /* SCROLLBAR */
+    /* FOCUS INDICATORS */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    button:focus-visible, .city-btn:focus-visible, .sopt:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      z-index: 1;
+    }
+    input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 0;
+    }
+
+    /* SCROLLBAR */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); }
     ::-webkit-scrollbar-thumb:hover { background: #444; }
+    /* Firefox */
+    * { scrollbar-width: thin; scrollbar-color: var(--border) var(--bg); }
 
     /* SETTINGS */
     .setting-row { margin-bottom: 16px; }
@@ -346,17 +452,40 @@
       flex:1; background:var(--bg3); border:1px solid var(--border);
       color:var(--muted); font-family:'Share Tech Mono',monospace;
       font-size:13px; padding:8px 4px; cursor:pointer; text-align:center; line-height:1.4;
+      transition: border-color var(--duration-fast) var(--ease-out),
+                  color var(--duration-fast) var(--ease-out),
+                  background var(--duration-fast) var(--ease-out);
     }
     .sopt span { font-size:11px; color:var(--muted); }
     .sopt:hover { border-color:var(--accent); color:var(--text); }
     .sopt.active { border-color:var(--accent); background:#1a1600; color:var(--accent); }
     .sopt.active span { color:var(--accent); opacity:0.7; }
 
-    /* RESPONSIVE */
-    @media (max-width: 600px) {
+    /* MODAL BUTTON ROW */
+    .modal-btn-row { display: flex; gap: 10px; justify-content: center; }
+    .modal-btn-secondary {
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .modal-btn-secondary:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .modal-full { width: 100%; margin-top: 18px; }
+    .header-btn { font-size: 13px; padding: 4px 10px; border-color: var(--muted); }
+
+    /* HELP SECTIONS */
+    .help-heading {
+      color: var(--accent);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .help-body { margin-bottom: 12px; }
+
+    /* RESPONSIVE — tablet and below */
+    @media (max-width: 800px) {
       .main { grid-template-columns: 1fr; height: auto; overflow: visible; }
       html, body { overflow: auto; }
-      .stats-bar { grid-template-columns: repeat(2, 1fr); }
       .panel { border-right: none; border-bottom: 1px solid var(--border); }
       /* settings modal: scrollable overlay, compact rows */
       .overlay { align-items: flex-start; padding: 8px; overflow-y: auto; }
@@ -365,30 +494,41 @@
       #set-theme { flex-wrap: wrap; }
       #set-theme .sopt { flex: 1 1 calc(50% - 3px); }
     }
+    /* RESPONSIVE — phone */
+    @media (max-width: 600px) {
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .qty-btn { min-height: 44px; padding: 8px 12px; }
+      .qty-in { min-height: 44px; padding: 8px 4px; }
+      .action-btn { min-height: 44px; padding: 8px 14px; }
+      .sopt { min-height: 44px; padding: 10px 4px; }
+      .modal-ok, .input-confirm, .input-cancel { min-height: 44px; }
+      .stat-tray button { min-height: 44px; padding: 8px 6px; }
+      .log { max-height: 200px; }
+    }
   </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<div class="header">
+<header class="header">
   <div>
     <h1>DOPE WARS</h1>
     <div class="header-sub" id="headerSub">NEW YORK CITY &bull; 1984</div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
-    <button class="action-btn" onclick="openHighScores()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">🏆 SCORES</button>
-    <button class="action-btn" onclick="openHelp()"     style="font-size:13px;padding:4px 10px;border-color:var(--muted)">? HELP</button>
-    <button class="action-btn" onclick="openSettings()" style="font-size:13px;padding:4px 10px;border-color:var(--muted)">⚙ SETTINGS</button>
+    <button class="action-btn header-btn" onclick="openHighScores()" aria-label="High scores">🏆 SCORES</button>
+    <button class="action-btn header-btn" onclick="openHelp()" aria-label="How to play">? HELP</button>
+    <button class="action-btn header-btn" onclick="openSettings()" aria-label="Game settings">⚙ SETTINGS</button>
     <div style="text-align:right">
       <div style="font-size:10px;color:var(--muted)">DAY</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);line-height:1" id="dayDisplay">1</div>
       <div style="font-size:10px;color:var(--muted)" id="daysLeft">29 days left</div>
     </div>
   </div>
-</div>
+</header>
 
 <!-- MAIN LAYOUT -->
-<div class="main">
+<main class="main">
 
   <!-- LEFT: TRAVEL + MARKET -->
   <div class="panel">
@@ -409,20 +549,24 @@
       <div class="panel-title">Finances</div>
       <!-- stats: cash / bank / debt / coat -->
       <div class="stats-bar">
-        <div class="stat stat-clickable" onclick="toggleTray('cash')">
-          <div class="stat-label">Cash <span class="stat-hint">▾</span></div>
-          <div class="stat-val" id="cashDisplay">$2,000</div>
-          <div class="stat-tray" id="tray-cash">
+        <div class="stat">
+          <button type="button" class="stat-clickable" onclick="toggleTray('cash')" aria-expanded="false" aria-controls="tray-cash" aria-label="Cash actions">
+            <div class="stat-label">Cash <span class="stat-hint">▾</span></div>
+            <div class="stat-val" id="cashDisplay">$2,000</div>
+          </button>
+          <div class="stat-tray" id="tray-cash" role="group" aria-label="Cash actions">
             <button onclick="closeTray();openInput('deposit','Deposit how much?')">Deposit</button>
             <button onclick="closeTray();openInput('withdraw','Withdraw how much?')">Withdraw</button>
             <button onclick="closeTray();withdrawAll()">Withdraw all</button>
           </div>
         </div>
         <div class="stat"><div class="stat-label">Bank</div><div class="stat-val" id="bankDisplay">$0</div></div>
-        <div class="stat stat-clickable" onclick="toggleTray('debt')">
-          <div class="stat-label">Debt <span class="stat-hint">▾</span></div>
-          <div class="stat-val danger" id="debtDisplay">$5,000</div>
-          <div class="stat-tray" id="tray-debt">
+        <div class="stat">
+          <button type="button" class="stat-clickable" onclick="toggleTray('debt')" aria-expanded="false" aria-controls="tray-debt" aria-label="Debt actions">
+            <div class="stat-label">Debt <span class="stat-hint">▾</span></div>
+            <div class="stat-val danger" id="debtDisplay">$5,000</div>
+          </button>
+          <div class="stat-tray" id="tray-debt" role="group" aria-label="Debt actions">
             <button onclick="closeTray();openBorrow()">Borrow more</button>
             <button class="danger" onclick="closeTray();openInput('loan','Pay how much on debt?')">Pay partial</button>
             <button class="danger" onclick="closeTray();payAllLoan()">Pay all</button>
@@ -442,12 +586,12 @@
     <div id="upgradeStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px"></div>
 
     <div class="panel-title">Street News</div>
-    <div class="log" id="log"></div>
+    <div class="log" id="log" role="log" aria-label="Street news log" aria-live="polite"></div>
   </div>
-</div>
+</main>
 
 <!-- EVENT MODAL -->
-<div class="overlay hidden" id="eventOverlay">
+<div class="overlay hidden" id="eventOverlay" role="dialog" aria-modal="true" aria-labelledby="eventTitle">
   <div class="modal-box">
     <div class="modal-title" id="eventTitle">EVENT</div>
     <div class="modal-msg" id="eventMsg"></div>
@@ -456,41 +600,41 @@
 </div>
 
 <!-- COAT OFFER MODAL -->
-<div class="overlay hidden" id="coatOverlay">
+<div class="overlay hidden" id="coatOverlay" role="dialog" aria-modal="true" aria-label="Street offer">
   <div class="modal-box">
     <div class="modal-title">STREET OFFER</div>
     <div class="modal-msg" id="coatOfferMsg"></div>
-    <div style="display:flex;gap:10px;justify-content:center">
+    <div class="modal-btn-row">
       <button class="modal-ok" onclick="acceptCoatOffer()">BUY IT</button>
-      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="declineCoatOffer()">PASS</button>
+      <button class="modal-ok modal-btn-secondary" onclick="declineCoatOffer()">PASS</button>
     </div>
   </div>
 </div>
 
 <!-- FIRE SALE MODAL -->
-<div class="overlay hidden" id="fireSaleOverlay">
+<div class="overlay hidden" id="fireSaleOverlay" role="dialog" aria-modal="true" aria-label="Fire sale">
   <div class="modal-box">
     <div class="modal-title">FIRE SALE</div>
     <div class="modal-msg" id="fireSaleMsg"></div>
-    <div style="display:flex;gap:10px;justify-content:center">
+    <div class="modal-btn-row">
       <button class="modal-ok" onclick="acceptFireSale()">TAKE IT</button>
-      <button class="modal-ok" style="background:var(--bg3);color:var(--text);border:1px solid var(--border)" onclick="declineFireSale()">PASS</button>
+      <button class="modal-ok modal-btn-secondary" onclick="declineFireSale()">PASS</button>
     </div>
   </div>
 </div>
 
 <!-- SAFEHOUSE MODAL -->
-<div class="overlay hidden" id="safehouseOverlay">
+<div class="overlay hidden" id="safehouseOverlay" role="dialog" aria-modal="true" aria-label="Safe house">
   <div class="modal-box" style="max-width:520px;text-align:left">
     <div class="modal-title" style="margin-bottom:12px">SAFE HOUSE</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Store product off your body. Safehouse never gets busted.</div>
     <div id="safehouseList"></div>
-    <button class="modal-ok" style="margin-top:14px;width:100%" onclick="closeSafehouse()">CLOSE</button>
+    <button class="modal-ok modal-full" style="margin-top:14px" onclick="closeSafehouse()">CLOSE</button>
   </div>
 </div>
 
 <!-- SETTINGS MODAL -->
-<div class="overlay hidden" id="settingsOverlay">
+<div class="overlay hidden" id="settingsOverlay" role="dialog" aria-modal="true" aria-label="Settings">
   <div class="modal-box" style="max-width:500px;text-align:left">
     <div class="modal-title" style="margin-bottom:16px">SETTINGS</div>
 
@@ -567,15 +711,15 @@
       </div>
     </div>
 
-    <div style="display:flex;gap:10px;margin-top:18px">
+    <div class="modal-btn-row" style="margin-top:18px">
       <button class="modal-ok" style="flex:1;font-size:20px" onclick="startFromSettings()">START NEW GAME</button>
-      <button class="modal-ok" id="settingsCancelBtn" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-size:16px;padding:9px 18px" onclick="closeSettings()">CANCEL</button>
+      <button class="modal-ok modal-btn-secondary" id="settingsCancelBtn" style="font-size:16px;padding:9px 18px" onclick="closeSettings()">CANCEL</button>
     </div>
   </div>
 </div>
 
 <!-- HELP MODAL -->
-<div class="overlay hidden" id="helpOverlay">
+<div class="overlay hidden" id="helpOverlay" role="dialog" aria-modal="true" aria-label="How to play">
   <div class="modal-box" style="max-width:540px;text-align:left;max-height:90vh;overflow-y:auto">
     <div class="modal-title" style="margin-bottom:14px">HOW TO PLAY</div>
 
@@ -616,21 +760,21 @@
       <div style="margin-bottom:4px">On the last day you cannot travel. Sell your stash, settle your accounts, then hit <strong>WRAP UP &amp; END GAME</strong>. You'll get a warning popup 3 days before the end.</div>
     </div>
 
-    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT</button>
+    <button class="modal-ok modal-full" onclick="closeHelp()">GOT IT</button>
   </div>
 </div>
 
 <!-- HIGH SCORES MODAL -->
-<div class="overlay hidden" id="highScoresOverlay">
+<div class="overlay hidden" id="highScoresOverlay" role="dialog" aria-modal="true" aria-label="High scores">
   <div class="modal-box" style="max-width:520px;text-align:left">
     <div class="modal-title" style="margin-bottom:14px">HIGH SCORES</div>
     <div id="highScoreTableModal"></div>
-    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHighScores()">CLOSE</button>
+    <button class="modal-ok modal-full" onclick="closeHighScores()">CLOSE</button>
   </div>
 </div>
 
 <!-- CUSTOM INPUT DIALOG -->
-<div class="input-overlay hidden" id="inputOverlay">
+<div class="input-overlay hidden" id="inputOverlay" role="dialog" aria-modal="true" aria-labelledby="inputLabel">
   <div class="input-box">
     <label id="inputLabel">Amount</label>
     <input type="number" id="inputField" min="0" value="0">
@@ -642,7 +786,7 @@
 </div>
 
 <!-- GAME OVER -->
-<div class="gameover hidden" id="gameOver">
+<div class="gameover hidden" id="gameOver" role="dialog" aria-modal="true" aria-labelledby="goTitle">
   <div class="go-box" style="max-width:520px">
     <div class="go-title" id="goTitle">GAME OVER</div>
     <div class="go-score" id="goScore"></div>
@@ -861,6 +1005,35 @@
   let G = {};
   let inputAction = null;
 
+  /* ─── FOCUS TRAP ─── */
+  let activeTrap = null;
+  function trapFocus(overlayEl) {
+    activeTrap = overlayEl;
+    const focusable = overlayEl.querySelectorAll('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    if (focusable.length) focusable[0].focus();
+    overlayEl._trapHandler = function(e) {
+      if (e.key === 'Tab') {
+        const nodes = overlayEl.querySelectorAll('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        if (!nodes.length) return;
+        const first = nodes[0], last = nodes[nodes.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+      if (e.key === 'Escape') {
+        const closeBtn = overlayEl.querySelector('.modal-ok, .input-cancel');
+        if (closeBtn) closeBtn.click();
+      }
+    };
+    overlayEl.addEventListener('keydown', overlayEl._trapHandler);
+  }
+  function releaseFocus(overlayEl) {
+    if (overlayEl._trapHandler) {
+      overlayEl.removeEventListener('keydown', overlayEl._trapHandler);
+      delete overlayEl._trapHandler;
+    }
+    activeTrap = null;
+  }
+
   /* ─── SETTINGS ─── */
   const SETTINGS = {
     theme:    'nyc',
@@ -873,10 +1046,12 @@
   };
 
   function openSettings() {
-    document.getElementById('settingsOverlay').classList.remove('hidden');
+    const el = document.getElementById('settingsOverlay');
+    el.classList.remove('hidden');
     // show Cancel only when a game is already in progress
     const hasGame = G.day && G.day <= G.maxDays;
     document.getElementById('settingsCancelBtn').style.display = hasGame ? '' : 'none';
+    trapFocus(el);
     // sync button states to current SETTINGS
     document.querySelectorAll('#set-theme .sopt').forEach(b =>
       b.classList.toggle('active', b.dataset.theme === SETTINGS.theme));
@@ -888,20 +1063,30 @@
     syncSopt('set-coat',     SETTINGS.coat);
   }
   function closeSettings() {
-    document.getElementById('settingsOverlay').classList.add('hidden');
+    const el = document.getElementById('settingsOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
   }
   function openHelp() {
-    document.getElementById('helpOverlay').classList.remove('hidden');
+    const el = document.getElementById('helpOverlay');
+    el.classList.remove('hidden');
+    trapFocus(el);
   }
   function closeHelp() {
-    document.getElementById('helpOverlay').classList.add('hidden');
+    const el = document.getElementById('helpOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
   }
   function openHighScores() {
     renderHighScores(loadScores(), 'highScoreTableModal');
-    document.getElementById('highScoresOverlay').classList.remove('hidden');
+    const el = document.getElementById('highScoresOverlay');
+    el.classList.remove('hidden');
+    trapFocus(el);
   }
   function closeHighScores() {
-    document.getElementById('highScoresOverlay').classList.add('hidden');
+    const el = document.getElementById('highScoresOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
   }
   function openBorrow() {
     if (G.day < 3) {
@@ -985,6 +1170,14 @@
   const rnd   = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
   const fmt   = n      => '$' + Math.abs(Math.round(n)).toLocaleString();
   const carried = ()   => Object.values(G.stash).reduce((a, b) => a + b, 0);
+  function flashEl(id, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth; // force reflow to restart animation
+    el.classList.add(cls);
+    el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+  }
 
   /* ─── GAME INIT ─── */
   function newGame() {
@@ -1148,13 +1341,17 @@
   function showEvent(title, msg) {
     document.getElementById('eventTitle').textContent = title;
     document.getElementById('eventMsg').textContent   = msg;
-    document.getElementById('eventOverlay').classList.remove('hidden');
+    const el = document.getElementById('eventOverlay');
+    el.classList.remove('hidden');
+    trapFocus(el);
   }
   function showEndGameModal() {
     showEvent('FINAL DAY', "Time's up. Sell what you have and settle your accounts. When you're ready, hit END GAME.");
   }
   function dismissEvent() {
-    document.getElementById('eventOverlay').classList.add('hidden');
+    const el = document.getElementById('eventOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
     renderAll();
   }
 
@@ -1180,6 +1377,7 @@
     if (G.market[name] <= 0) delete G.market[name];
     addLog(`Bought ${qty}x ${name} @ ${fmt(price)} ea. (avg cost: ${fmt(G.avgCost[name])})`, 'good');
     renderAll();
+    flashEl('cashDisplay', 'flash-bad');
   }
 
   function buyDrug(name) {
@@ -1233,6 +1431,7 @@
     if (G.stash[name] <= 0) { delete G.stash[name]; delete G.avgCost[name]; }
     addLog(`Sold ${qty}x ${name} @ ${fmt(price)} ea.`, 'good');
     renderAll();
+    flashEl('cashDisplay', 'flash-good');
   }
 
   /* ─── LATE-GAME EVENTS ─── */
@@ -1272,11 +1471,15 @@
     const canBuy = Math.min(qty, space, Math.floor(G.cash / price));
     document.getElementById('fireSaleMsg').textContent =
       `A desperate dealer is offloading ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of base). You can take up to ${canBuy} units.`;
-    document.getElementById('fireSaleOverlay').classList.remove('hidden');
+    const fsEl = document.getElementById('fireSaleOverlay');
+    fsEl.classList.remove('hidden');
+    trapFocus(fsEl);
   }
 
   function acceptFireSale() {
-    document.getElementById('fireSaleOverlay').classList.add('hidden');
+    const fsEl = document.getElementById('fireSaleOverlay');
+    releaseFocus(fsEl);
+    fsEl.classList.add('hidden');
     const offer = G.pendingFireSale;
     G.pendingFireSale = null;
     if (!offer) return;
@@ -1292,7 +1495,9 @@
   }
 
   function declineFireSale() {
-    document.getElementById('fireSaleOverlay').classList.add('hidden');
+    const fsEl = document.getElementById('fireSaleOverlay');
+    releaseFocus(fsEl);
+    fsEl.classList.add('hidden');
     G.pendingFireSale = null;
     addLog('Passed on the fire sale.', '');
   }
@@ -1421,11 +1626,15 @@
     pendingCoatOffer = offer;
     document.getElementById('coatOfferMsg').textContent =
       `${offer.desc}. +${offer.capacity} carry capacity for ${fmt(offer.price)}. Interested?`;
-    document.getElementById('coatOverlay').classList.remove('hidden');
+    const el = document.getElementById('coatOverlay');
+    el.classList.remove('hidden');
+    trapFocus(el);
   }
 
   function acceptCoatOffer() {
-    document.getElementById('coatOverlay').classList.add('hidden');
+    const el = document.getElementById('coatOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
     if (!pendingCoatOffer) return;
     const offer = pendingCoatOffer;
     pendingCoatOffer = null;
@@ -1440,7 +1649,9 @@
   }
 
   function declineCoatOffer() {
-    document.getElementById('coatOverlay').classList.add('hidden');
+    const el = document.getElementById('coatOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
     pendingCoatOffer = null;
     addLog('Passed on the carry offer.', '');
   }
@@ -1516,9 +1727,12 @@
     const overlay = document.getElementById('safehouseOverlay');
     renderSafehouseModal();
     overlay.classList.remove('hidden');
+    trapFocus(overlay);
   }
   function closeSafehouse() {
-    document.getElementById('safehouseOverlay').classList.add('hidden');
+    const el = document.getElementById('safehouseOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
   }
   function renderSafehouseModal() {
     const list = document.getElementById('safehouseList');
@@ -1567,12 +1781,16 @@
     inputAction = action;
     document.getElementById('inputLabel').textContent = labelText;
     document.getElementById('inputField').value = 0;
-    document.getElementById('inputOverlay').classList.remove('hidden');
+    const el = document.getElementById('inputOverlay');
+    el.classList.remove('hidden');
+    trapFocus(el);
     document.getElementById('inputField').focus();
   }
   function closeInput() {
     inputAction = null;
-    document.getElementById('inputOverlay').classList.add('hidden');
+    const el = document.getElementById('inputOverlay');
+    releaseFocus(el);
+    el.classList.add('hidden');
   }
   function confirmInput() {
     const amt    = parseInt(document.getElementById('inputField').value) || 0;
@@ -1622,11 +1840,16 @@
   }
 
   /* ─── PERSISTENCE ─── */
+  let _saveTimer = null;
   function saveGame() {
-    try {
-      localStorage.setItem('dopewars_game',     JSON.stringify(G));
-      localStorage.setItem('dopewars_settings', JSON.stringify(SETTINGS));
-    } catch(e) {}
+    if (_saveTimer) return;
+    _saveTimer = setTimeout(() => {
+      _saveTimer = null;
+      try {
+        localStorage.setItem('dopewars_game',     JSON.stringify(G));
+        localStorage.setItem('dopewars_settings', JSON.stringify(SETTINGS));
+      } catch(e) {}
+    }, 300);
   }
 
   function loadSavedGame() {
@@ -1689,11 +1912,12 @@
   function endGame() {
     const net = G.cash + G.bank - G.debt;
     let title, flavor;
-    if (net > 100000)     { title = 'KINGPIN!';        flavor = 'You OWN these streets. Nobody moves product without your say-so.'; }
-    else if (net > 50000) { title = 'MADE MAN';        flavor = 'Big earner. The bosses are watching. Keep it up.'; }
-    else if (net > 10000) { title = 'STREET HUSTLER';  flavor = 'Not bad. You survived and came out ahead.'; }
-    else if (net > 0)     { title = 'SURVIVOR';        flavor = 'You made it out alive — barely. Try harder next time.'; }
-    else                  { title = 'BROKE & BURIED';  flavor = 'The loan shark owns everything you had. Game over for real.'; }
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    if (net > 100000)     { title = 'KINGPIN!';        flavor = pick(['You OWN these streets. Nobody moves product without your say-so.', 'They\'ll write songs about you. Dark ones.', 'Empire built, debts paid, enemies buried.']); }
+    else if (net > 50000) { title = 'MADE MAN';        flavor = pick(['Big earner. The bosses are watching. Keep it up.', 'You walk into any room and they know your name.', 'Not quite the top — but close enough to taste it.']); }
+    else if (net > 10000) { title = 'STREET HUSTLER';  flavor = pick(['Not bad. You survived and came out ahead.', 'You kept your head down and your pockets full. Smart.', 'The streets taught you well.']); }
+    else if (net > 0)     { title = 'SURVIVOR';        flavor = pick(['You made it out alive — barely. Try harder next time.', 'Alive is a low bar, but you cleared it.', 'You walk away with your shoes and not much else.']); }
+    else                  { title = 'BROKE & BURIED';  flavor = pick(['The loan shark owns everything you had. Game over for real.', 'You owe more than you\'re worth. Time to disappear.', 'The streets chewed you up. No one noticed.']); }
 
     document.getElementById('goTitle').textContent = title;
     document.getElementById('goScore').innerHTML =
@@ -1705,7 +1929,9 @@
 
     const scores = saveScore(net);
     renderHighScores(scores);
-    document.getElementById('gameOver').classList.remove('hidden');
+    const goEl = document.getElementById('gameOver');
+    goEl.classList.remove('hidden');
+    trapFocus(goEl);
   }
 
   /* ─── LOG ─── */
@@ -1720,7 +1946,11 @@
 
   /* ─── RENDER ─── */
   function renderAll() {
-    document.getElementById('dayDisplay').textContent  = G.day;
+    const dayEl = document.getElementById('dayDisplay');
+    dayEl.textContent = G.day;
+    dayEl.classList.remove('day-tick');
+    void dayEl.offsetWidth;
+    dayEl.classList.add('day-tick');
     document.getElementById('daysLeft').textContent    = (G.maxDays - G.day) + ' days left';
     document.getElementById('cashDisplay').textContent = fmt(G.cash);
     document.getElementById('bankDisplay').textContent = fmt(G.bank);
@@ -1748,11 +1978,14 @@
     const left  = document.getElementById('topLeft');
     const right = document.getElementById('topRight');
     if (!left || !right) return;
+    // batch reads then writes to avoid layout thrashing
     left.style.minHeight  = '';
     right.style.minHeight = '';
-    const h = Math.max(left.offsetHeight, right.offsetHeight);
-    left.style.minHeight  = h + 'px';
-    right.style.minHeight = h + 'px';
+    requestAnimationFrame(() => {
+      const h = Math.max(left.offsetHeight, right.offsetHeight);
+      left.style.minHeight  = h + 'px';
+      right.style.minHeight = h + 'px';
+    });
   }
 
   function renderMarket() {
@@ -1777,11 +2010,12 @@
       const isBurned   = G.supplierBurnedUntil >= G.day;
       const canConnect = G.hasSupplier && !G.supplierUsedToday && !isBurned && hasSpace && G.cash >= discountPrice;
       const connectBtn = G.hasSupplier
-        ? `<button class="qty-btn" onclick="supplierBuy('${d.name}')" style="border-color:#4a3a7a;color:#b090f0" ${canConnect ? '' : 'disabled'} title="Buy at 25% off via connect">${isBurned ? 'BURNED' : G.supplierUsedToday ? 'USED' : 'CONNECT'}</button>`
+        ? `<button class="qty-btn qty-btn-connect" onclick="supplierBuy('${d.name}')" ${canConnect ? '' : 'disabled'} title="Buy at 25% off via connect">${isBurned ? 'BURNED' : G.supplierUsedToday ? 'USED' : 'CONNECT'}</button>`
         : '';
 
       const row = document.createElement('div');
-      row.className = 'drug-row';
+      row.className = 'drug-row animate-in';
+      row.style.animationDelay = (count * 40) + 'ms';
       row.innerHTML = `
         <div>
           <div class="drug-name">${d.name} <span class="drug-alias">${d.street}</span></div>
@@ -1789,9 +2023,9 @@
         </div>
         <div class="drug-price${isHigh ? ' high' : ''}">${fmt(price)}${trendHTML}</div>
         <div class="buy-group">
-          <input class="qty-in" id="qty_${d.name}" type="number" value="1" min="1" max="${G.market[d.name] || 1}" ${disabledAttr}>
+          <input class="qty-in" id="qty_${d.name}" type="number" value="1" min="1" max="${G.market[d.name] || 1}" ${disabledAttr} aria-label="Buy quantity for ${d.name}">
           <button class="qty-btn" onclick="buyDrug('${d.name}')" ${disabledAttr}>BUY</button>
-          <button class="qty-btn" onclick="buyMax('${d.name}')" style="border-color:#3a5a2a;color:var(--green)" title="Buy as much as possible" ${disabledAttr}>MAX</button>
+          <button class="qty-btn qty-btn-max" onclick="buyMax('${d.name}')" title="Buy as much as possible" ${disabledAttr}>MAX</button>
           ${connectBtn}
         </div>`;
       ml.appendChild(row);
@@ -1811,7 +2045,12 @@
     if (!allKeys.size) {
       sl.innerHTML = '';
       sl.style.color = 'var(--muted)';
-      sl.textContent  = 'Empty pockets.';
+      const emptyMsgs = [
+        'Empty pockets.', 'Nothing but lint.', 'Clean as a whistle.',
+        'Pockets lighter than your conscience.', 'Nothing to declare.',
+        'Your coat echoes when you move.', 'Dust and regret.',
+      ];
+      sl.textContent = emptyMsgs[Math.floor(Math.random() * emptyMsgs.length)];
       return;
     }
     sl.innerHTML  = '';
@@ -1843,7 +2082,7 @@
           ${name} <span class="pill pill-good">x${qty}</span>
           <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px">${sellPrice ? 'sell @ ' + fmt(sellPrice) : 'no buyers here'}${avgLine ? ' &mdash; ' + avgLine : ''}</span>
         </div>
-        <input class="qty-in" id="sqty_${name}" type="number" value="${qty}" min="1" max="${qty}">
+        <input class="qty-in" id="sqty_${name}" type="number" value="${qty}" min="1" max="${qty}" aria-label="Sell quantity for ${name}">
         <button class="qty-btn" onclick="sellDrug('${name}')" ${sellPrice ? '' : 'disabled'}>SELL</button>
         ${shBtns}`;
       sl.appendChild(row);
@@ -1868,15 +2107,19 @@
       cg.style.opacity = '';
     }
     CITIES.forEach(c => {
-      const btn = document.createElement('div');
+      const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
+      const isCurrent = c.name === G.city;
+      if (isCurrent) btn.setAttribute('aria-current', 'location');
+      if (isCurrent || isLastDay) btn.disabled = true;
       const specialtyLine = c.specialty
-        ? `<div style="font-size:10px;color:#2ecc71;margin-top:2px">★ ${c.specialty}</div>` : '';
+        ? `<div style="font-size:10px;color:var(--green);margin-top:2px">★ ${c.specialty}</div>` : '';
       btn.innerHTML = `
         <div class="city-name">${c.name}</div>
-        <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>
+        <div class="city-desc">${isCurrent ? 'you are here' : c.desc}</div>
         ${specialtyLine}`;
-      if (c.name !== G.city && !isLastDay) btn.onclick = () => travel(c.name);
+      if (!isCurrent && !isLastDay) btn.onclick = () => travel(c.name);
       cg.appendChild(btn);
     });
     if (isLastDay) {
@@ -1894,12 +2137,17 @@
   /* ─── TRAYS ─── */
   function closeTray() {
     document.querySelectorAll('.stat-tray').forEach(t => t.classList.remove('visible'));
+    document.querySelectorAll('.stat-clickable[aria-expanded]').forEach(b => b.setAttribute('aria-expanded', 'false'));
   }
   function toggleTray(name) {
     const tray = document.getElementById('tray-' + name);
     const isOpen = tray.classList.contains('visible');
     closeTray();
-    if (!isOpen) tray.classList.add('visible');
+    if (!isOpen) {
+      tray.classList.add('visible');
+      const trigger = document.querySelector(`[aria-controls="tray-${name}"]`);
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    }
   }
 
   /* ─── KEYBOARD SHORTCUT ─── */
@@ -1917,6 +2165,34 @@
       closeHighScores();
     }
   });
+
+  /* ─── CONSOLE EASTER EGG ─── */
+  console.log(
+    '%c DOPE WARS ',
+    'background:#e8c840;color:#0a0a0a;font-size:20px;font-weight:bold;padding:4px 12px;font-family:monospace'
+  );
+  console.log('%cYou found the back room. Nice.', 'color:#b0b0b0;font-size:12px');
+
+  /* ─── KONAMI CODE EASTER EGG ─── */
+  (function() {
+    const seq = [38,38,40,40,37,39,37,39,66,65]; // ↑↑↓↓←→←→BA
+    let pos = 0;
+    document.addEventListener('keydown', function(e) {
+      if (e.keyCode === seq[pos]) {
+        pos++;
+        if (pos === seq.length) {
+          pos = 0;
+          if (typeof G !== 'undefined' && G.cash != null) {
+            G.cash += 5000;
+            addLog('💰 A mysterious benefactor drops $5,000 in your lap.', 'good');
+            renderAll();
+          }
+        }
+      } else {
+        pos = 0;
+      }
+    });
+  })();
 
   /* ─── START ─── */
   applyTheme(SETTINGS.theme); // seed arrays before any render
