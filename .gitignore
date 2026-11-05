@@ -7,3 +7,6 @@ __pycache__/
 dist/
 build/
 .dopewars_scores.json
+
+# Local Claude Code files (settings, hooks, preview config)
+.claude/
