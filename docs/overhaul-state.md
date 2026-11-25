@@ -22,7 +22,7 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 | 6 | UI | done | overhaul/phase-6 |
 | 7 | Simulation / game balance | done | overhaul/phase-7 |
 | 8 | Research | done | overhaul/phase-8 |
-| 9 | Wrap-up | todo | |
+| 9 | Wrap-up | done | overhaul/phase-9 |
 | 10 | Land | todo | |
 
 ## Notes per phase
@@ -76,3 +76,9 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 - Wrote `docs/research.md` (52 sources, ranked list of 15 features, a never-build list, a Verification section) with the evidence per area in `docs/research/` (lineage, modern clones, trading genre, player voice, design lessons, replayability). No code changed; 719 tests still pass.
 - Top five to build, all offline/localStorage and small: seeded RNG with seed replay and `?seed=` link; high scores split per theme and difficulty with the end title; an end-of-game report card (profit by item, interest paid, busts); muggings and shark losses that scale with cash carried (Taipan style); a debt projection / borrow warning. Each touches a phase-7 finding. Never build: ads, IAP, accounts, online leaderboards, chat, tracking, PWA (breaks the single-file rule).
 - Choices made without asking: a workflow of 6 Sonnet researchers, 1 Opus synthesizer and 1 Opus fact-checker (18 sources opened: 15 supported, 4 partly, 2 unsupported and reworded; no ranked feature already exists in code). Player-voice sample is small (~25 comments). Pricing is context only. Phase 9 should put the ranked list into `docs/overhaul-summary.md`'s top ten; the doc map line numbers are unchanged since phase 7.
+
+### 9. Wrap-up (done)
+- Refreshed `CLAUDE.md`: the doc map line ranges for both files (they had drifted 10-60 lines; new rows for state, END GAME confirm, save validation and the toast), the test section (`balance.test.js`, the balance and screens tools, the `mutate.ps1` example range) and pointers to the overhaul docs. Fixed `tools\README.md`, whose `tools\balance.ps1` row had a literal backspace where `\b` was. No game code changed; 719 tests pass.
+- Wrote `docs/overhaul-summary.md`: what changed and what was left per phase, the top ten next steps (phase 8's ranked features merged with the findings: safehouse decision first, then seeded RNG, per-theme scores, report card, debt warning, scaled losses, deploy hardening, save hardening, short games and a daily run, cheap items and upgrades), and the tools added.
+- Choices made without asking: did this phase directly, without a workflow, because it was doc work over symbols a grep located. For /land: `overhaul/phase-9` holds all nine phases (19 commits on `main`); the open decisions are the safehouse (keep and sell it, or delete), the unused score `debt` field, and the CI/secret items in findings Phase 4. Pushing `main` deploys.
+
