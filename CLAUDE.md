@@ -43,7 +43,8 @@ boots a game; `newGame(name, settingsOverrides)` starts one past the settings mo
 `tests\smoke.test.js` covers boot and a random walk; `tests\bugs.test.js` has one regression test per fixed bug.
 The module tests are `trade` (market, buy, sell, supplier), `events` (random, late-game, headlines),
 `travel-shop` (travel, coat offer, upgrades), `money-save` (bank, loans, save, scores, game over) and `ui`
-(settings, themes, render, trays), each `tests\<module>.test.js`. `docs\coverage.md` lists what is still untested.
+(settings, themes, render, trays), each `tests\<module>.test.js`; `tests\security.test.js` covers save,
+settings and score validation and the CSP. `docs\coverage.md` lists what is still untested.
 
 Coverage and mutation testing (node's own `--experimental-test-coverage` misreads the HTML files, so use these):
 
@@ -112,4 +113,9 @@ Line numbers are for `dopewars.html` / `candywars.html`.
 - Keep each game a single self-contained HTML file; the only external resource is Google Fonts.
 - Update `README.md` (and the in-game help modal) with any rule or balance change.
 - `SETTINGS.interest` is a multiplier (1.10 = 10%/day); `SETTINGS.events` is a per-trip probability.
+- Saved data is untrusted: `loadSavedGame` resumes a save only if `cleanSave` and `cleanSettings` pass
+  (theme item and city names only, finite numbers), and `loadScores` drops malformed entries. Any new
+  saved field needs a check there, and saved text reaching `innerHTML` goes through `esc`.
+- Each file has a CSP `<meta>` (inline script and styles, Google Fonts only); a new external resource
+  must be added to it.
 - Overhaul progress: `docs/overhaul-state.md`.

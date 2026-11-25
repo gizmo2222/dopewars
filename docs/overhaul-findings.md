@@ -62,3 +62,30 @@ miss. No game bugs turned up. What the survivors and the coverage gaps show:
 - The settings modal shows Cancel on first load, because `newGame()` runs at boot and sets `G.day = 1`.
   Cancel then keeps the default game, which is harmless.
 - There is no bank interest; only the loan accrues. README and help agree, so this is by design.
+
+## Phase 4: security
+
+Fixed in both games, with tests in `tests\security.test.js`:
+- A tampered `localStorage` save could put HTML into `innerHTML` and inline `onclick` strings. That is self or stored XSS on the shared metacrystal.com origin.
+- A score list that wasn't an array crashed `endGame` after `G.ended` was set, so the game-over screen never showed.
+- Saved settings were `Object.assign`ed with no filtering.
+
+Saves are now validated on load, scores are filtered, the score date is escaped, and each file has a CSP `<meta>`. The items below were logged, not fixed, because they touch CI, secrets or the server.
+
+### Deploy workflow (`.github/workflows/deploy.yml`; CI config, not changed)
+- `actions/checkout@v5` is pinned by tag, not by commit SHA. Pin it to a SHA.
+- There is no `permissions:` block, so the job gets the repo's default token scope. Add `permissions: contents: read`.
+- SFTP logs in through `sshpass` with a password secret. A deploy key limited to the web root would be safer.
+- The server username and web-root path appear in the public workflow. This is low risk, but it helps an attacker guess the account.
+- Deploys before commit 0add383 ran with `StrictHostKeyChecking=no`, so they could have been intercepted. This is low risk, and rotating the SFTP password once is cheap.
+- The workflow was also checked for expression injection and is clean: no `github.event.*` text reaches a `run:` step.
+
+### History and server
+- A removed `.claude/settings.local.json` is still in public git history. It holds no secrets, but it does show the local username and paths. Rewriting history is Nick's call, so it was not done.
+- An app since removed from the repo (a Flask app) defaulted `secret_key` to `"change-me-in-production"`. Check that no old `.py` files or running instance are left on the server.
+
+### Notes
+- Google Fonts CSS cannot use SRI because it varies by browser, and it shows Google every visitor, which is a privacy concern, not a bug. Self-hosting the fonts would fix both and let the CSP drop the Google hosts.
+- The CSP needs `script-src 'unsafe-inline'` because every button uses an inline `onclick`. Moving them to `addEventListener` would allow a hash-based CSP; that is a phase 5 candidate.
+- Two equivalent mutants in `esc`: inside the regex character class, `<`→`<=` and `>`→`>=` still match the same characters.
+- There are no npm packages, so no dependencies to audit. The `tools\*.ps1` scripts pass argv arrays to `spawn`, and their deletes stay inside `mkdtemp` folders.

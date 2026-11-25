@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
   <title>CANDY WARS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -1554,14 +1555,53 @@
     } catch(e) {}
   }
 
+  /* Saved data is checked before use: item and place names end up in innerHTML and onclick
+     strings, so a save resumes only if every name is one the theme knows and every number is finite. */
+  const isNum = v => typeof v === 'number' && isFinite(v);
+  const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+  const esc   = s => String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+  const SETTING_KEYS = ['days', 'cash', 'debt', 'interest', 'events', 'coat'];
+
+  function cleanSettings(raw) {
+    const out = {};
+    if (!isObj(raw)) return out;
+    if (typeof raw.theme === 'string' && Object.prototype.hasOwnProperty.call(THEMES, raw.theme)) out.theme = raw.theme;
+    SETTING_KEYS.forEach(k => { if (isNum(raw[k])) out[k] = raw[k]; });
+    return out;
+  }
+
+  function cleanSave(s, theme) {
+    const t = (Object.prototype.hasOwnProperty.call(THEMES, theme) && THEMES[theme]) || THEMES.neighborhood;
+    if (!isObj(s)) return null;
+    const items  = new Set(t.drugs.map(d => d.name));
+    const places = new Set(t.cities.map(c => c.name));
+    if (!['day', 'maxDays', 'cash', 'bank', 'debt', 'coat'].every(k => isNum(s[k]))) return null;
+    const optional = ['borrowedToday', 'carTripsToday', 'coatsBought', 'supplierBurnedUntil', 'corneredUntil', 'tippedExpiry'];
+    if (!optional.every(k => s[k] === undefined || isNum(s[k]))) return null;
+    if (!places.has(s.city)) return null;
+    const maps = { stash: items, safehouse: items, prices: items, prevPrices: items, market: items, avgCost: items, lastVisit: places };
+    for (const k of Object.keys(maps)) {
+      if (s[k] === undefined) { s[k] = {}; continue; } // older saves lack some of these
+      if (!isObj(s[k])) return null;
+      if (!Object.keys(s[k]).every(key => maps[k].has(key) && isNum(s[k][key]))) return null;
+    }
+    const nameOrNone = (v, set) => v === null || v === undefined || set.has(v);
+    if (!nameOrNone(s.supplierBoughtDrug, items) || !nameOrNone(s.corneredDrug, items) || !nameOrNone(s.tippedCity, places)) return null;
+    const fs = s.pendingFireSale;
+    if (fs !== null && fs !== undefined && !(isObj(fs) && items.has(fs.drug) && isNum(fs.qty) && isNum(fs.price))) return null;
+    return s;
+  }
+
   function loadSavedGame() {
     try {
       const raw = localStorage.getItem('candywars_game');
       if (!raw) return false;
       const saved = JSON.parse(raw);
-      if (saved.day > saved.maxDays || saved.ended) return false;
+      if (!isObj(saved) || saved.day > saved.maxDays || saved.ended) return false;
       const savedSettings = localStorage.getItem('candywars_settings');
-      if (savedSettings) Object.assign(SETTINGS, JSON.parse(savedSettings));
+      const settings = cleanSettings(savedSettings ? JSON.parse(savedSettings) : {});
+      if (!cleanSave(saved, settings.theme || SETTINGS.theme)) return false;
+      Object.assign(SETTINGS, settings);
       applyTheme(SETTINGS.theme);
       G = saved;
       document.getElementById('gameOver').classList.add('hidden');
@@ -1577,7 +1617,10 @@
 
   /* ─── HIGH SCORES ─── */
   function loadScores() {
-    try { return JSON.parse(localStorage.getItem('candywars_scores') || '[]'); }
+    try {
+      const raw = JSON.parse(localStorage.getItem('candywars_scores') || '[]');
+      return Array.isArray(raw) ? raw.filter(s => isObj(s) && ['net', 'days', 'cash', 'interest'].every(k => isNum(s[k]))) : [];
+    }
     catch(e) { return []; }
   }
   function saveScore(net) {
@@ -1604,7 +1647,7 @@
       const interestPct = Math.round((s.interest - 1) * 100);
       return `<div style="display:grid;grid-template-columns:28px 1fr auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">
         <span style="font-size:14px">${rank}</span>
-        <span style="color:var(--muted)">${s.days}d · $${s.cash.toLocaleString()} start · ${interestPct}% int · ${s.date}</span>
+        <span style="color:var(--muted)">${s.days}d · $${s.cash.toLocaleString()} start · ${interestPct}% int · ${esc(s.date)}</span>
         <span style="color:${color};font-weight:bold">${s.net < 0 ? '-' : ''}${fmt(s.net)}</span>
       </div>`;
     }).join('');
