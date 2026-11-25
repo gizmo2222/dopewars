@@ -21,7 +21,7 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 | 5 | Clean-up | done | overhaul/phase-5 |
 | 6 | UI | done | overhaul/phase-6 |
 | 7 | Simulation / game balance | done | overhaul/phase-7 |
-| 8 | Research | todo | |
+| 8 | Research | done | overhaul/phase-8 |
 | 9 | Wrap-up | todo | |
 | 10 | Land | todo | |
 
@@ -71,3 +71,8 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 - New `tools\balance.ps1` / `tools\balance.js` plays whole games headless with 8 bot strategies over both games, 8 themes and 3 difficulties. The before-grid was 960 games and the after-grid 576. Four fixes went into both games. The end titles now scale with the theme's priciest item (500x / 100x / 20x its base price; before, the fixed $100k top title went to every competent run). Surge and drought headlines now hit the item they name. The three game-flow items from phase 6 are done: dialogs refuse when there is nothing to move, END GAME confirms while goods are unsold, and the warning shows at 3 days left. 40 new headlines were added after an Opus judge rejected 40 of the 80 drafted. There are 719 tests, all passing.
 - Logged in `docs\overhaul-findings.md` under "Phase 7", not applied: cheap items are dead weight (0-1% of profit, a genre trait with capped carry); the debt snowball is steep for new players on medium and hard; upgrades are cheap after the first week; the burned-contact event is rare and muggings are trivial late; the Candy Wars safehouse still has no UI; high scores mix themes in raw dollars.
 - Choices made without asking: I scaled the titles instead of rebalancing prices, because the themes line up once net worth is divided by the top price. The new headlines were drafted by Sonnet and judged by Opus, at most 5 per theme. Each theme's original last headline stays last, because `calm()` in `travel-shop.test.js` rolls 0.99 and must get the harmless surge. For phase 8: `node tools\balance.js --seeds 1` gives a quick 192-game check, and the doc map lines have shifted by about 10-50 (endGame is now at dopewars.html ~1808).
+
+### 8. Research (done)
+- Wrote `docs/research.md` (52 sources, ranked list of 15 features, a never-build list, a Verification section) with the evidence per area in `docs/research/` (lineage, modern clones, trading genre, player voice, design lessons, replayability). No code changed; 719 tests still pass.
+- Top five to build, all offline/localStorage and small: seeded RNG with seed replay and `?seed=` link; high scores split per theme and difficulty with the end title; an end-of-game report card (profit by item, interest paid, busts); muggings and shark losses that scale with cash carried (Taipan style); a debt projection / borrow warning. Each touches a phase-7 finding. Never build: ads, IAP, accounts, online leaderboards, chat, tracking, PWA (breaks the single-file rule).
+- Choices made without asking: a workflow of 6 Sonnet researchers, 1 Opus synthesizer and 1 Opus fact-checker (18 sources opened: 15 supported, 4 partly, 2 unsupported and reworded; no ranked feature already exists in code). Player-voice sample is small (~25 comments). Pricing is context only. Phase 9 should put the ranked list into `docs/overhaul-summary.md`'s top ten; the doc map line numbers are unchanged since phase 7.
