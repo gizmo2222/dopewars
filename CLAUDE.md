@@ -30,7 +30,7 @@ The suite is the inline-script syntax check plus `node:test` regression tests (N
 packages). Run all of it:
 
 ```powershell
-powershell -File tools	est.ps1 -Quiet
+powershell -File tools\test.ps1 -Quiet
 ```
 
 `tests\harness.js` loads a game's inline `<script>` into `node:vm` with a small DOM
