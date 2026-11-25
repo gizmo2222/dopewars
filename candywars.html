@@ -30,6 +30,8 @@
       line-height: 1.4;
       overflow: hidden;
     }
+    body { display: flex; flex-direction: column; }
+    .header { flex: none; }
     h1 { font-family: 'Fredoka One', cursive; letter-spacing: 1px; }
 
     /* HEADER */
@@ -54,7 +56,7 @@
     .stat { text-align: center; }
     .stat-clickable { cursor: pointer; }
     .stat-clickable:hover .stat-val { opacity: 0.8; }
-    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
     .stat-val { font-size: 16px; color: var(--accent); font-weight: bold; }
     .stat-val.danger { color: var(--red); }
     .stat-hint { font-size: 12px; color: var(--muted); }
@@ -71,8 +73,10 @@
       border: 1px solid var(--accent);
       color: var(--accent);
       font-family: 'Nunito', sans-serif;
-      font-size: 13px;
-      padding: 4px 6px;
+      font-size: 12px;
+      padding: 6px 2px;
+      line-height: 1.2;
+      white-space: nowrap;
       cursor: pointer;
     }
     .stat-tray button:hover { background: var(--accent); color: #000; }
@@ -83,7 +87,9 @@
     .main {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      height: calc(100vh - 52px);
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
       overflow: hidden;
     }
     .panel {
@@ -157,12 +163,13 @@
     .pill {
       display: inline-block;
       padding: 1px 7px;
-      font-size: 10px;
+      font-size: 11px;
       border-radius: 2px;
     }
     .pill-good { background: #1a3a1a; color: var(--green); border: 1px solid #2d5a2d; }
 
     /* CITY GRID */
+    #stashList { font-size: 16px; }
     .top-section {
       min-height: 200px;
       margin-bottom: 0;
@@ -184,8 +191,8 @@
     .city-btn:hover { border-color: var(--accent); color: var(--accent); }
     .city-btn.current { border-color: var(--accent); background: #2a1040; color: var(--accent); cursor: default; }
     .city-name { font-size: 13px; font-weight: bold; }
-    .city-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
-    .city-btn.current .city-desc { color: var(--accent); opacity: 0.6; }
+    .city-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .city-btn.current .city-desc { color: var(--accent); opacity: 0.85; }
 
     /* HEADER BUTTONS */
     .action-btn {
@@ -231,6 +238,8 @@
       z-index: 100;
     }
     .overlay.hidden, .input-overlay.hidden, .gameover.hidden { display: none; }
+    .overlay, .input-overlay, .gameover { overflow-y: auto; padding: 8px; }
+    .modal-box, .input-box, .go-box { margin: auto; }
     .modal-box {
       background: var(--bg2);
       border: 2px solid var(--accent2);
@@ -245,7 +254,7 @@
       color: var(--accent2);
       margin-bottom: 12px;
     }
-    .modal-msg { margin-bottom: 20px; line-height: 1.7; color: var(--text); }
+    .modal-msg { font-size: 18px; line-height: 1.5; margin-bottom: 20px; color: var(--text); }
     .modal-ok {
       background: var(--accent);
       color: #000;
@@ -337,18 +346,35 @@
     .sopt.active span { color:var(--accent); opacity:0.7; }
 
     /* RESPONSIVE */
-    @media (max-width: 600px) {
+    @media (max-width: 720px) {
       .main { grid-template-columns: 1fr; height: auto; overflow: visible; }
       html, body { overflow: auto; }
       .stats-bar { grid-template-columns: repeat(2, 1fr); }
       .panel { border-right: none; border-bottom: 1px solid var(--border); }
       /* settings modal: scrollable overlay, compact rows */
-      .overlay { align-items: flex-start; padding: 8px; overflow-y: auto; }
       .modal-box { width: 100%; }
+      .header { flex-wrap: wrap; row-gap: 6px; padding: 8px 12px; }
+      .header > div:first-child { flex: 1 1 100%; }
+      .header > div:last-child { flex: 1 1 100%; justify-content: space-between; gap: 6px !important; }
+      .header h1 { white-space: nowrap; }
+      .action-btn { white-space: nowrap; padding: 4px 8px; }
+      .top-section, #topLeft, #topRight { min-height: 0 !important; }
+      body { display: block; }
+      .qty-in, .qty-btn { min-height: 36px; }
+      .buy-group { gap: 6px; }
+      .stat-tray button { min-height: 36px; }
+      .action-btn { min-height: 36px; }
       .setting-row { margin-bottom: 10px; }
       #set-theme { flex-wrap: wrap; }
       #set-theme .sopt { flex: 1 1 calc(50% - 3px); }
     }
+    @media (pointer: coarse) {
+      .qty-in, .qty-btn { min-height: 36px; }
+      .buy-group { gap: 6px; }
+      .stat-tray button { min-height: 36px; }
+      .action-btn { min-height: 36px; }
+    }
+    #daysLeft { white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -364,9 +390,9 @@
     <button class="action-btn" onclick="openHelp()">? HELP</button>
     <button class="action-btn" onclick="openSettings()">⚙ SETTINGS</button>
     <div style="text-align:right">
-      <div style="font-size:10px;color:var(--muted)">DAY</div>
+      <div style="font-size:11px;color:var(--muted)">DAY</div>
       <div style="font-family:'Fredoka One',cursive;font-size:32px;color:var(--accent);line-height:1" id="dayDisplay">1</div>
-      <div style="font-size:10px;color:var(--muted)" id="daysLeft">29 days left</div>
+      <div style="font-size:11px;color:var(--muted)" id="daysLeft">29 days left</div>
     </div>
   </div>
 </div>
@@ -406,8 +432,8 @@
           <div class="stat-label">Owe Parents <span class="stat-hint">▾</span></div>
           <div class="stat-val danger" id="debtDisplay">$5,000</div>
           <div class="stat-tray" id="tray-debt" onclick="event.stopPropagation()">
-            <button onclick="closeTray();openBorrow()">Ask for advance</button>
-            <button class="danger" onclick="closeTray();openInput('loan','Pay how much back?')">Pay some back</button>
+            <button onclick="closeTray();openBorrow()">Ask for more</button>
+            <button class="danger" onclick="closeTray();openInput('loan','Pay how much back?')">Pay some</button>
             <button class="danger" onclick="closeTray();payAllLoan()">Pay in full</button>
           </div>
         </div>
@@ -1763,7 +1789,7 @@
       row.className = 'owned-row';
       row.innerHTML = `
         <div>
-          ${name} <span class="pill pill-good">x${qty}</span>
+          <span class="drug-name">${name}</span> <span class="pill pill-good">x${qty}</span>
           <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px">${sellPrice ? 'sell @ ' + fmt(sellPrice) : 'no buyers here'}${avgLine ? ' &mdash; ' + avgLine : ''}</span>
         </div>
         <input class="qty-in" id="sqty_${name}" type="number" value="${qty}" min="1" max="${qty}">
@@ -1786,7 +1812,7 @@
       const btn = document.createElement('div');
       btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
       const specialtyLine = c.specialty
-        ? `<div style="font-size:10px;color:#50fa7b;margin-top:2px">★ ${c.specialty}</div>` : '';
+        ? `<div style="font-size:11px;color:#50fa7b;margin-top:2px">★ ${c.specialty}</div>` : '';
       btn.innerHTML = `
         <div class="city-name">${c.name}</div>
         <div class="city-desc">${c.name === G.city ? 'you are here' : c.desc}</div>

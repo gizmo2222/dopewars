@@ -727,3 +727,27 @@ for (const name of GAMES) {
     assert.equal(g.hidden('eventOverlay'), false);
   });
 }
+
+const fsx = require('node:fs');
+const pathx = require('node:path');
+for (const name of GAMES) {
+  const css = () => fsx.readFileSync(pathx.join(__dirname, '..', name + '.html'), 'utf8');
+  test(`${name}: stash names sit in a .drug-name span`, () => {
+    const g = newGame(name, noEvents);
+    const a = g.run('DRUGS[0].name');
+    g.ctx.__s = { [a]: 3 };
+    g.ctx.__p = { [a]: 150 };
+    g.run('G.stash = __s; G.prices = __p; renderStash()');
+    const span = g.el('stashList').children[0].querySelector('.drug-name');
+    assert.ok(span);
+    assert.equal(span.textContent, a);
+  });
+  test(`${name}: tall modals scroll and the layout styles are in place`, () => {
+    const html = css();
+    assert.match(html, /\.overlay, \.input-overlay, \.gameover \{ overflow-y: auto; padding: 8px; \}/);
+    assert.match(html, /\.modal-box, \.input-box, \.go-box \{ margin: auto; \}/);
+    assert.match(html, /@media \(max-width: 720px\)/);
+    assert.doesNotMatch(html, /calc\(100vh - 52px\)/);
+    assert.match(html, /#daysLeft \{ white-space: nowrap; \}/);
+  });
+}
