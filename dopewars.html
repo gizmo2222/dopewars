@@ -412,7 +412,7 @@
         <div class="stat stat-clickable" onclick="toggleTray('cash')">
           <div class="stat-label">Cash <span class="stat-hint">▾</span></div>
           <div class="stat-val" id="cashDisplay">$2,000</div>
-          <div class="stat-tray" id="tray-cash">
+          <div class="stat-tray" id="tray-cash" onclick="event.stopPropagation()">
             <button onclick="closeTray();openInput('deposit','Deposit how much?')">Deposit</button>
             <button onclick="closeTray();openInput('withdraw','Withdraw how much?')">Withdraw</button>
             <button onclick="closeTray();withdrawAll()">Withdraw all</button>
@@ -422,7 +422,7 @@
         <div class="stat stat-clickable" onclick="toggleTray('debt')">
           <div class="stat-label">Debt <span class="stat-hint">▾</span></div>
           <div class="stat-val danger" id="debtDisplay">$5,000</div>
-          <div class="stat-tray" id="tray-debt">
+          <div class="stat-tray" id="tray-debt" onclick="event.stopPropagation()">
             <button onclick="closeTray();openBorrow()">Borrow more</button>
             <button class="danger" onclick="closeTray();openInput('loan','Pay how much on debt?')">Pay partial</button>
             <button class="danger" onclick="closeTray();payAllLoan()">Pay all</button>
@@ -613,7 +613,7 @@
       <div style="margin-bottom:4px">Occasionally after traveling you'll be offered extra carry capacity for a price. More space means bigger buys.</div>
 
       <div style="color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px">FINAL DAY</div>
-      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your stash, settle your accounts, then hit <strong>WRAP UP &amp; END GAME</strong>. You'll get a warning popup 3 days before the end.</div>
+      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your stash, settle your accounts, then hit <strong>END GAME</strong>. You'll get a warning popup 3 days before the end.</div>
     </div>
 
     <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT</button>
@@ -860,6 +860,7 @@
 
   let G = {};
   let inputAction = null;
+  let eventQueue = [];
 
   /* ─── SETTINGS ─── */
   const SETTINGS = {
@@ -875,7 +876,7 @@
   function openSettings() {
     document.getElementById('settingsOverlay').classList.remove('hidden');
     // show Cancel only when a game is already in progress
-    const hasGame = G.day && G.day <= G.maxDays;
+    const hasGame = G.day && G.day <= G.maxDays && !G.ended;
     document.getElementById('settingsCancelBtn').style.display = hasGame ? '' : 'none';
     // sync button states to current SETTINGS
     document.querySelectorAll('#set-theme .sopt').forEach(b =>
@@ -948,7 +949,6 @@
   }
 
   function selectTheme(id) {
-    SETTINGS.theme = id;
     document.querySelectorAll('#set-theme .sopt').forEach(b =>
       b.classList.toggle('active', b.dataset.theme === id));
   }
@@ -988,6 +988,7 @@
 
   /* ─── GAME INIT ─── */
   function newGame() {
+    eventQueue = [];
     applyTheme(SETTINGS.theme);
     G = {
       day: 1, maxDays: SETTINGS.days,
@@ -999,6 +1000,7 @@
       carTripsToday: 0,
       supplierUsedToday: false,
       supplierBoughtDrug: null,
+      ended: false,
       heatDay: false,
       coatsBought: 0,
       lastVisit: {},
@@ -1059,11 +1061,11 @@
   function maybeEvent() {
     if (Math.random() > SETTINGS.events) return;
     const ev = EVENTS[rnd(0, EVENTS.length - 1)];
-    applyEvent(ev.type);
-    showEvent(ev.title, ev.msg);
+    showEvent(ev.title, applyEvent(ev.type) || ev.msg);
   }
 
   function applyEvent(type) {
+    const say = (m, c) => { addLog(m, c); return m; };
     if (type === 'bust') {
       let lost = 0;
       let fraction = G.hasGun ? 0.25 : 0.5;
@@ -1076,7 +1078,7 @@
       });
       const heatNote = G.heatDay ? ' (heat day)' : '';
       const gunNote  = G.hasGun  ? ' (gun reduced losses)' : '';
-      addLog(`BUST! Lost ${lost} units to the cops${gunNote}${heatNote}.`, 'bad');
+      return say(`BUST! Lost ${lost} units to the cops${gunNote}${heatNote}.`, 'bad');
     } else if (type === 'surge') {
       Object.keys(G.prices).forEach(k => {
         G.prices[k] = Math.round(G.prices[k] * (1.5 + Math.random()));
@@ -1085,27 +1087,30 @@
     } else if (type === 'drought') {
       const citySpec = (CITIES.find(c => c.name === G.city) || {}).specialty;
       const keys = Object.keys(G.market).filter(k => k !== citySpec);
-      for (let i = 0; i < Math.floor(keys.length / 2); i++) {
-        delete G.market[keys[i]];
-        delete G.prices[keys[i]];
+      for (let n = Math.floor(keys.length / 2); n > 0; n--) {
+        const k = keys.splice(rnd(0, keys.length - 1), 1)[0];
+        delete G.market[k];
+        delete G.prices[k];
       }
       addLog('Drought hit — half the supply vanished.', 'bad');
     } else if (type === 'mug') {
       if (G.hasGun && Math.random() < 0.6) {
-        addLog('Mugger tried you — you flashed the piece and they ran.', 'good');
-        return;
+        return say('Mugger tried you — you flashed the piece and they ran.', 'good');
       }
       const take = Math.min(G.cash, rnd(300, 1500));
       G.cash -= take;
-      addLog(`Mugged for ${fmt(take)}!`, 'bad');
+      return say(`Mugged for ${fmt(take)}!`, 'bad');
     } else if (type === 'find') {
       const d = DRUGS[rnd(0, DRUGS.length - 1)];
       let qty = rnd(5, 25);
       qty = Math.min(qty, G.coat - carried());
       if (qty > 0) {
-        G.stash[d.name] = (G.stash[d.name] || 0) + qty;
-        addLog(`Found ${qty}x ${d.name} in an alley!`, 'good');
+        const prevQty = G.stash[d.name] || 0;
+        G.avgCost[d.name] = prevQty ? Math.round((G.avgCost[d.name] || 0) * prevQty / (prevQty + qty)) : 0;
+        G.stash[d.name] = prevQty + qty;
+        return say(`Found ${qty}x ${d.name} in an alley!`, 'good');
       }
+      return say('You spot a stash but have no room to carry any of it.', 'warn');
     } else if (type === 'cheap') {
       Object.keys(G.prices).forEach(k => {
         G.prices[k] = Math.round(G.prices[k] * 0.35);
@@ -1113,8 +1118,7 @@
       addLog('Prices crashed — buy now!', 'good');
     } else if (type === 'shark') {
       if (G.debt <= 0) {
-        addLog("Loan shark's boys came by — nothing to collect.", 'warn');
-        return;
+        return say("Loan shark's boys came by — nothing to collect.", 'warn');
       }
       const pct  = rnd(10, 25);
       const take = Math.min(G.cash, Math.max(200, Math.round(G.debt * pct / 100)));
@@ -1123,10 +1127,10 @@
     } else if (type === 'bribe') {
       if (G.cash < 200) {
         applyEvent('bust');
-        addLog(`Couldn't afford the bribe — cop busted you instead.`, 'bad');
+        return say(`Couldn't afford the bribe — cop busted you instead.`, 'bad');
       } else {
         G.cash -= 200;
-        addLog(`Paid a cop $200 to look away.`, 'warn');
+        return say(`Paid a cop $200 to look away.`, 'warn');
       }
     } else if (type === 'tip') {
       // find the drug with the lowest price relative to its base (best deal)
@@ -1146,6 +1150,7 @@
   }
 
   function showEvent(title, msg) {
+    if (!document.getElementById('eventOverlay').classList.contains('hidden')) { eventQueue.push([title, msg]); return; }
     document.getElementById('eventTitle').textContent = title;
     document.getElementById('eventMsg').textContent   = msg;
     document.getElementById('eventOverlay').classList.remove('hidden');
@@ -1155,6 +1160,8 @@
   }
   function dismissEvent() {
     document.getElementById('eventOverlay').classList.add('hidden');
+    const next = eventQueue.shift();
+    if (next) showEvent(next[0], next[1]);
     renderAll();
   }
 
@@ -1184,7 +1191,9 @@
 
   function buyDrug(name) {
     const qtyEl = document.getElementById('qty_' + name);
-    let qty = parseInt(qtyEl.value) || 1;
+    let qty = parseInt(qtyEl.value);
+    if (isNaN(qty)) qty = 1;
+    if (!(qty > 0)) { addLog('Enter a quantity of 1 or more.', 'bad'); return; }
     qty = Math.min(qty, calcMaxQty(name));
     executeBuy(name, qty);
   }
@@ -1221,7 +1230,9 @@
 
   function sellDrug(name) {
     const qtyEl = document.getElementById('sqty_' + name);
-    let qty     = parseInt(qtyEl.value) || 1;
+    let qty     = parseInt(qtyEl.value);
+    if (isNaN(qty)) qty = 1;
+    if (!(qty > 0)) { addLog('Enter a quantity of 1 or more.', 'bad'); return; }
     const have  = G.stash[name] || 0;
     const price = G.prices[name];
     if (!have)  { addLog("You don't have that.", 'bad'); return; }
@@ -1258,7 +1269,7 @@
   }
 
   function leBurnedContact() {
-    G.supplierBurnedUntil = G.day + 3;
+    G.supplierBurnedUntil = G.day + 2;
     showEvent('CONTACT BURNED', 'Your supplier got picked up by the feds. Connect is unavailable for 3 days.');
     addLog('Contact burned — supplier unavailable for 3 days.', 'bad');
   }
@@ -1302,6 +1313,8 @@
     const days = rnd(2, 3);
     G.corneredDrug   = d.name;
     G.corneredUntil  = G.day + days;
+    delete G.market[d.name];
+    delete G.prices[d.name];
     showEvent('MARKET CORNERED', `A rival dealer bought out all the ${d.name} in the city. It won't be available for ${days} days.`);
     addLog(`Rival cornered the ${d.name} market for ${days} days.`, 'bad');
   }
@@ -1344,6 +1357,7 @@
   function travel(city) {
     if (city === G.city) return;
     G.city = city;
+    G.supplierBoughtDrug = null;
 
     const freeTrip = G.hasCar && G.carTripsToday < CAR_FREE_TRIPS;
     if (freeTrip) {
@@ -1355,7 +1369,6 @@
       G.borrowedToday = 0;
       G.carTripsToday = 0;
       G.supplierUsedToday = false;
-      G.supplierBoughtDrug = null;
       G.heatDay = false;
       if (G.hasSafehouse) {
         const paid = Math.min(200, G.cash);
@@ -1380,8 +1393,7 @@
       // block shark before day 6, and when debt is cleared
       if (ev.type === 'shark' && (G.day <= 5 || G.debt <= 0)) ev = null;
       if (ev) {
-        applyEvent(ev.type);
-        showEvent(ev.title, ev.msg);
+        showEvent(ev.title, applyEvent(ev.type) || ev.msg);
       }
     }
     // escalating shark visits after day 15
@@ -1389,8 +1401,7 @@
       const extraChance = Math.min((G.day - 15) * 0.02, 0.30);
       if (Math.random() < extraChance) {
         const sharkEv = EVENTS.find(e => e.type === 'shark');
-        applyEvent('shark');
-        showEvent(sharkEv.title, sharkEv.msg);
+        showEvent(sharkEv.title, applyEvent('shark') || sharkEv.msg);
       }
     }
     if (!freeTrip && G.day > 15) maybeLateEvent();
@@ -1578,7 +1589,8 @@
     const amt    = parseInt(document.getElementById('inputField').value) || 0;
     const action = inputAction;   // capture BEFORE closeInput() clears it
     closeInput();
-    if (amt <= 0) return;
+    if (action === 'loan' && G.debt <= 0) { addLog('No debt to pay.', 'bad'); return; }
+    if (amt <= 0) { addLog('Enter an amount above $0.', 'bad'); return; }
     if (action === 'deposit') {
       const a = Math.min(amt, G.cash);
       G.cash -= a; G.bank += a;
@@ -1604,6 +1616,7 @@
   }
 
   function payAllLoan() {
+    if (G.debt <= 0) { addLog('No debt to pay.', 'bad'); return; }
     const a = Math.min(G.cash, G.debt);
     if (a <= 0) { addLog('No cash to pay debt with.', 'bad'); return; }
     G.cash -= a; G.debt -= a;
@@ -1634,7 +1647,7 @@
       const raw = localStorage.getItem('dopewars_game');
       if (!raw) return false;
       const saved = JSON.parse(raw);
-      if (saved.day > saved.maxDays) return false; // finished game — don't resume
+      if (saved.day > saved.maxDays || saved.ended) return false; // finished game — don't resume
       const savedSettings = localStorage.getItem('dopewars_settings');
       if (savedSettings) Object.assign(SETTINGS, JSON.parse(savedSettings));
       applyTheme(SETTINGS.theme);
@@ -1680,13 +1693,15 @@
       return `<div style="display:grid;grid-template-columns:28px 1fr auto;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">
         <span style="font-size:14px">${rank}</span>
         <span style="color:var(--muted)">${s.days}d · $${s.cash.toLocaleString()} start · ${interestPct}% int · ${s.date}</span>
-        <span style="color:${color};font-weight:bold">${fmt(s.net)}</span>
+        <span style="color:${color};font-weight:bold">${s.net < 0 ? '-' : ''}${fmt(s.net)}</span>
       </div>`;
     }).join('');
   }
 
   /* ─── GAME OVER ─── */
   function endGame() {
+    if (G.ended) return;
+    G.ended = true;
     const net = G.cash + G.bank - G.debt;
     let title, flavor;
     if (net > 100000)     { title = 'KINGPIN!';        flavor = 'You OWN these streets. Nobody moves product without your say-so.'; }
@@ -1700,10 +1715,11 @@
       `Cash on hand: ${fmt(G.cash)}<br>` +
       `Bank: ${fmt(G.bank)}<br>` +
       `Debt owed: −${fmt(G.debt)}<br><br>` +
-      `<strong>Net Worth: ${fmt(net)}</strong><br><br>` +
+      `<strong>Net Worth: ${net < 0 ? '-' : ''}${fmt(net)}</strong><br><br>` +
       flavor;
 
     const scores = saveScore(net);
+    saveGame();
     renderHighScores(scores);
     document.getElementById('gameOver').classList.remove('hidden');
   }
@@ -1912,7 +1928,7 @@
     }
     if (e.key === 'Escape') {
       closeInput();
-      if (G.day && G.day <= G.maxDays) closeSettings();
+      if (G.day && G.day <= G.maxDays && !G.ended) closeSettings();
       closeHelp();
       closeHighScores();
     }

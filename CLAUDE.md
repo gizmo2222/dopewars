@@ -40,6 +40,8 @@ boots a game; `newGame(name, settingsOverrides)` starts one past the settings mo
 `Math.random()` values, `game.flushTimers()` runs queued `setTimeout`s. Name tests
 `<game>: <behaviour>` and loop over `GAMES` so each check covers both files.
 
+`tests\smoke.test.js` covers boot and a random walk; `tests\bugs.test.js` has one regression test per fixed bug.
+
 Scripts are indexed in `tools\README.md`.
 
 ## Deploy
@@ -69,25 +71,25 @@ Line numbers are for `dopewars.html` / `candywars.html`.
 | Settings / help / high-score modals | 492-631 | 482-617 | `#settingsOverlay`, `#helpOverlay`, `#highScoresOverlay` |
 | Amount input dialog, game-over screen | 632-658 | 618-644 | `#inputOverlay`, `#gameOver` |
 | Data: themes (cities, items, prices, upgrade names, copy) | 660-848 | 646-835 | `THEMES` |
-| Data: random events | 849-860 | 836-847 | `EVENTS` |
-| Settings, presets, theme switch | 864-983 | 851-966 | `SETTINGS`, `PRESETS` (931/914), `applyPreset`, `applyTheme`, `readSettings`, `startFromSettings` |
+| Data: random events | 849-864 | 836-851 | `EVENTS` |
+| Settings, presets, theme switch | 865-983 | 852-966 | `SETTINGS`, `PRESETS` (932/915), `applyPreset`, `applyTheme`, `readSettings`, `startFromSettings` |
 | Helpers | 984-988 | 967-971 | `rnd`, `fmt`, `carried` |
-| New game / state shape | 989-1024 | 972-1007 | `newGame` (the `G` object fields) |
-| Market generation | 1025-1057 | 1008-1038 | `generateMarket` |
-| Random events | 1058-1160 | 1039-1140 | `maybeEvent`, `applyEvent`, `showEvent`, `dismissEvent` |
-| Buy / sell / supplier | 1161-1237 | 1141-1215 | `calcMaxQty`, `executeBuy`, `buyDrug`, `buyMax`, `supplierBuy`, `sellDrug` |
-| Late-game events (after day 15) | 1238-1317 | 1216-1291 | `maybeLateEvent`, `leFireSale`, `leMarketCornered`, `leTipOff`, `leBurnedContact` |
-| Headlines | 1318-1340 | 1292-1314 | `applyHeadline` |
-| Travel (day tick, interest, events) | 1341-1406 | 1315-1371 | `travel`, `CAR_FREE_TRIPS` |
-| Coat / bag offer | 1407-1447 | 1372-1412 | `COAT_OFFERS`, `maybeCoatOffer`, `acceptCoatOffer` |
-| Upgrades shop | 1448-1512 | 1413-1476 | `UPGRADES`, `renderShop`, `buyUpgrade`, `buyCoatUpgrade` |
-| Safehouse | 1513-1564 | — | `openSafehouse`, `shStash`, `shRetrieve` |
-| Amount input (bank, borrow, repay) | 1565-1623 | 1477-1535 | `openInput`, `confirmInput`, `payAllLoan`, `withdrawAll` |
-| Persistence | 1624-1652 | 1536-1564 | `saveGame`, `loadSavedGame`; keys `dopewars_game` / `_settings` / `_scores` (`candywars_*`) |
-| High scores | 1653-1687 | 1565-1599 | `loadScores`, `saveScore`, `renderHighScores` |
-| Game over | 1688-1710 | 1600-1622 | `endGame` |
-| Log, render | 1711-1893 | 1623-1792 | `addLog`, `renderAll`, `renderMarket`, `renderStash`, `renderCities` |
-| Trays, keyboard, start-up | 1894-1926 | 1793-1825 | `toggleTray`, keydown handler, start block |
+| New game / state shape | 989-1026 | 972-1009 | `newGame` (the `G` object fields) |
+| Market generation | 1027-1059 | 1010-1040 | `generateMarket` |
+| Random events | 1060-1167 | 1041-1147 | `maybeEvent`, `applyEvent`, `showEvent`, `dismissEvent` |
+| Buy / sell / supplier | 1168-1248 | 1148-1226 | `calcMaxQty`, `executeBuy`, `buyDrug`, `buyMax`, `supplierBuy`, `sellDrug` |
+| Late-game events (after day 15) | 1249-1330 | 1227-1304 | `maybeLateEvent`, `leFireSale`, `leMarketCornered`, `leTipOff`, `leBurnedContact` |
+| Headlines | 1331-1353 | 1305-1327 | `applyHeadline` |
+| Travel (day tick, interest, events) | 1354-1417 | 1328-1382 | `travel`, `CAR_FREE_TRIPS` |
+| Coat / bag offer | 1418-1458 | 1383-1423 | `COAT_OFFERS`, `maybeCoatOffer`, `acceptCoatOffer` |
+| Upgrades shop | 1459-1523 | 1424-1487 | `UPGRADES`, `renderShop`, `buyUpgrade`, `buyCoatUpgrade` |
+| Safehouse | 1524-1575 | — | `openSafehouse`, `shStash`, `shRetrieve` |
+| Amount input (bank, borrow, repay) | 1576-1636 | 1488-1548 | `openInput`, `confirmInput`, `payAllLoan`, `withdrawAll` |
+| Persistence | 1637-1665 | 1549-1577 | `saveGame`, `loadSavedGame`; keys `dopewars_game` / `_settings` / `_scores` (`candywars_*`) |
+| High scores | 1666-1700 | 1578-1612 | `loadScores`, `saveScore`, `renderHighScores` |
+| Game over | 1701-1726 | 1613-1638 | `endGame` |
+| Log, render | 1727-1909 | 1639-1808 | `addLog`, `renderAll`, `renderMarket`, `renderStash`, `renderCities` |
+| Trays, keyboard, start-up | 1910-1945 | 1809-1844 | `toggleTray`, keydown handler, start block |
 
 ## Conventions
 
