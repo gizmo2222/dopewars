@@ -32,7 +32,7 @@ const TXT = {
     find: (q, d) => `Found ${q}x ${d} hidden behind the bleachers!`, noRoom: 'You spot a stash but have no room to carry any of it.',
     sharkNone: 'Parents checked in — you owe them nothing. Nice!',
     shark: (t, p) => `Parents collected ${t} (${p}% of what you owe) as a reminder to pay them back.`,
-    bribeFail: `Couldn't bribe the hall monitor — they reported you anyway!`, bribeOk: 'Gave the hall monitor a candy bar ($200) to look away.',
+    bribeFail: `No candy bar to share — the hall monitor checked your bag!`, bribeOk: 'Gave the hall monitor a candy bar ($200) to look away.',
     tip: (d, p) => `Playground tip: ${d} is going for ${p} here — that's a steal!`, tipNone: 'Your friend had nothing useful to share.',
     burnedTitle: 'CLUB CARD DECLINED', burnedLog: 'Club card declined — no bulk deals for 3 days.',
     cornerTitle: 'BOUGHT OUT!', cornerLog: (d, n) => `Popular kid bought out all ${d} for ${n} days.`,

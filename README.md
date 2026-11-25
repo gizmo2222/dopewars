@@ -32,7 +32,7 @@ You start with some cash, a debt, and 30 days to make your fortune. Your final s
 - **Bank / Piggy Bank** — safe storage; deposit here to protect it
 - **Debt** — compounds daily; ignore it and it will bury you
 
-Click the **Cash** or **Debt** labels in the Finances panel to deposit, withdraw, borrow, or repay.
+Click the **Cash** or **Debt** labels in the Finances panel to deposit, withdraw, borrow, or repay. From day 3 you can borrow more, up to $10,000 a day; it adds to your debt and earns interest.
 
 ### Upgrades
 
@@ -70,7 +70,7 @@ Occasionally you'll be offered extra carry capacity for a price. More space mean
 
 ### Final Day
 
-On the last day you cannot travel. Sell your stash, settle your accounts, and hit **End Game**. A warning appears 3 days before the end.
+On the last day you cannot travel. Sell your stash, settle your accounts, and hit **End Game**. Anything still in your stash when you end the game counts for nothing. A warning appears 3 days before the end.
 
 ---
 

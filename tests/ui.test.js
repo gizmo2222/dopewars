@@ -910,3 +910,28 @@ test('dopewars: safehouse buttons are disabled when there is nothing to move', (
   assert.equal(by('STORE ALL').filter(b => 'disabled' in b.attrs).length, 1);
   assert.equal(by('TAKE ALL').filter(b => 'disabled' in b.attrs).length, 1);
 });
+
+for (const name of GAMES) {
+  test(`${name}: help text shows the live interest rate and the theme's upgrades`, () => {
+    const g = newGame(name, { interest: 1.15 });
+    g.run('openHelp()');
+    assert.equal(g.el('helpRate').textContent, '15%/day');
+    const html = g.el('helpUpgrades').innerHTML;
+    assert.ok(html.includes(g.run('UPGRADES[0].label')));
+    assert.ok(html.includes(g.run('UPGRADES[3].label')));
+  });
+
+  test(`${name}: days left reads singular, plural and final day`, () => {
+    const g = newGame(name, {});
+    for (const [left, text] of [[2, '2 days left'], [1, '1 day left'], [0, 'final day']]) {
+      g.run(`G.day = G.maxDays - ${left}; renderAll()`);
+      assert.equal(g.el('daysLeft').textContent, text);
+    }
+  });
+
+  test(`${name}: fire-sale message says 1 unit, not 1 units`, () => {
+    const g = newGame(name, {});
+    g.run('G.cash = 1e9; G.coat = carried() + 1; leFireSale()');
+    assert.match(g.el('fireSaleMsg').innerHTML + g.el('fireSaleMsg').textContent, /up to 1 unit\b/);
+  });
+}

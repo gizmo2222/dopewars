@@ -608,22 +608,17 @@
       <div style="margin-bottom:12px">You have 30 days (default) to make as much money as possible. Buy drugs cheap, sell them high, and pay off your debt before time runs out. Your final score is <strong>cash + bank &minus; debt</strong>.</div>
 
       <div class="help-h">TRAVEL</div>
-      <div style="margin-bottom:12px">Each trip to a new borough uses up one day and generates a fresh market. Prices vary wildly by location — shop around. Traveling also applies daily interest to your debt.</div>
+      <div style="margin-bottom:12px">Each trip to a new location uses up one day and generates a fresh market. Prices vary wildly by location — shop around. Traveling also applies daily interest to your debt.</div>
 
       <div class="help-h">BUYING &amp; SELLING</div>
       <div style="margin-bottom:12px">Enter a quantity and hit <strong>BUY</strong>, or hit <strong>MAX</strong> to buy as much as your cash and coat space allow. To sell, use the quantity field in Your Stash and hit <strong>SELL</strong>. Your average cost and profit/loss % are shown for each drug you're holding.</div>
 
       <div class="help-h">DEBT &amp; THE BANK</div>
-      <div style="margin-bottom:12px">You start with a loan shark debt that compounds daily. Pay it off fast — at 10%/day it snowballs quickly. The bank keeps your cash safe from muggers and events. Click <strong>Cash</strong> or <strong>Debt</strong> in the Finances panel to deposit, withdraw, borrow, or pay.</div>
+      <div style="margin-bottom:12px">You start with a loan shark debt that compounds daily. Pay it off fast — at <span id="helpRate">10%/day</span> it snowballs quickly. The bank keeps your cash safe from muggers and events. Click <strong>Cash</strong> or <strong>Debt</strong> in the Finances panel to deposit, withdraw, borrow, or pay. From day 3 you can borrow more, up to $10,000 a day; it adds to your debt and earns interest.</div>
 
       <div class="help-h">UPGRADES</div>
       <div style="margin-bottom:4px">Buy these from the <strong>Black Market</strong> panel when you can afford them:</div>
-      <div style="margin-bottom:12px;padding-left:10px">
-        🔫 <strong>9mm Pistol ($1,500)</strong> — Halves losses in a bust. 60% chance to scare off muggers.<br>
-        📱 <strong>Burner Phone ($500)</strong> — Nearly full drug selection every market visit.<br>
-        🚗 <strong>Stolen Honda ($3,000)</strong> — 1 free trip per day (no day lost, no interest accrued).<br>
-        📞 <strong>Supplier Contact ($2,000)</strong> — Once per day, buy any drug at 25% off (up to half the available supply).
-      </div>
+      <div style="margin-bottom:12px;padding-left:10px" id="helpUpgrades"></div>
 
       <div class="help-h">CITY SPECIALTIES</div>
       <div style="margin-bottom:12px">Each city has a specialty drug (shown as ★ on the city button) that is always available, priced ~20% cheaper, and stocked in larger quantities than elsewhere.</div>
@@ -636,7 +631,7 @@
       <div style="margin-bottom:4px">Occasionally after traveling you'll be offered extra carry capacity for a price. More space means bigger buys.</div>
 
       <div class="help-h">FINAL DAY</div>
-      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your stash, settle your accounts, then hit <strong>END GAME</strong>. You'll get a warning popup 3 days before the end.</div>
+      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your stash, settle your accounts, then hit <strong>END GAME</strong>. Anything still in your stash when you end the game counts for nothing. You'll get a warning popup 3 days before the end.</div>
     </div>
 
     <button class="modal-ok" id="helpClose" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT</button>
@@ -911,6 +906,8 @@
     document.getElementById('settingsOverlay').classList.add('hidden');
   }
   function openHelp() {
+    document.getElementById('helpRate').textContent = Math.round((SETTINGS.interest - 1) * 100) + '%/day';
+    document.getElementById('helpUpgrades').innerHTML = UPGRADES.map(u => `${u.icon} <strong>${u.label} (${fmt(u.price)})</strong> — ${u.desc}`).join('<br>');
     document.getElementById('helpOverlay').classList.remove('hidden');
     document.getElementById('helpClose').focus();
   }
@@ -1301,7 +1298,7 @@
     G.pendingFireSale = { drug: d.name, qty, price };
     const canBuy = fireSaleMax(G.pendingFireSale);
     document.getElementById('fireSaleMsg').textContent =
-      `A desperate dealer is offloading ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of base). You can take up to ${canBuy} units.`;
+      `A desperate dealer is offloading ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of base). You can take up to ${canBuy} ${canBuy === 1 ? 'unit' : 'units'}.`;
     document.getElementById('fireSaleOverlay').classList.remove('hidden');
     document.getElementById('fireSaleAccept').focus();
   }
@@ -1798,7 +1795,8 @@
   /* ─── RENDER ─── */
   function renderAll() {
     document.getElementById('dayDisplay').textContent  = G.day;
-    document.getElementById('daysLeft').textContent    = (G.maxDays - G.day) + ' days left';
+    { const left = G.maxDays - G.day;
+      document.getElementById('daysLeft').textContent    = left <= 0 ? 'final day' : left === 1 ? '1 day left' : left + ' days left'; }
     document.getElementById('cashDisplay').textContent = fmt(G.cash);
     document.getElementById('bankDisplay').textContent = fmt(G.bank);
     document.getElementById('debtDisplay').textContent = fmt(G.debt);

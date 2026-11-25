@@ -80,7 +80,7 @@ for (const name of GAMES) {
   test(`${name}: failed bribe, scared-off mugger and no-room find return an outcome message`, () => {
     const g = newGame(name, noEvents);
     g.run('G.cash = 100');
-    assert.match(g.call('applyEvent', 'bribe'), /afford|bribe/i);
+    assert.match(g.call('applyEvent', 'bribe'), /afford|bribe|candy bar/i);
     g.run('G.hasGun = true; G.cash = 1000');
     g.rig([0.1]);
     const mug = g.call('applyEvent', 'mug');
@@ -96,7 +96,7 @@ for (const name of GAMES) {
     const idx = g.run("EVENTS.findIndex(e => e.type === 'bribe')");
     g.rig([0.5, (idx + 0.5) / g.run('EVENTS.length')]);
     g.run('maybeEvent()');
-    assert.match(g.el('eventMsg').textContent, /afford|bribe/i);
+    assert.match(g.el('eventMsg').textContent, /afford|bribe|candy bar/i);
   });
 
   // 6. burned contact lasts the 3 days it says

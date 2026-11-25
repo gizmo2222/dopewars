@@ -510,7 +510,7 @@
     <div class="setting-row sep">
       <label class="setting-label">Theme</label>
       <div class="setting-opts" role="group" aria-label="Theme" id="set-theme">
-        <button class="sopt active" data-theme="neighborhood" onclick="selectTheme('neighborhood')">The Hood<br><span>Summer</span></button>
+        <button class="sopt active" data-theme="neighborhood" onclick="selectTheme('neighborhood')">Neighborhood<br><span>Summer</span></button>
         <button class="sopt"        data-theme="fair"         onclick="selectTheme('fair')">Summer Fair<br><span>4th of July</span></button>
         <button class="sopt"        data-theme="school"       onclick="selectTheme('school')">School Days<br><span>Lunchtime</span></button>
         <button class="sopt"        data-theme="halloween"    onclick="selectTheme('halloween')">Halloween<br><span>Oct 31</span></button>
@@ -604,16 +604,11 @@
       <div style="margin-bottom:12px">Enter a quantity and hit <strong>BUY</strong>, or hit <strong>MAX</strong> to buy as much as your coins and bag space allow. To sell, use the quantity field in Your Bag and hit <strong>SELL</strong>. Your average cost and profit/loss % are shown for each item you're holding.</div>
 
       <div class="help-h">ALLOWANCE DEBT &amp; PIGGY BANK</div>
-      <div style="margin-bottom:12px">You may start with an allowance advance from your parents that compounds daily. Pay it off fast — at 10%/day it grows quickly! The piggy bank keeps your coins safe from random events. Click <strong>Coins</strong> or <strong>Owe Parents</strong> in the Finances panel to deposit, withdraw, borrow, or pay.</div>
+      <div style="margin-bottom:12px">You may start with an allowance advance from your parents that compounds daily. Pay it off fast — at <span id="helpRate">10%/day</span> it grows quickly! The piggy bank keeps your coins safe from random events. Click <strong>Coins</strong> or <strong>Owe Parents</strong> in the Finances panel to deposit, withdraw, borrow, or pay. From day 3 you can ask your parents for more, up to $10,000 a day.</div>
 
       <div class="help-h">GEAR</div>
       <div style="margin-bottom:4px">Buy these from the <strong>Gear Shop</strong> when you can afford them:</div>
-      <div style="margin-bottom:12px;padding-left:10px">
-        🎫 <strong>Hall Pass ($1,500)</strong> — Reduces inspection losses. 60% chance to scare off bullies.<br>
-        📻 <strong>Walkie-Talkie ($500)</strong> — Better market info — nearly full selection every visit.<br>
-        🛹 <strong>Skateboard ($3,000)</strong> — 1 free trip per day with no day lost or interest charged.<br>
-        🏷️ <strong>Club Card ($2,000)</strong> — Once per day, buy any item at 25% off (up to half the supply).
-      </div>
+      <div style="margin-bottom:12px;padding-left:10px" id="helpUpgrades"></div>
 
       <div class="help-h">LOCATION SPECIALTIES</div>
       <div style="margin-bottom:12px">Each location has a specialty item (shown as ★) that's always available, priced ~20% cheaper, and stocked in larger quantities.</div>
@@ -622,7 +617,7 @@
       <div style="margin-bottom:12px">Every time you travel there's a chance something happens — a principal inspection, a price surge, a shortage, a bully, a found stash, or a neighborhood tip. Gear can help reduce losses. After day 15, bigger events can happen too: a <strong>Going-Home Sale</strong>, a <strong>Buyout</strong>, an <strong>Inspection Warning</strong>, or a <strong>Club Card Declined</strong>.</div>
 
       <div class="help-h">LAST DAY</div>
-      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your candy, settle your accounts, then hit <strong>END GAME</strong>. You'll get a warning 3 days before the end.</div>
+      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your candy, settle your accounts, then hit <strong>END GAME</strong>. Anything still in your bag when you end the game counts for nothing. You'll get a warning 3 days before the end.</div>
     </div>
 
     <button class="modal-ok" id="helpClose" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT!</button>
@@ -865,7 +860,7 @@
     { title:'LUCKY FIND',       msg:"You found a forgotten candy stash behind the bleachers. Score!",                  type:'find'    },
     { title:'PRICE CRASH',      msg:"A kid needs money fast — everything's on clearance!",                             type:'cheap'   },
     { title:'PARENT CHECK-IN',  msg:"Your parents dropped by and collected some of their advance money as a reminder.", type:'shark'   },
-    { title:'HALL MONITOR DEAL',msg:"You gave the hall monitor a candy bar and they looked the other way. Smart!",    type:'bribe'   },
+    { title:'HALL MONITOR',msg:"You shared a candy bar with the hall monitor and they waved you through.",    type:'bribe'   },
     { title:'PLAYGROUND TIP',   msg:"A friend whispers something useful about today's prices.",                        type:'tip'     },
   ];
 
@@ -896,6 +891,8 @@
     document.getElementById('settingsOverlay').classList.add('hidden');
   }
   function openHelp() {
+    document.getElementById('helpRate').textContent = Math.round((SETTINGS.interest - 1) * 100) + '%/day';
+    document.getElementById('helpUpgrades').innerHTML = UPGRADES.map(u => `${u.icon} <strong>${u.label} (${fmt(u.price)})</strong> — ${u.desc}`).join('<br>');
     document.getElementById('helpOverlay').classList.remove('hidden');
     document.getElementById('helpClose').focus();
   }
@@ -1129,7 +1126,7 @@
     } else if (type === 'bribe') {
       if (G.cash < 200) {
         applyEvent('bust');
-        return say(`Couldn't bribe the hall monitor — they reported you anyway!`, 'bad');
+        return say(`No candy bar to share — the hall monitor checked your bag!`, 'bad');
       } else {
         G.cash -= 200;
         return say(`Gave the hall monitor a candy bar ($200) to look away.`, 'warn');
@@ -1277,7 +1274,7 @@
     G.pendingFireSale = { drug: d.name, qty, price };
     const canBuy = fireSaleMax(G.pendingFireSale);
     document.getElementById('fireSaleMsg').textContent =
-      `A kid who's moving away is selling ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of normal price). You can take up to ${canBuy} units.`;
+      `A kid who's moving away is selling ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of normal price). You can take up to ${canBuy} ${canBuy === 1 ? 'unit' : 'units'}.`;
     document.getElementById('fireSaleOverlay').classList.remove('hidden');
     document.getElementById('fireSaleAccept').focus();
   }
@@ -1677,7 +1674,7 @@
     let title, flavor;
     if (net > 100000)     { title = 'CANDY TYCOON!';   flavor = 'You own this neighborhood. Everyone comes to you for candy!'; }
     else if (net > 50000) { title = 'SUGAR BARON';     flavor = 'Big earner. Everyone knows your name around here.'; }
-    else if (net > 10000) { title = 'SWEET DEALER';    flavor = 'Not bad! You survived and came out ahead.'; }
+    else if (net > 10000) { title = 'SWEET SELLER';    flavor = 'Nice work! You came out ahead.'; }
     else if (net > 0)     { title = 'SMALL TIMER';     flavor = 'You made it — barely. Try harder next time!'; }
     else                  { title = 'BROKE KID';       flavor = "You owe your parents everything you had. Better luck next time!"; }
 
@@ -1685,7 +1682,7 @@
     document.getElementById('goScore').innerHTML =
       `Coins on hand: ${fmt(G.cash)}<br>` +
       `Piggy Bank: ${fmt(G.bank)}<br>` +
-      `Owe parents: −${fmt(G.debt)}<br><br>` +
+      `Owe parents: ${fmt(G.debt)}<br><br>` +
       `<strong>Net Worth: ${net < 0 ? '-' : ''}${fmt(net)}</strong><br><br>` +
       flavor;
 
@@ -1710,7 +1707,8 @@
   /* ─── RENDER ─── */
   function renderAll() {
     document.getElementById('dayDisplay').textContent  = G.day;
-    document.getElementById('daysLeft').textContent    = (G.maxDays - G.day) + ' days left';
+    { const left = G.maxDays - G.day;
+      document.getElementById('daysLeft').textContent    = left <= 0 ? 'final day' : left === 1 ? '1 day left' : left + ' days left'; }
     document.getElementById('cashDisplay').textContent = fmt(G.cash);
     document.getElementById('bankDisplay').textContent = fmt(G.bank);
     document.getElementById('debtDisplay').textContent = fmt(G.debt);

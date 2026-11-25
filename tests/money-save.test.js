@@ -40,7 +40,7 @@ const TEXT = {
     wdAll: a => `Emptied your piggy bank: ${a}.`,
     restored: 'Session restored. Welcome back, candy trader!',
     goCash: 'Coins on hand: ', goBank: 'Piggy Bank: ', goDebt: 'Owe parents: ',
-    titles: ['BROKE KID', 'SMALL TIMER', 'SWEET DEALER', 'SUGAR BARON', 'CANDY TYCOON!'],
+    titles: ['BROKE KID', 'SMALL TIMER', 'SWEET SELLER', 'SUGAR BARON', 'CANDY TYCOON!'],
   },
 };
 
@@ -630,7 +630,7 @@ for (const name of GAMES) {
     const html = g.el('goScore').innerHTML;
     assert.ok(html.includes(T.goCash + '$12,000<br>'));
     assert.ok(html.includes(T.goBank + '$3,000<br>'));
-    assert.ok(html.includes(T.goDebt + '−$4,000<br>'));
+    assert.ok(html.includes(T.goDebt + (name === 'candywars' ? '' : '−') + '$4,000<br>'));
     assert.ok(html.includes('<strong>Net Worth: $11,000</strong>'));
     assert.equal(g.hidden('gameOver'), false);
     assert.equal(scoresOf(g)[0].net, 11000);
