@@ -26,12 +26,19 @@ python -m http.server 8080
 
 ## Test
 
-There is no test suite yet (as of overhaul phase 1). The only check is a syntax check of each file's
-inline script:
+The suite is the inline-script syntax check plus `node:test` regression tests (Node 24, no npm
+packages). Run all of it:
 
 ```powershell
-powershell -File tools\check-syntax.ps1 -Quiet
+powershell -File tools	est.ps1 -Quiet
 ```
+
+`tests\harness.js` loads a game's inline `<script>` into `node:vm` with a small DOM
+(`tests\dom.js`, which parses the real HTML and `innerHTML`). `loadGame(name, {seed, storage})`
+boots a game; `newGame(name, settingsOverrides)` starts one past the settings modal. In a test,
+`game.run('G.cash')` evaluates code in the game's scope, `game.rig([0.1, 0.9])` fixes the next
+`Math.random()` values, `game.flushTimers()` runs queued `setTimeout`s. Name tests
+`<game>: <behaviour>` and loop over `GAMES` so each check covers both files.
 
 Scripts are indexed in `tools\README.md`.
 
