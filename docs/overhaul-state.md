@@ -15,7 +15,7 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 | # | Phase | Status | Branch |
 |---|---|---|---|
 | 1 | Map | done | overhaul/phase-1 |
-| 2 | Bug hunt | todo | |
+| 2 | Bug hunt | done | overhaul/phase-2 |
 | 3 | Tests | todo | |
 | 4 | Security | todo | |
 | 5 | Clean-up | todo | |
@@ -36,3 +36,13 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
   loading the inline script into `vm` with a small DOM stub, under `tests\`, run by a `tools\` script.
 - Choice made without asking: did this phase directly rather than with a workflow, since the repo is two
   files and mapping them took a few greps.
+
+### 2. Bug hunt (done)
+- Built the suite: `tests\harness.js` + `tests\dom.js` (game script in node:vm with a mini DOM, seeded
+  Math.random), smoke tests, and `tools\test.ps1 -Quiet` (syntax check + node:test; 43 tests pass).
+- Fixed 14 confirmed bugs in both games, one test each in `tests\bugs.test.js`: repeat scoring after
+  game over, theme Cancel re-theming the save, negative/zero trade quantities, event modals overwriting
+  each other, event text contradicting outcome, plus 9 smaller ones. 3 unfixed are in `docs\overhaul-findings.md`.
+- Choices made without asking: the workflow used 4 area hunters (each covering all five bug classes) and
+  4 disprovers, 8 agents, not one per area x class; the dead safehouse code is left for phase 5 or /land
+  to wire up or delete. Phase 3: measure coverage with `node --test --experimental-test-coverage`.
