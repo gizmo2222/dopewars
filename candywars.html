@@ -56,6 +56,9 @@
     .stat { text-align: center; }
     .stat-clickable { cursor: pointer; }
     .stat-clickable:hover .stat-val { opacity: 0.8; }
+    .stat-toggle { all: unset; box-sizing: border-box; display: block; width: 100%; cursor: pointer; text-align: center; }
+    .stat-toggle .stat-label, .stat-toggle .stat-val { display: block; }
+    .stat-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
     .stat-val { font-size: 16px; color: var(--accent); font-weight: bold; }
     .stat-val.danger { color: var(--red); }
@@ -192,6 +195,9 @@
     .city-btn.current { border-color: var(--accent); background: #2a1040; color: var(--accent); cursor: default; }
     .city-name { font-size: 13px; font-weight: bold; }
     .city-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .city-btn { font: inherit; color: inherit; width: 100%; display: block; }
+    .city-btn:disabled { cursor: default; }
+    .city-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .city-btn.current .city-desc { color: var(--accent); opacity: 0.85; }
 
     /* HEADER BUTTONS */
@@ -418,9 +424,11 @@
     <div class="top-section" id="topRight">
       <div class="panel-title">Finances</div>
       <div class="stats-bar">
-        <div class="stat stat-clickable" onclick="toggleTray('cash')">
-          <div class="stat-label">Coins <span class="stat-hint">▾</span></div>
-          <div class="stat-val" id="cashDisplay">$2,000</div>
+        <div class="stat stat-clickable">
+          <button type="button" class="stat-toggle" id="toggle-cash" aria-expanded="false" aria-controls="tray-cash" onclick="toggleTray('cash')">
+            <span class="stat-label">Coins <span class="stat-hint">▾</span></span>
+            <span class="stat-val" id="cashDisplay">$2,000</span>
+          </button>
           <div class="stat-tray" id="tray-cash" onclick="event.stopPropagation()">
             <button onclick="closeTray();openInput('deposit','Save how much to piggy bank?')">Save to Bank</button>
             <button onclick="closeTray();openInput('withdraw','Take how much from piggy bank?')">Take from Bank</button>
@@ -428,9 +436,11 @@
           </div>
         </div>
         <div class="stat"><div class="stat-label">Piggy Bank</div><div class="stat-val" id="bankDisplay">$0</div></div>
-        <div class="stat stat-clickable" onclick="toggleTray('debt')">
-          <div class="stat-label">Owe Parents <span class="stat-hint">▾</span></div>
-          <div class="stat-val danger" id="debtDisplay">$5,000</div>
+        <div class="stat stat-clickable">
+          <button type="button" class="stat-toggle" id="toggle-debt" aria-expanded="false" aria-controls="tray-debt" onclick="toggleTray('debt')">
+            <span class="stat-label">Owe Parents <span class="stat-hint">▾</span></span>
+            <span class="stat-val danger" id="debtDisplay">$5,000</span>
+          </button>
           <div class="stat-tray" id="tray-debt" onclick="event.stopPropagation()">
             <button onclick="closeTray();openBorrow()">Ask for more</button>
             <button class="danger" onclick="closeTray();openInput('loan','Pay how much back?')">Pay some</button>
@@ -457,20 +467,20 @@
 
 <!-- EVENT MODAL -->
 <div class="overlay hidden" id="eventOverlay">
-  <div class="modal-box">
+  <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="eventTitle" aria-describedby="eventMsg">
     <div class="modal-title" id="eventTitle">EVENT</div>
     <div class="modal-msg" id="eventMsg"></div>
-    <button class="modal-ok" onclick="dismissEvent()">OK, GOT IT</button>
+    <button class="modal-ok" id="eventOk" onclick="dismissEvent()">OK, GOT IT</button>
   </div>
 </div>
 
 <!-- BAG OFFER MODAL -->
 <div class="overlay hidden" id="coatOverlay">
-  <div class="modal-box">
-    <div class="modal-title">BACKPACK DEAL</div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="coatTitle">
+    <div id="coatTitle" class="modal-title">BACKPACK DEAL</div>
     <div class="modal-msg" id="coatOfferMsg"></div>
     <div style="display:flex;gap:10px;justify-content:center">
-      <button class="modal-ok" onclick="acceptCoatOffer()">BUY IT</button>
+      <button class="modal-ok" id="coatAccept" onclick="acceptCoatOffer()">BUY IT</button>
       <button class="modal-ok alt" onclick="declineCoatOffer()">PASS</button>
     </div>
   </div>
@@ -478,11 +488,11 @@
 
 <!-- GOING-HOME SALE MODAL -->
 <div class="overlay hidden" id="fireSaleOverlay">
-  <div class="modal-box">
-    <div class="modal-title">GOING-HOME SALE!</div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="fireSaleTitle">
+    <div id="fireSaleTitle" class="modal-title">GOING-HOME SALE!</div>
     <div class="modal-msg" id="fireSaleMsg"></div>
     <div style="display:flex;gap:10px;justify-content:center">
-      <button class="modal-ok" onclick="acceptFireSale()">TAKE IT</button>
+      <button class="modal-ok" id="fireSaleAccept" onclick="acceptFireSale()">TAKE IT</button>
       <button class="modal-ok alt" onclick="declineFireSale()">PASS</button>
     </div>
   </div>
@@ -490,12 +500,12 @@
 
 <!-- SETTINGS MODAL -->
 <div class="overlay hidden" id="settingsOverlay">
-  <div class="modal-box" style="max-width:500px;text-align:left">
-    <div class="modal-title" style="margin-bottom:16px">SETTINGS</div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" style="max-width:500px;text-align:left">
+    <div id="settingsTitle" class="modal-title" style="margin-bottom:16px">SETTINGS</div>
 
     <div class="setting-row sep">
       <label class="setting-label">Theme</label>
-      <div class="setting-opts" id="set-theme">
+      <div class="setting-opts" role="group" aria-label="Theme" id="set-theme">
         <button class="sopt active" data-theme="neighborhood" onclick="selectTheme('neighborhood')">The Hood<br><span>Summer</span></button>
         <button class="sopt"        data-theme="fair"         onclick="selectTheme('fair')">Summer Fair<br><span>4th of July</span></button>
         <button class="sopt"        data-theme="school"       onclick="selectTheme('school')">School Days<br><span>Lunchtime</span></button>
@@ -505,7 +515,7 @@
 
     <div class="setting-row sep">
       <label class="setting-label">Difficulty Preset</label>
-      <div class="setting-opts" id="set-difficulty">
+      <div class="setting-opts" role="group" aria-label="Difficulty Preset" id="set-difficulty">
         <button class="sopt" data-preset="easy"   onclick="applyPreset('easy')">Easy<br><span>Explorer</span></button>
         <button class="sopt" data-preset="medium" onclick="applyPreset('medium')">Medium<br><span>Trader</span></button>
         <button class="sopt" data-preset="hard"   onclick="applyPreset('hard')">Hard<br><span>Entrepreneur</span></button>
@@ -514,7 +524,7 @@
 
     <div class="setting-row">
       <label class="setting-label">Game Length</label>
-      <div class="setting-opts" id="set-days">
+      <div class="setting-opts" role="group" aria-label="Game Length" id="set-days">
         <button class="sopt active" data-val="30">30 days<br><span>Standard</span></button>
         <button class="sopt" data-val="60">60 days<br><span>Extended</span></button>
         <button class="sopt" data-val="90">90 days<br><span>Marathon</span></button>
@@ -523,7 +533,7 @@
 
     <div class="setting-row">
       <label class="setting-label">Starting Coins</label>
-      <div class="setting-opts" id="set-cash">
+      <div class="setting-opts" role="group" aria-label="Starting Coins" id="set-cash">
         <button class="sopt active" data-val="2000">$2,000<br><span>Standard</span></button>
         <button class="sopt" data-val="5000">$5,000<br><span>Head start</span></button>
         <button class="sopt" data-val="1000">$1,000<br><span>Hardcore</span></button>
@@ -532,7 +542,7 @@
 
     <div class="setting-row">
       <label class="setting-label">Allowance Advance</label>
-      <div class="setting-opts" id="set-debt">
+      <div class="setting-opts" role="group" aria-label="Allowance Advance" id="set-debt">
         <button class="sopt active" data-val="5000">$5,000<br><span>Standard</span></button>
         <button class="sopt" data-val="0">$0<br><span>Clean slate</span></button>
         <button class="sopt" data-val="10000">$10,000<br><span>Deep in it</span></button>
@@ -541,7 +551,7 @@
 
     <div class="setting-row">
       <label class="setting-label">Daily Interest Rate</label>
-      <div class="setting-opts" id="set-interest">
+      <div class="setting-opts" role="group" aria-label="Daily Interest Rate" id="set-interest">
         <button class="sopt active" data-val="1.10">10%<br><span>Standard</span></button>
         <button class="sopt" data-val="1.05">5%<br><span>Relaxed</span></button>
         <button class="sopt" data-val="1.15">15%<br><span>Brutal</span></button>
@@ -550,7 +560,7 @@
 
     <div class="setting-row">
       <label class="setting-label">Event Frequency</label>
-      <div class="setting-opts" id="set-events">
+      <div class="setting-opts" role="group" aria-label="Event Frequency" id="set-events">
         <button class="sopt active" data-val="0.38">Normal<br><span>38% chance</span></button>
         <button class="sopt" data-val="0.20">Quiet<br><span>20% chance</span></button>
         <button class="sopt" data-val="0.50">Chaotic<br><span>50% chance</span></button>
@@ -559,7 +569,7 @@
 
     <div class="setting-row">
       <label class="setting-label">Starting Bag Size</label>
-      <div class="setting-opts" id="set-coat">
+      <div class="setting-opts" role="group" aria-label="Starting Bag Size" id="set-coat">
         <button class="sopt active" data-val="100">100<br><span>Standard</span></button>
         <button class="sopt" data-val="50">50<br><span>Tight</span></button>
         <button class="sopt" data-val="200">200<br><span>Loaded</span></button>
@@ -575,8 +585,8 @@
 
 <!-- HELP MODAL -->
 <div class="overlay hidden" id="helpOverlay">
-  <div class="modal-box" style="max-width:540px;text-align:left;max-height:90vh;overflow-y:auto">
-    <div class="modal-title" style="margin-bottom:14px">HOW TO PLAY</div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="helpTitle" style="max-width:540px;text-align:left;max-height:90vh;overflow-y:auto">
+    <div id="helpTitle" class="modal-title" style="margin-bottom:14px">HOW TO PLAY</div>
 
     <div style="font-size:13px;line-height:1.9;color:var(--text)">
 
@@ -611,24 +621,24 @@
       <div style="margin-bottom:4px">On the last day you cannot travel. Sell your candy, settle your accounts, then hit <strong>END GAME</strong>. You'll get a warning 3 days before the end.</div>
     </div>
 
-    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT!</button>
+    <button class="modal-ok" id="helpClose" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT!</button>
   </div>
 </div>
 
 <!-- HIGH SCORES MODAL -->
 <div class="overlay hidden" id="highScoresOverlay">
-  <div class="modal-box" style="max-width:520px;text-align:left">
-    <div class="modal-title" style="margin-bottom:14px">HIGH SCORES</div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="scoresTitle" style="max-width:520px;text-align:left">
+    <div id="scoresTitle" class="modal-title" style="margin-bottom:14px">HIGH SCORES</div>
     <div id="highScoreTableModal"></div>
-    <button class="modal-ok" style="width:100%;margin-top:18px" onclick="closeHighScores()">CLOSE</button>
+    <button class="modal-ok" id="scoresClose" style="width:100%;margin-top:18px" onclick="closeHighScores()">CLOSE</button>
   </div>
 </div>
 
 <!-- CUSTOM INPUT DIALOG -->
 <div class="input-overlay hidden" id="inputOverlay">
-  <div class="input-box">
-    <label id="inputLabel">Amount</label>
-    <input type="number" id="inputField" min="0" value="0">
+  <div class="input-box" role="dialog" aria-modal="true" aria-labelledby="inputLabel">
+    <label id="inputLabel" for="inputField">Amount</label>
+    <input type="number" id="inputField" inputmode="numeric" min="0" value="0">
     <div class="btn-row">
       <button class="input-confirm" onclick="confirmInput()">CONFIRM</button>
       <button class="input-cancel" onclick="closeInput()">CANCEL</button>
@@ -638,11 +648,11 @@
 
 <!-- GAME OVER -->
 <div class="gameover hidden" id="gameOver">
-  <div class="go-box">
+  <div class="go-box" role="dialog" aria-modal="true" aria-labelledby="goTitle">
     <div class="go-title" id="goTitle">GAME OVER</div>
     <div class="go-score" id="goScore"></div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px">
-      <button class="modal-ok" onclick="document.getElementById('gameOver').classList.add('hidden');openSettings()">PLAY AGAIN</button>
+      <button class="modal-ok" id="playAgain" onclick="document.getElementById('gameOver').classList.add('hidden');openSettings()">PLAY AGAIN</button>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:14px">
       <div style="font-family:'Fredoka One',cursive;font-size:20px;color:var(--accent);letter-spacing:2px;margin-bottom:8px">HIGH SCORES</div>
@@ -882,6 +892,7 @@
   }
   function openHelp() {
     document.getElementById('helpOverlay').classList.remove('hidden');
+    document.getElementById('helpClose').focus();
   }
   function closeHelp() {
     document.getElementById('helpOverlay').classList.add('hidden');
@@ -889,6 +900,7 @@
   function openHighScores() {
     renderHighScores(loadScores(), 'highScoreTableModal');
     document.getElementById('highScoresOverlay').classList.remove('hidden');
+    document.getElementById('scoresClose').focus();
   }
   function closeHighScores() {
     document.getElementById('highScoresOverlay').classList.add('hidden');
@@ -903,16 +915,19 @@
   }
   function syncSopt(groupId, val) {
     document.querySelectorAll('#' + groupId + ' .sopt').forEach(b => {
-      b.classList.toggle('active', parseFloat(b.dataset.val) === parseFloat(val));
+      const on = parseFloat(b.dataset.val) === parseFloat(val);
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', String(on));
     });
   }
   document.querySelectorAll('.sopt').forEach(btn => {
     btn.addEventListener('click', () => {
       const group = btn.closest('.setting-opts');
-      group.querySelectorAll('.sopt').forEach(b => b.classList.remove('active'));
+      group.querySelectorAll('.sopt').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
       btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       if (!btn.dataset.preset && !btn.dataset.theme) {
-        document.querySelectorAll('#set-difficulty .sopt').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#set-difficulty .sopt').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
       }
     });
   });
@@ -926,13 +941,13 @@
     const p = PRESETS[name];
     SETTING_KEYS.forEach(k => syncSopt('set-' + k, p[k]));
     document.querySelectorAll('#set-difficulty .sopt').forEach(b =>
-      b.classList.toggle('active', b.dataset.preset === name)
+      { const on = b.dataset.preset === name; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); }
     );
   }
 
   function selectTheme(id) {
     document.querySelectorAll('#set-theme .sopt').forEach(b =>
-      b.classList.toggle('active', b.dataset.theme === id));
+      { const on = b.dataset.theme === id; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   }
 
   const themeOf = id => (Object.prototype.hasOwnProperty.call(THEMES, id) && THEMES[id]) || THEMES.neighborhood;
@@ -1135,6 +1150,7 @@
     document.getElementById('eventTitle').textContent = title;
     document.getElementById('eventMsg').textContent   = msg;
     document.getElementById('eventOverlay').classList.remove('hidden');
+    document.getElementById('eventOk').focus();
   }
   function showEndGameModal() {
     showEvent('LAST DAY!', "Time's up! Sell everything and pay back your parents. When you're ready, hit END GAME.");
@@ -1258,6 +1274,7 @@
     document.getElementById('fireSaleMsg').textContent =
       `A kid who's moving away is selling ${qty} units of ${d.name} at ${fmt(price)} each (${Math.round(price / d.base * 100)}% of normal price). You can take up to ${canBuy} units.`;
     document.getElementById('fireSaleOverlay').classList.remove('hidden');
+    document.getElementById('fireSaleAccept').focus();
   }
 
   const fireSaleMax = o => Math.min(o.qty, G.coat - carried(), Math.floor(G.cash / o.price));
@@ -1393,6 +1410,7 @@
     document.getElementById('coatOfferMsg').textContent =
       `${offer.desc}. +${offer.capacity} bag space for ${fmt(offer.price)}. Interested?`;
     document.getElementById('coatOverlay').classList.remove('hidden');
+    document.getElementById('coatAccept').focus();
   }
 
   function acceptCoatOffer() {
@@ -1490,6 +1508,7 @@
     document.getElementById('inputField').value = 0;
     document.getElementById('inputOverlay').classList.remove('hidden');
     document.getElementById('inputField').focus();
+    document.getElementById('inputField').select();
   }
   function closeInput() {
     inputAction = null;
@@ -1669,6 +1688,7 @@
     saveGame();
     renderHighScores(scores);
     document.getElementById('gameOver').classList.remove('hidden');
+    document.getElementById('playAgain').focus();
   }
 
   /* ─── LOG ─── */
@@ -1739,7 +1759,7 @@
       const discountPrice = Math.round(price * 0.75);
       const canConnect = G.hasSupplier && !G.supplierUsedToday && !isBurned && hasSpace && G.cash >= discountPrice;
       const connectBtn = G.hasSupplier
-        ? `<button class="qty-btn" onclick="supplierBuy('${d.name}')" style="border-color:#6a4aaa;color:#c090f0" ${canConnect ? '' : 'disabled'} title="Buy at 25% off via club card">${isBurned ? 'DECLINED' : G.supplierUsedToday ? 'USED' : 'CARD'}</button>`
+        ? `<button class="qty-btn" aria-label="Supplier buy ${d.name}" onclick="supplierBuy('${d.name}')" style="border-color:#6a4aaa;color:#c090f0" ${canConnect ? '' : 'disabled'} title="Buy at 25% off via club card">${isBurned ? 'DECLINED' : G.supplierUsedToday ? 'USED' : 'CARD'}</button>`
         : '';
 
       const row = document.createElement('div');
@@ -1751,9 +1771,9 @@
         </div>
         <div class="drug-price${isHigh ? ' high' : ''}">${fmt(price)}${trendHTML}</div>
         <div class="buy-group">
-          <input class="qty-in" id="qty_${d.name}" type="number" value="1" min="1" max="${avail || 1}" ${disabledAttr}>
-          <button class="qty-btn" onclick="buyDrug('${d.name}')" ${disabledAttr}>BUY</button>
-          <button class="qty-btn" onclick="buyMax('${d.name}')" style="border-color:#3a5a2a;color:var(--green)" title="Buy as much as possible" ${disabledAttr}>MAX</button>
+          <input class="qty-in" id="qty_${d.name}" aria-label="Quantity of ${d.name}" type="number" value="1" min="1" max="${avail || 1}" ${disabledAttr}>
+          <button class="qty-btn" aria-label="Buy ${d.name}" onclick="buyDrug('${d.name}')" ${disabledAttr}>BUY</button>
+          <button class="qty-btn" aria-label="Buy max ${d.name}" onclick="buyMax('${d.name}')" style="border-color:#3a5a2a;color:var(--green)" title="Buy as much as possible" ${disabledAttr}>MAX</button>
           ${connectBtn}
         </div>`;
       ml.appendChild(row);
@@ -1792,8 +1812,8 @@
           <span class="drug-name">${name}</span> <span class="pill pill-good">x${qty}</span>
           <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px">${sellPrice ? 'sell @ ' + fmt(sellPrice) : 'no buyers here'}${avgLine ? ' &mdash; ' + avgLine : ''}</span>
         </div>
-        <input class="qty-in" id="sqty_${name}" type="number" value="${qty}" min="1" max="${qty}">
-        <button class="qty-btn" onclick="sellDrug('${name}')" ${sellPrice ? '' : 'disabled'}>SELL</button>`;
+        <input class="qty-in" id="sqty_${name}" aria-label="Quantity of ${name} to sell" type="number" value="${qty}" min="1" max="${qty}">
+        <button class="qty-btn" aria-label="Sell ${name}" onclick="sellDrug('${name}')" ${sellPrice ? '' : 'disabled'}>SELL</button>`;
       sl.appendChild(row);
     });
   }
@@ -1809,8 +1829,11 @@
     document.getElementById('travelTitle').innerHTML = `Go To — <span id="cityDisplay">${G.city}</span>` + titleNote;
     cg.style.opacity = isLastDay ? '0.35' : '';
     CITIES.forEach(c => {
-      const btn = document.createElement('div');
+      const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'city-btn' + (c.name === G.city ? ' current' : '');
+      btn.disabled = (c.name === G.city || isLastDay);
+      if (c.name === G.city) btn.setAttribute('aria-current', 'location');
       const specialtyLine = c.specialty
         ? `<div style="font-size:11px;color:#50fa7b;margin-top:2px">★ ${c.specialty}</div>` : '';
       btn.innerHTML = `
@@ -1835,17 +1858,22 @@
   /* ─── TRAYS ─── */
   function closeTray() {
     document.querySelectorAll('.stat-tray').forEach(t => t.classList.remove('visible'));
+    document.querySelectorAll('.stat-toggle').forEach(b => b.setAttribute('aria-expanded', 'false'));
   }
   function toggleTray(name) {
     const tray = document.getElementById('tray-' + name);
     const isOpen = tray.classList.contains('visible');
     closeTray();
-    if (!isOpen) tray.classList.add('visible');
+    if (!isOpen) {
+      tray.classList.add('visible');
+      document.getElementById('toggle-' + name).setAttribute('aria-expanded', 'true');
+    }
   }
 
   /* ─── KEYBOARD SHORTCUT ─── */
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
+      if (e.target && e.target.tagName === 'BUTTON') return;
       const overlay = document.getElementById('inputOverlay');
       if (!overlay.classList.contains('hidden')) confirmInput();
       const ev = document.getElementById('eventOverlay');
@@ -1856,6 +1884,7 @@
       if (gameInProgress()) closeSettings();
       closeHelp();
       closeHighScores();
+      if (typeof closeSafehouse === 'function') closeSafehouse();
     }
   });
 

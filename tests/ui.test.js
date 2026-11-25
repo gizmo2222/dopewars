@@ -751,3 +751,139 @@ for (const name of GAMES) {
     assert.match(html, /#daysLeft \{ white-space: nowrap; \}/);
   });
 }
+
+// ---------- keyboard access, dialog semantics, labels (phase 6) ----------
+for (const name of GAMES) {
+  test(`${name}: city cells are buttons, the current one is disabled with aria-current`, () => {
+    const g = newGame(name, noEvents);
+    g.run('renderCities()');
+    const cells = g.el('cityGrid').children.filter(c => c.classList.contains('city-btn'));
+    assert.ok(cells.length > 1);
+    for (const c of cells) assert.equal(c.tagName, 'BUTTON');
+    const cur = cells.filter(c => c.classList.contains('current'));
+    assert.equal(cur.length, 1);
+    assert.equal(cur[0].disabled, true);
+    assert.equal(cur[0].getAttribute('aria-current'), 'location');
+    for (const c of cells.filter(c => !c.classList.contains('current'))) {
+      assert.equal(c.disabled, false);
+      assert.equal(c.getAttribute('aria-current'), null);
+    }
+    g.run('G.day = G.maxDays; renderCities()');
+    const locked = g.el('cityGrid').children.filter(c => c.classList.contains('city-btn'));
+    assert.ok(locked.every(c => c.disabled));
+  });
+
+  test(`${name}: tray toggles are buttons and aria-expanded follows the tray`, () => {
+    const g = newGame(name, noEvents);
+    const cash = g.el('toggle-cash'), debt = g.el('toggle-debt');
+    assert.equal(cash.tagName, 'BUTTON');
+    assert.equal(cash.getAttribute('aria-controls'), 'tray-cash');
+    assert.equal(cash.getAttribute('aria-expanded'), 'false');
+    g.call('toggleTray', 'cash');
+    assert.equal(cash.getAttribute('aria-expanded'), 'true');
+    g.call('toggleTray', 'debt');
+    assert.equal(cash.getAttribute('aria-expanded'), 'false');
+    assert.equal(debt.getAttribute('aria-expanded'), 'true');
+    g.call('toggleTray', 'debt');
+    assert.equal(debt.getAttribute('aria-expanded'), 'false');
+  });
+
+  test(`${name}: Enter on a focused button does not fire the dialog shortcuts`, () => {
+    const g = newGame(name, noEvents);
+    g.run("openInput('deposit', 'x')");
+    g.document.dispatchEvent({ type: 'keydown', key: 'Enter', target: { tagName: 'BUTTON' } });
+    assert.equal(g.hidden('inputOverlay'), false);
+    g.key('Enter');
+    assert.equal(g.hidden('inputOverlay'), true);
+    g.run("showEvent('A', 'a'); showEvent('B', 'b')");
+    g.document.dispatchEvent({ type: 'keydown', key: 'Enter', target: { tagName: 'BUTTON' } });
+    assert.equal(g.el('eventTitle').textContent, 'A');
+  });
+
+  test(`${name}: every dialog box has role, aria-modal and a label that exists`, () => {
+    const g = newGame(name, noEvents);
+    const boxes = g.document.querySelectorAll('.modal-box').concat(g.document.querySelectorAll('.input-box'), g.document.querySelectorAll('.go-box'));
+    assert.ok(boxes.length >= 8);
+    for (const b of boxes) {
+      assert.match(b.getAttribute('role'), /^(alert)?dialog$/);
+      assert.equal(b.getAttribute('aria-modal'), 'true');
+      assert.ok(g.el(b.getAttribute('aria-labelledby')), 'label target exists');
+    }
+    assert.equal(g.el('eventOverlay').querySelector('.modal-box').getAttribute('role'), 'alertdialog');
+  });
+
+  test(`${name}: opening a modal focuses its primary button`, () => {
+    const g = newGame(name, noEvents);
+    const focused = () => g.document.activeElement && g.document.activeElement.id;
+    g.run("showEvent('E', 'x')");
+    assert.equal(focused(), 'eventOk');
+    g.run('dismissEvent()');
+    g.run('openHelp()');
+    assert.equal(focused(), 'helpClose');
+    g.run('openHighScores()');
+    assert.equal(focused(), 'scoresClose');
+    g.run('maybeCoatOffer = maybeCoatOffer; Math.random = () => 0; maybeCoatOffer()');
+    assert.equal(focused(), 'coatAccept');
+    g.run('endGame()');
+    assert.equal(focused(), 'playAgain');
+  });
+
+  test(`${name}: the fire sale modal focuses its accept button`, () => {
+    const g = newGame(name, noEvents);
+    g.run('G.day = 20; G.cash = 100000; leFireSale()');
+    assert.equal(g.hidden('fireSaleOverlay'), false);
+    assert.equal(g.document.activeElement.id, 'fireSaleAccept');
+  });
+
+  test(`${name}: market and stash controls have accessible names`, () => {
+    const g = newGame(name, noEvents);
+    const d = g.run('DRUGS[0].name');
+    g.ctx.__s = { [d]: 2 };
+    g.run('G.stash = __s; renderAll()');
+    assert.equal(g.el('qty_' + d).getAttribute('aria-label'), `Quantity of ${d}`);
+    const row = g.el('marketList').children[0];
+    const names = row.querySelectorAll('button').map(b => b.getAttribute('aria-label'));
+    assert.ok(names.includes(`Buy ${d}`));
+    assert.ok(names.includes(`Buy max ${d}`));
+    assert.equal(g.el('sqty_' + d).getAttribute('aria-label'), `Quantity of ${d} to sell`);
+    assert.ok(g.el('stashList').querySelectorAll('button').some(b => b.getAttribute('aria-label') === `Sell ${d}`));
+  });
+
+  test(`${name}: amount field is labelled, numeric and selected on open`, () => {
+    const g = newGame(name, noEvents);
+    assert.equal(g.el('inputLabel').getAttribute('for'), 'inputField');
+    assert.equal(g.el('inputField').getAttribute('inputmode'), 'numeric');
+    let selected = 0;
+    g.el('inputField').select = () => { selected++; };
+    g.run("openInput('deposit', 'x')");
+    assert.equal(selected, 1);
+    assert.equal(g.document.activeElement.id, 'inputField');
+  });
+
+  test(`${name}: settings groups are labelled and options expose aria-pressed`, () => {
+    const g = newGame(name, noEvents);
+    const groups = g.document.querySelectorAll('.setting-opts');
+    assert.ok(groups.length >= 8);
+    for (const grp of groups) {
+      assert.equal(grp.getAttribute('role'), 'group');
+      assert.ok(grp.getAttribute('aria-label'));
+    }
+    g.run("applyPreset('easy')");
+    const pressed = id => g.document.querySelectorAll(`#${id} .sopt`).filter(b => b.getAttribute('aria-pressed') === 'true').length;
+    assert.equal(pressed('set-difficulty'), 1);
+    assert.equal(pressed('set-days'), 1);
+    const th = g.document.querySelectorAll('#set-theme .sopt')[1];
+    g.run(`selectTheme('${th.dataset.theme}')`);
+    assert.equal(th.getAttribute('aria-pressed'), 'true');
+    assert.equal(pressed('set-theme'), 1);
+  });
+}
+
+test('dopewars: Escape closes the safehouse and focuses its close button on open', () => {
+  const g = newGame('dopewars', noEvents);
+  g.run('G.hasSafehouse = true; openSafehouse()');
+  assert.equal(g.hidden('safehouseOverlay'), false);
+  assert.equal(g.document.activeElement.id, 'safehouseClose');
+  g.key('Escape');
+  assert.equal(g.hidden('safehouseOverlay'), true);
+});
