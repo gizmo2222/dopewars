@@ -899,6 +899,12 @@ for (const name of GAMES) {
     g.run("addLog('fine', 'good')");
     assert.notEqual(g.el('toast').textContent, 'fine');
   });
+
+  test(`${name}: the starting-debt log line does not pop the toast`, () => {
+    const g = newGame(name, noEvents);
+    assert.ok(g.run('SETTINGS.debt') > 0);
+    assert.equal(g.el('toast').classList.contains('show'), false);
+  });
 }
 
 test('dopewars: safehouse buttons are disabled when there is nothing to move', () => {

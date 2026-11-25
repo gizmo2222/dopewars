@@ -369,15 +369,11 @@
       .action-btn { white-space: nowrap; padding: 4px 8px; }
       .top-section, #topLeft, #topRight { min-height: 0 !important; }
       body { display: block; }
-      .qty-in, .qty-btn { min-height: 36px; }
-      .buy-group { gap: 6px; }
-      .stat-tray button { min-height: 36px; }
-      .action-btn { min-height: 36px; }
       .setting-row { margin-bottom: 10px; }
       #set-theme { flex-wrap: wrap; }
       #set-theme .sopt { flex: 1 1 calc(50% - 3px); }
     }
-    @media (pointer: coarse) {
+    @media (max-width: 720px), (pointer: coarse) {
       .qty-in, .qty-btn { min-height: 36px; }
       .buy-group { gap: 6px; }
       .stat-tray button { min-height: 36px; }
@@ -1039,7 +1035,7 @@
     generateMarket();
     renderAll();
     addLog(`Welcome to Dope Wars. ${SETTINGS.days} days. Make your fortune.`, 'warn');
-    if (SETTINGS.debt > 0) addLog(`You owe ${fmt(SETTINGS.debt)} to the loan shark at ${interestPct}%/day.`, 'bad');
+    if (SETTINGS.debt > 0) addLog(`You owe ${fmt(SETTINGS.debt)} to the loan shark at ${interestPct}%/day.`, 'bad', false);
   }
 
   /* ─── MARKET GENERATION ─── */
@@ -1782,13 +1778,13 @@
   }
 
   /* ─── LOG ─── */
-  function addLog(msg, cls = '') {
+  function addLog(msg, cls = '', toast = cls === 'bad') {
     const log = document.getElementById('log');
     const d   = document.createElement('div');
     d.className = 'log-entry ' + cls;
     d.textContent = msg;
     log.prepend(d);
-    if (cls === 'bad') { const t = document.getElementById('toast'); if (t) { t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); } }
+    if (toast && ![...document.querySelectorAll('.overlay')].some(o => !o.classList.contains('hidden'))) { const t = document.getElementById('toast'); if (t) { t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); } }
     while (log.children.length > 50) log.removeChild(log.lastChild);
   }
 

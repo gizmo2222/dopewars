@@ -115,3 +115,29 @@ Logged, not applied (behaviour or product changes, or against the project's conv
   a hardening note.
 - No dependencies: there is no `package.json`, and the only external resource is Google Fonts.
 - The CLAUDE.md doc map line numbers have shifted again; phase 9 refreshes them.
+
+## Phase 6: UI
+
+Fixed in both games (15 items): overlays scroll so no modal is cut off; the phone header wraps; city cells
+and the Cash/Debt toggles are real buttons; dialogs have roles, labels and focus on open; Enter no longer
+double-fires on a focused button; the panels fill the window instead of `calc(100vh - 52px)`; the
+breakpoint moved to 720px with 44px tap targets; text is 11px or larger; refusals show a toast; the log
+is a live region; END GAME is not faded on the last day; safehouse rows wrap; help reads the interest
+rate and upgrade list from the code; Candy Wars copy and singular/plural wording.
+
+Logged, not applied:
+- Phase 7 (they change the game flow): the amount dialog opens for impossible actions and logs a $0
+  success (`bugs.test.js` pins that flow); no END GAME confirm while the stash is unsold; the days-left
+  warning could start at `maxDays - 3`.
+- Low polish, cut to keep the list at 15: a losing game over is styled like a win (toggle a `.loss`
+  class in `endGame`); the difficulty preset is not highlighted when settings match one; glyphs and emoji
+  are read aloud and price trend is shown only by symbol and colour; the qty input border has low
+  contrast; help's GOT IT is only at the bottom; game-over score rows are centred; BUY/MAX are disabled
+  with no reason shown; Candy Wars market names wrap to 2-3 lines at phone and tablet widths; at tablet
+  width the Candy Wars "OWE PARENTS ▾" label wraps its arrow onto a second line (unchanged from before).
+- Highlighting the current run in high scores needs a new saved field and with it new `loadScores` checks.
+- Font preconnect or non-blocking font CSS: a small gain, but the `media=print` trick needs an inline
+  handler and causes a flash of unstyled text.
+- Rejected as redesigns or taste: moving Finances above the market on phones, removing
+  `syncTopSections` (it keeps the two column titles aligned), zebra rows, Candy Wars rounded corners,
+  restyling the input dialog.
