@@ -546,7 +546,7 @@ for (const name of GAMES) {
     const cities = g.run('CITIES.map(c => ({ name: c.name, desc: c.desc, specialty: c.specialty }))');
     const grid = g.el('cityGrid');
     assert.equal(grid.children.length, cities.length);
-    assert.equal(grid.style.opacity, '');
+    assert.equal(grid.classList.contains('locked'), false);
     cities.forEach((c, i) => {
       const btn = grid.children[i];
       const isCur = c.name === g.run('G.city');
@@ -594,7 +594,7 @@ for (const name of GAMES) {
     assert.match(g.el('travelTitle').textContent, new RegExp(word));
     assert.ok(!/free trip/.test(g.el('travelTitle').textContent));
     const grid = g.el('cityGrid');
-    assert.equal(grid.style.opacity, '0.35');
+    assert.equal(grid.classList.contains('locked'), true);
     const n = g.run('CITIES.length');
     assert.equal(grid.children.length, n + 1);
     for (let i = 0; i < n; i++) assert.ok(!grid.children[i].onclick, 'travel disabled');
@@ -614,10 +614,10 @@ for (const name of GAMES) {
     const g = newGame(name, noEvents);
     g.run('G.day = G.maxDays - 1; renderCities()');
     assert.equal(g.el('cityGrid').children.length, g.run('CITIES.length'));
-    assert.equal(g.el('cityGrid').style.opacity, '');
+    assert.equal(g.el('cityGrid').classList.contains('locked'), false);
     assert.equal(g.pendingTimers(), 0);
     g.run('G.day = G.maxDays + 1; renderCities()');
-    assert.equal(g.el('cityGrid').style.opacity, '0.35');
+    assert.equal(g.el('cityGrid').classList.contains('locked'), true);
   });
 
   // ---------- trays ----------
@@ -886,4 +886,27 @@ test('dopewars: Escape closes the safehouse and focuses its close button on open
   assert.equal(g.document.activeElement.id, 'safehouseClose');
   g.key('Escape');
   assert.equal(g.hidden('safehouseOverlay'), true);
+});
+
+for (const name of GAMES) {
+  test(`${name}: a refusal shows the toast and the log is a live region`, () => {
+    const g = newGame(name, noEvents);
+    assert.equal(g.el('log').getAttribute('role'), 'log');
+    g.el('toast').classList.remove('show');
+    g.run('G.day = 1; openBorrow()');
+    assert.ok(g.el('toast').classList.contains('show'));
+    assert.ok(g.el('toast').textContent.length > 0);
+    g.run("addLog('fine', 'good')");
+    assert.notEqual(g.el('toast').textContent, 'fine');
+  });
+}
+
+test('dopewars: safehouse buttons are disabled when there is nothing to move', () => {
+  const g = newGame('dopewars', noEvents);
+  g.run("G.hasSafehouse = true; G.stash = { Weed: 3 }; G.safehouse = { Coke: 2 }; openSafehouse()");
+  const btns = g.el('safehouseList').descendants().filter(e => e.tagName && e.tagName.toLowerCase() === 'button');
+  const by = t => btns.filter(b => b.textContent.trim() === t);
+  assert.equal(btns.length, 4);
+  assert.equal(by('STORE ALL').filter(b => 'disabled' in b.attrs).length, 1);
+  assert.equal(by('TAKE ALL').filter(b => 'disabled' in b.attrs).length, 1);
 });

@@ -243,6 +243,10 @@
       z-index: 100;
     }
     .overlay.hidden, .input-overlay.hidden, .gameover.hidden { display: none; }
+    .toast { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 300; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--red); color: var(--red); font-size: 15px; opacity: 0; pointer-events: none; }
+    .toast.show { animation: toastFade 2.6s forwards; }
+    @keyframes toastFade { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+    .city-grid.locked .city-btn { opacity: .35; }
     .overlay, .input-overlay, .gameover { overflow-y: auto; padding: 8px; }
     .modal-box, .input-box, .go-box { margin: auto; }
     .modal-box {
@@ -461,7 +465,7 @@
     <div id="upgradeStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px"></div>
 
     <div class="panel-title">Street News</div>
-    <div class="log" id="log"></div>
+    <div class="log" id="log" role="log" aria-label="News"></div>
   </div>
 </div>
 
@@ -675,6 +679,7 @@
   </div>
 </div>
 
+<div id="toast" class="toast" aria-hidden="true"></div>
 <script>
   /* ─── DATA ─── */
   let DRUGS, CITIES, HEADLINES;
@@ -1554,13 +1559,15 @@
       const onBody = G.stash[name] || 0;
       const stored = G.safehouse[name] || 0;
       const row = document.createElement('div');
-      row.style.cssText = 'border-bottom:1px solid var(--border);padding:8px 0;display:grid;grid-template-columns:1fr auto auto auto auto;gap:6px;align-items:center;font-size:14px';
+      row.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px';
       row.innerHTML = `
-        <div>${name}</div>
-        <div style="color:var(--muted)">on you: ${onBody}</div>
-        <div style="color:var(--accent)">stored: ${stored}</div>
-        <button class="qty-btn" style="font-size:12px" onclick="shStash('${name}')">STORE ALL</button>
-        <button class="qty-btn" style="font-size:12px" onclick="shRetrieve('${name}')">TAKE ALL</button>`;
+        <div style="flex:1 1 auto">${name}</div>
+        <div style="color:var(--muted);white-space:nowrap">on you: ${onBody}</div>
+        <div style="color:var(--accent);white-space:nowrap">stored: ${stored}</div>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          <button class="qty-btn" style="font-size:14px;padding:7px 10px;min-height:32px" ${onBody ? '' : 'disabled'} onclick="shStash('${name}')">STORE ALL</button>
+          <button class="qty-btn" style="font-size:14px;padding:7px 10px;min-height:32px" ${stored ? '' : 'disabled'} onclick="shRetrieve('${name}')">TAKE ALL</button>
+        </div>`;
       list.appendChild(row);
     });
   }
@@ -1784,6 +1791,7 @@
     d.className = 'log-entry ' + cls;
     d.textContent = msg;
     log.prepend(d);
+    if (cls === 'bad') { const t = document.getElementById('toast'); if (t) { t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); } }
     while (log.children.length > 50) log.removeChild(log.lastChild);
   }
 
@@ -1926,7 +1934,7 @@
       ? ` <span style="color:var(--accent2);font-size:13px">— FINAL DAY</span>`
       : G.hasCar ? ` <span style="color:var(--muted);font-size:13px">(${freeLeft} free trip${freeLeft !== 1 ? 's' : ''} left)</span>` : '';
     document.getElementById('travelTitle').innerHTML = `Travel — <span id="cityDisplay">${G.city}</span>` + titleNote;
-    cg.style.opacity = isLastDay ? '0.35' : '';
+    cg.classList.toggle('locked', isLastDay);
     CITIES.forEach(c => {
       const btn = document.createElement('button');
       btn.type = 'button';
