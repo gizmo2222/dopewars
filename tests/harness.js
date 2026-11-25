@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const { pathToFileURL } = require('url');
 const { Document, Storage } = require('./dom');
 
 const ROOT = path.join(__dirname, '..');
@@ -22,7 +23,10 @@ function source(name) {
     const html = fs.readFileSync(path.join(ROOT, name + '.html'), 'utf8');
     const m = /<script>([\s\S]*?)<\/script>/.exec(html);
     if (!m) throw new Error(`${name}.html has no inline <script>`);
-    cache[name] = { html, script: new vm.Script(m[1], { filename: name + '.html' }) };
+    // Filename is the file URL and lineOffset matches the HTML, so stack traces and V8 coverage point at real lines.
+    const lineOffset = html.slice(0, m.index + '<script>'.length).split('\n').length - 1;
+    const filename = pathToFileURL(path.join(ROOT, name + '.html')).href;
+    cache[name] = { html, script: new vm.Script(m[1], { filename, lineOffset }) };
   }
   return cache[name];
 }
