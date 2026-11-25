@@ -198,6 +198,50 @@ for (const name of GAMES) {
     assert.ok(trays.length >= 2);
     for (const t of trays) assert.match(t.attrs.onclick || '', /stopPropagation/);
   });
+
+  // 16. (phase 7) the amount dialog refuses impossible actions instead of logging a $0 success
+  test(`${name}: the amount dialog does not open when there is nothing to move`, () => {
+    const g = newGame(name, noEvents);
+    for (const [setup, action] of [['G.cash = 0', 'deposit'], ['G.bank = 0', 'withdraw'], ['G.debt = 0', 'loan'],
+      ['G.debt = 500; G.cash = 0', 'loan'], ['G.borrowedToday = DAILY_BORROW_LIMIT', 'borrow']]) {
+      g.run(setup + `; openInput('${action}', 'x')`);
+      assert.equal(g.hidden('inputOverlay'), true, `${action} after ${setup}`);
+      assert.ok(!/[$]0(?![0-9,])/.test(g.logLines()[0]), g.logLines()[0]);
+    }
+    assert.ok(!g.logLines().some(l => /Deposited \$0|Withdrew \$0|Saved \$0|Took \$0|Paid \$0/.test(l)));
+  });
+
+  test(`${name}: confirming an amount after the cash is gone logs a refusal, not $0`, () => {
+    const g = newGame(name, noEvents);
+    g.run("G.cash = 500; openInput('deposit', 'x'); G.cash = 0; document.getElementById('inputField').value = 100; confirmInput()");
+    assert.equal(g.G.bank, 0);
+    assert.ok(!/[$]0(?![0-9,])/.test(g.logLines()[0]), g.logLines()[0]);
+  });
+
+  // 17. (phase 7) END GAME with an unsold stash warns first
+  test(`${name}: END GAME warns once about an unsold stash, then ends on the next click`, () => {
+    const g = newGame(name, noEvents);
+    g.run('G.day = G.maxDays; G.stash[DRUGS[0].name] = 5; renderAll()');
+    g.flushTimers(); g.run('dismissEvent()');
+    g.run('confirmEndGame()');
+    assert.equal(g.G.ended, false);
+    assert.equal(g.hidden('eventOverlay'), false);
+    assert.match(g.el('eventMsg').textContent, / 5 (units|pieces)/);
+    g.run('dismissEvent(); confirmEndGame()');
+    assert.equal(g.G.ended, true);
+  });
+
+  test(`${name}: END GAME with an empty stash ends at once`, () => {
+    const g = newGame(name, noEvents);
+    g.run('G.day = G.maxDays; G.stash = {}; confirmEndGame()');
+    assert.equal(g.G.ended, true);
+  });
+
+  test(`${name}: the END GAME button calls confirmEndGame`, () => {
+    const g = newGame(name, noEvents);
+    g.run('G.day = G.maxDays; renderAll()');
+    assert.match(g.el('cityGrid').innerHTML, /onclick="confirmEndGame\(\)"/);
+  });
 }
 
 // 15. dopewars help names the real button

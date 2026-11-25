@@ -144,18 +144,19 @@ for (const name of GAMES) {
     assert.equal(g.G.day, 10);
   });
 
-  test(`${name}: the 3-day warning shows once, when 2 days or fewer remain`, () => {
+  test(`${name}: the 3-day warning shows once, when the counter reads 3 days left`, () => {
     const g = calm(name);
-    g.run('G.maxDays = 30; G.day = 26');
+    g.run('G.maxDays = 30; G.day = 25');
     g.call('travel', g.run('CITIES[1].name'));
-    assert.equal(g.G.day, 27);
+    assert.equal(g.G.day, 26);
     assert.equal(g.G.shown3DayWarning, false);
     assert.equal(g.hidden('eventOverlay'), true);
     g.call('travel', g.run('CITIES[2].name'));
-    assert.equal(g.G.day, 28);
+    assert.equal(g.G.day, 27);
     assert.equal(g.G.shown3DayWarning, true);
     assert.equal(g.hidden('eventOverlay'), false);
     assert.match(g.el('eventTitle').textContent, /^3 DAYS LEFT/);
+    assert.equal(g.el('daysLeft').textContent, '3 days left');
     g.call('dismissEvent');
     g.call('travel', g.run('CITIES[1].name'));
     assert.equal(g.hidden('eventOverlay'), true, 'not shown again');

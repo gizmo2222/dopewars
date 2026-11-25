@@ -70,7 +70,9 @@ Occasionally you'll be offered extra carry capacity for a price. More space mean
 
 ### Final Day
 
-On the last day you cannot travel. Sell your stash, settle your accounts, and hit **End Game**. Anything still in your stash when you end the game counts for nothing. A warning appears 3 days before the end.
+On the last day you cannot travel. Sell your stash, settle your accounts, and hit **End Game**. Anything still in your stash when you end the game counts for nothing; End Game asks once before letting you end with unsold goods. A warning appears when 3 days are left. The bank, borrow and repay buttons refuse with a log line when there is nothing to move.
+
+Your end title depends on final net worth (cash + bank - debt) and scales with the theme's priciest item, so every city or place is judged alike: over 500 times that item's base price for **KINGPIN!** (Candy Wars: **CANDY TYCOON!**), over 100 times for **MADE MAN** (**SUGAR BARON**), over 20 times for **STREET HUSTLER** (**SWEET SELLER**), and above $0 for **SURVIVOR** (**SMALL TIMER**). In New York that is $7.5M, $1.5M and $300k; the help screen shows the figures for your theme.
 
 ---
 

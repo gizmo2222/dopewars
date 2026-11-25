@@ -141,3 +141,58 @@ Logged, not applied:
 - Rejected as redesigns or taste: moving Finances above the market on phones, removing
   `syncTopSections` (it keeps the two column titles aligned), zebra rows, Candy Wars rounded corners,
   restyling the input dialog.
+
+## Phase 7: Simulation / game balance
+
+Balance run: `tools\balance.ps1` (driving `tools\balance.js`) plays whole games headless through the test
+harness. The before-grid was 960 games: 5 seeds x 8 themes (4 per game) x 3 difficulties x 8 bot strategies
+(idle, random, greedy, trader, leverage, spikeOnly, specialist, fireOnly). Outcomes went to `games.jsonl`
+and `summary.md`. The after-grid was 576 games (3 seeds).
+
+Fixed in both games:
+- **The title tiers were trivial.** The top title (KINGPIN! / CANDY TYCOON!) needed $100k, and the
+  trader bot got it in 100% of easy and medium games and 98% of hard ones. Even random play got it in 23%
+  of easy games. Medians were $18M easy, $6.4M medium and $3.6M hard. The tiers now scale with the
+  theme's priciest base price: over 500x for the top title, 100x for the second, 20x for the third.
+  That makes $7.5M / $1.5M / $300k in New York and $2.5M / $500k / $100k in the Wild West. The help screen
+  shows the figures for the current theme (`titleTiers()`, `#helpTiers`). After the change (576-game run) the top title goes to every trader run on easy, 58% on medium and
+  54% on hard, (the leverage bot 63% and 8%), and to no other strategy outside easy. Greedy buyers land in the second or third
+  tier on medium, and random play gets a positive title in 33% of medium games, mostly SURVIVOR.
+- **Theme spread.** In dollars, trader medians differ 3-4x between themes (Miami $9.1M, Wild West
+  $3.3M). This only tracks each theme's top price. Measured as net worth divided by the top base price,
+  the themes line up (medium medians from 325 to 711). The scaled tiers remove the unfairness, so prices
+  were left alone.
+- **Headlines that named the wrong item.** A surge or drought headline named one item but hit a random
+  one. Headlines now carry an `item:` tag. A named item that is not on sale today makes the headline
+  flavour only, and a drought never hits the city's specialty.
+- **Phase 6 game-flow items.** The bank, withdraw, repay and borrow dialogs no longer open when there is
+  nothing to move; they refuse with a log line (`inputBlocked`). END GAME asks once while the stash holds
+  unsold units, and asks again if the count changes (`confirmEndGame`). The 3-day warning now appears
+  when the counter reads 3 days left (`G.day >= G.maxDays - 3`).
+
+New content: 80 headlines were drafted (Sonnet, 10 per theme), and an Opus judge kept the best 5 per theme
+and rejected the rest with reasons. The 40 accepted were added. The 40 rejected were too close to an
+existing headline; wrong for the era or setting, or not kid-safe in Candy Wars; muddled about which item
+they hit (slang that names another item, or a "surge" that reads like a shortage); bland flavour with no
+trade angle; or past the cap of 5 per theme. Each theme's original last headline stays last, because the
+tests' fixed 0.99 roll picks it.
+
+Logged, not applied:
+- **Dead cheap items.** Across trader and greedy runs, the two or three cheapest items in every theme
+  earn 0-1% of realised profit (Speed, Ludes, Weed, Quaaludes, Spice, Tobacco, Snake Oil, Candy Corn,
+  Chips, Lemonade, Mini Donuts, Apple Juice, Animal Crackers, Twizzlers, Nerds), while the priciest item
+  earns 44-73%. With a capped coat, the priciest item always wins. That is how the genre works; a fix
+  (carry by weight, or caps per item) would be a redesign.
+- **Debt snowball.** Doing nothing ends at -$79k on medium and -$576k on hard, and random play ends
+  positive in only 25% / 15% of games. Debt at 10% or 15% a day is the intended pressure, and the help
+  and README say so. Noted as a steep start for new players, not changed.
+- **Leverage is not degenerate.** Borrowing the daily maximum every day never beats plain trading. On
+  hard its p10 is -$3.3M, and on medium it pays about $3M in interest.
+- **Upgrades are cheap late on.** Trader bots own every upgrade by day 7, leverage bots by day 2. The
+  coat upgrade's cost doubles each time (average 10 bought), which is what caps carry. Left as is.
+- **Rare and trivial content.** The burned-contact late event fires 0.17 times per game. Muggings take
+  about $700-900, which means nothing after the first week. Both are left for a content pass.
+- **Candy Wars safehouse.** It still has no UI (see Phase 5); unchanged.
+- **High scores across themes.** Scores store net worth only, so a Miami run and a Wild West run share
+  one table in dollars even though their titles now use different thresholds. Showing the title or the
+  theme in the table needs a new saved field and new `loadScores` checks.

@@ -637,9 +637,10 @@ for (const name of GAMES) {
     assert.match(g.el('highScoreTable').innerHTML, /\$11,000/);
   });
 
-  test(`${name}: endGame picks the title by net worth bands`, () => {
+  test(`${name}: endGame picks the title by net worth bands scaled to the theme`, () => {
+    const [top, mid, low] = newGame(name, noEvents).run('titleTiers()');
     const cases = [
-      [-1, 0], [0, 0], [1, 1], [10000, 1], [10001, 2], [50000, 2], [50001, 3], [100000, 3], [100001, 4],
+      [-1, 0], [0, 0], [1, 1], [low, 1], [low + 1, 2], [mid, 2], [mid + 1, 3], [top, 3], [top + 1, 4],
     ];
     for (const [net, idx] of cases) {
       const g = newGame(name, noEvents);
@@ -648,9 +649,28 @@ for (const name of GAMES) {
     }
   });
 
+  test(`${name}: title thresholds follow the theme's priciest item`, () => {
+    const g = newGame(name, noEvents);
+    const tiers = g.run('titleTiers()');
+    const top = g.run('Math.max(...DRUGS.map(d => d.base))');
+    assert.deepEqual([...tiers], [top * 500, top * 100, top * 20]);
+    const themes = g.run('Object.keys(THEMES)');
+    const tops = new Set(themes.map(t => g.run(`Math.max(...THEMES[${JSON.stringify(t)}].drugs.map(d => d.base))`)));
+    assert.ok(tops.size > 1, 'themes differ in top price, so their thresholds differ');
+  });
+
+  test(`${name}: help shows the title thresholds for the theme`, () => {
+    const g = newGame(name, noEvents);
+    g.run('openHelp()');
+    const [top] = g.run('titleTiers()');
+    assert.ok(g.el('helpTiers').textContent.includes(g.run(`fmt(${top})`)));
+    assert.ok(g.el('helpTiers').textContent.startsWith(T.titles[4]));
+  });
+
   test(`${name}: endGame flavour text differs per band`, () => {
+    const [top, mid, low] = newGame(name, noEvents).run('titleTiers()');
     const seen = new Set();
-    for (const net of [-5, 5, 20000, 60000, 200000]) {
+    for (const net of [-5, 5, low + 5, mid + 5, top + 5]) {
       const g = newGame(name, noEvents);
       g.run(`G.cash = ${net}; G.bank = 0; G.debt = 0; endGame()`);
       const html = g.el('goScore').innerHTML;

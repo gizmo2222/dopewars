@@ -774,6 +774,51 @@ for (const name of GAMES) {
     }
   });
 
+  test(`${name}: a headline with an item hits that item, or is only news when it is not on sale`, () => {
+    const g = fresh(name, { prices: { A: 100, B: 200, C: 300 } });
+    g.run("HEADLINES = [{text:'H-NAMED',type:'surge',item:'C'}];");
+    g.rig([0, 0.5]);   // headline pick, then the price multiplier (no item roll)
+    g.run('applyHeadline()');
+    assert.deepEqual(g.json('G.prices'), { A: 100, B: 200, C: 450 });
+    assert.equal(g.top(), '📰 H-NAMED — C prices are up.');
+    g.run("G.prices = { A: 100 }; HEADLINES = [{text:'H-GONE',type:'surge',item:'C'}];");
+    g.rig([0]);
+    g.run('applyHeadline()');
+    assert.deepEqual(g.json('G.prices'), { A: 100 });
+    assert.equal(g.top(), '📰 H-GONE');
+    // A named drought removes that item, but never the city's specialty.
+    const spec = g.run('CITIES.find(c => c.name === G.city).specialty');
+    const other = g.json('DRUGS.map(d => d.name)').find(n => n !== spec);
+    g.ctx.__s = spec; g.ctx.__o = other;
+    g.run("G.market = {}; G.prices = {}; G.market[__s] = 5; G.prices[__s] = 100; G.market[__o] = 5; G.prices[__o] = 100;");
+    g.run("HEADLINES = [{text:'H-DRY',type:'drought',item:__o}];");
+    g.rig([0]);
+    g.run('applyHeadline()');
+    assert.deepEqual(Object.keys(g.json('G.prices')), [spec]);
+    assert.equal(g.top(), `📰 H-DRY — ${other} ${T.dryHeadline}.`);
+    g.run("HEADLINES = [{text:'H-SPEC',type:'drought',item:__s}];");
+    g.rig([0]);
+    g.run('applyHeadline()');
+    assert.deepEqual(Object.keys(g.json('G.prices')), [spec]);
+    assert.equal(g.top(), '📰 H-SPEC');
+  });
+
+  test(`${name}: every surge and drought headline names a real item of its theme`, () => {
+    const g = fresh(name);
+    const themes = g.json('Object.fromEntries(Object.entries(THEMES).map(([k,t]) => [k, {items: t.drugs.map(d => d.name), hl: t.headlines}]))');
+    for (const [key, t] of Object.entries(themes)) {
+      for (const h of t.hl) {
+        if (h.item !== undefined) {
+          assert.ok(t.items.includes(h.item), `${key}: ${h.text} -> ${h.item}`);
+          assert.ok(h.type === 'surge' || h.type === 'drought', `${key}: ${h.text}`);
+        }
+        // A surge or drought headline that names an item in its text must target it.
+        const named = t.items.filter(i => new RegExp(`(^|[^A-Z])${i.toUpperCase().replace(/[.*+?^${}()|[\]\&]/g, '\$&')}([^A-Z]|$)`).test(h.text));
+        if ((h.type === 'surge' || h.type === 'drought') && named.length === 1) assert.equal(h.item, named[0], `${key}: ${h.text}`);
+      }
+    }
+  });
+
   test(`${name}: find can pick the last good and a full 25 units`, () => {
     const g = fresh(name, { coat: 1000 });
     g.rig([0.9999, 0.9999]);

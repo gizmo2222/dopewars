@@ -249,7 +249,8 @@ for (const name of GAMES) {
     assert.equal(g.hidden('inputOverlay'), false);
     assert.match(g.el('inputLabel').textContent, /\$6,000/);
     g.run('closeInput(); G.borrowedToday = 15000; openBorrow()');
-    assert.match(g.el('inputLabel').textContent, /\$0/);
+    assert.ok(g.hidden('inputOverlay'));
+    assert.match(g.logLines()[0], /won't (lend|advance) any more today/);
   });
 
   // ---------- log ----------
@@ -598,7 +599,7 @@ for (const name of GAMES) {
     const n = g.run('CITIES.length');
     assert.equal(grid.children.length, n + 1);
     for (let i = 0; i < n; i++) assert.ok(!grid.children[i].onclick, 'travel disabled');
-    assert.match(grid.children[n].innerHTML, /endGame\(\)/);
+    assert.match(grid.children[n].innerHTML, /confirmEndGame\(\)/);
     assert.match(grid.children[n].textContent, /END GAME/);
     assert.equal(g.run('G.shownEndGamePopup'), true);
     assert.equal(g.pendingTimers(), 1);

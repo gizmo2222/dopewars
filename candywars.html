@@ -613,7 +613,7 @@
       <div style="margin-bottom:12px">Every time you travel there's a chance something happens — a principal inspection, a price surge, a shortage, a bully, a found stash, or a neighborhood tip. Gear can help reduce losses. After day 15, bigger events can happen too: a <strong>Going-Home Sale</strong>, a <strong>Buyout</strong>, an <strong>Inspection Warning</strong>, or a <strong>Club Card Declined</strong>.</div>
 
       <div class="help-h">LAST DAY</div>
-      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your candy, settle your accounts, then hit <strong>END GAME</strong>. Anything still in your bag when you end the game counts for nothing. You'll get a warning 3 days before the end.</div>
+      <div style="margin-bottom:4px">On the last day you cannot travel. Sell your candy, settle your accounts, then hit <strong>END GAME</strong>. Anything still in your bag when you end the game counts for nothing; END GAME asks once before it lets you go home with unsold candy. You'll get a warning when 3 days are left. Your title depends on your final net worth: <span id="helpTiers"></span>.</div>
     </div>
 
     <button class="modal-ok" id="helpClose" style="width:100%;margin-top:18px" onclick="closeHelp()">GOT IT!</button>
@@ -692,7 +692,7 @@
       headlines: [
         { text:'PLAYGROUND MONITOR CRACKS DOWN ON CANDY TRADING — HEAT IS ON',  type:'heat'    },
         { text:'PRINCIPAL BANS ALL SNACKS FROM SCHOOL PREMISES',                 type:'heat'    },
-        { text:'WAREHOUSE CLUB RUNS OUT OF GUMMY BEARS — SHORTAGE AHEAD',        type:'drought' },
+        { text:'WAREHOUSE CLUB RUNS OUT OF GUMMY BEARS — SHORTAGE AHEAD',        type:'drought', item:'Gummy Bears' },
         { text:'BIRTHDAY PARTY SEASON DRIVES UP CHOCOLATE DEMAND',               type:'surge'   },
         { text:'RIVAL TRADING CREW MOVES INTO THE PARK',                         type:'neutral' },
         { text:'VICE PRINCIPAL EXPANDING LUNCHBOX INSPECTION PROGRAM',           type:'heat'    },
@@ -705,6 +705,11 @@
         { text:'PLAYGROUND INFORMANT NETWORK GROWS',                             type:'heat'    },
         { text:'DRY SPELL HITS NEIGHBORHOOD SNACK SUPPLY',                       type:'drought' },
         { text:'RIVAL TRADER DISRUPTED BY OLDER SIBLING',                        type:'neutral' },
+        { text:'SOUR WORM CHALLENGE TAKES OVER THE PLAYGROUND', type:'surge', item:'Sour Worms' },
+        { text:'MOVIE NIGHT AT THE PARK SENDS CHIPS PRICES UP', type:'surge', item:'Chips' },
+        { text:'LOLLIPOP STICKS RUN OUT AT THE CANDY FACTORY', type:'drought', item:'Lollipop' },
+        { text:'CANDY CORN SHIPMENT STUCK BEHIND LONG PARADE', type:'drought', item:'Candy Corn' },
+        { text:'PARENTS VOLUNTEER FOR EXTRA PARK PATROL TODAY', type:'heat' },
         { text:'PRICES EXPECTED TO SPIKE AFTER HOLIDAY WEEKEND',                 type:'surge'   },
       ],
     },
@@ -738,19 +743,24 @@
       headlines: [
         { text:'FAIR SECURITY REPORTS SURGE IN UNAUTHORIZED TRADING',            type:'heat'    },
         { text:'FAIR MANAGER PLEDGES CRACKDOWN ON FOOD RESELLERS',               type:'heat'    },
-        { text:'COTTON CANDY SUPPLIER DELAYED — SHORTAGES EXPECTED',             type:'drought' },
+        { text:'COTTON CANDY SUPPLIER DELAYED — SHORTAGES EXPECTED',             type:'drought', item:'Cotton Candy' },
         { text:'HOLIDAY WEEKEND DRIVES UP DEMAND FOR FAIR FOOD',                 type:'surge'   },
         { text:'MIDWAY RIVALRY BREAKS OUT BETWEEN VENDOR CREWS',                 type:'neutral' },
         { text:'FAIR INSPECTOR WARNS OF NEW FOOD SAFETY PATROLS',                type:'heat'    },
         { text:'FAMILIES COMPLAIN ABOUT RISING FAIR FOOD PRICES',                type:'neutral' },
         { text:'SUPPLY TRUCK BREAKS DOWN — FOOD COURT STOCKS DWINDLING',         type:'drought' },
-        { text:'FERRIS WHEEL CROWD PUSHES COTTON CANDY PRICES HIGHER',           type:'surge'   },
+        { text:'FERRIS WHEEL CROWD PUSHES COTTON CANDY PRICES HIGHER',           type:'surge', item:'Cotton Candy' },
         { text:'UNDERCOVER INSPECTOR SPOTTED AT MIDWAY GAMES',                   type:'heat'    },
         { text:'COUNTY DEBATES NEW FAIR FOOD REGULATIONS',                       type:'neutral' },
         { text:'VENDORS SUSPECTED OF PRICE FIXING AT PRIZE BOOTH',               type:'neutral' },
         { text:'FAIR INFORMANT TIPPING OFF SECURITY',                            type:'heat'    },
         { text:'HEAT WAVE STRAINS COLD TREAT SUPPLY LINES',                      type:'drought' },
         { text:'LOCAL VENDOR NETWORK DISRUPTED BY COMPETING CREW',               type:'neutral' },
+        { text:'FIREWORKS NIGHT SENDS FUNNEL CAKE PRICES SOARING', type:'surge', item:'Funnel Cake' },
+        { text:'SCORCHING AFTERNOON SPARKS LEMONADE RUSH', type:'surge', item:'Lemonade' },
+        { text:'MINI DONUT MACHINE OUT OF ORDER AT MAIN GATE', type:'drought', item:'Mini Donuts' },
+        { text:'SNOW CONE ICE DELIVERY STUCK IN TRAFFIC', type:'drought', item:'Snow Cone' },
+        { text:'FAIR MONITORS DOUBLE PATROLS AT ALL BOOTHS', type:'heat' },
         { text:'PRICES EXPECTED TO SPIKE ON FINAL FAIR WEEKEND',                 type:'surge'   },
       ],
     },
@@ -784,7 +794,7 @@
       headlines: [
         { text:'PRINCIPAL ANNOUNCES SURPRISE LUNCHBOX INSPECTIONS',              type:'heat'    },
         { text:'TEACHERS ON ALERT FOR UNAUTHORIZED FOOD TRADING',                type:'heat'    },
-        { text:'CHOCOLATE MILK SUPPLIER RUNNING LOW — SHORTAGE COMING',          type:'drought' },
+        { text:'CHOCOLATE MILK SUPPLIER RUNNING LOW — SHORTAGE COMING',          type:'drought', item:'Chocolate Milk' },
         { text:'PIZZA DAY DRIVES MASSIVE CAFETERIA DEMAND',                      type:'surge'   },
         { text:'RIVAL TRADING CREW MOVES INTO THE COMPUTER LAB',                 type:'neutral' },
         { text:'VICE PRINCIPAL EXPANDING CAFETERIA MONITORING PROGRAM',          type:'heat'    },
@@ -797,6 +807,11 @@
         { text:'STUDENT INFORMANT NETWORK EXPANDING',                            type:'heat'    },
         { text:'SUPPLY DROUGHT HITS SCHOOL SNACK STANDS',                        type:'drought' },
         { text:'LOCAL TRADER DISRUPTED BY HALL MONITOR',                         type:'neutral' },
+        { text:'BAKE SALE CRAZE SENDS PRETZEL PRICES SOARING', type:'surge', item:'Pretzels' },
+        { text:'RECESS RELAY RACE MAKES GRANOLA BARS HOT ITEM', type:'surge', item:'Granola Bar' },
+        { text:'ANIMAL CRACKERS SOLD OUT AT LIBRARY STORY HOUR', type:'drought', item:'Animal Crackers' },
+        { text:'PIZZA OVEN BREAKS DOWN, NO SLICES TODAY', type:'drought', item:'Pizza Slice' },
+        { text:'HALL MONITORS DOUBLE PATROLS AT LUNCH TODAY', type:'heat' },
         { text:'PRICES SPIKE AHEAD OF END-OF-YEAR PARTY',                        type:'surge'   },
       ],
     },
@@ -843,6 +858,11 @@
         { text:'NEIGHBORHOOD INFORMANT NETWORK GROWING FAST',                    type:'heat'    },
         { text:'DROUGHT OF GOOD CANDY ON THE EAST SIDE',                         type:'drought' },
         { text:'LOCAL CREW DISRUPTED BY OLDER KID GANG',                         type:'neutral' },
+        { text:'TWIZZLERS WANTED FOR HAUNTED HOUSE PROPS', type:'surge', item:'Twizzlers' },
+        { text:'SKITTLES RAINBOW CRAZE SWEEPS GYM DANCE', type:'surge', item:'Skittles' },
+        { text:'M&MS SOLD OUT AT PUMPKIN PATCH BAKE SALE', type:'drought', item:'M&Ms' },
+        { text:'FULL SIZE BARS VANISH FROM PINE AVENUE PORCHES', type:'drought', item:'Full Size Bar' },
+        { text:'TEACHERS WATCH GYM DANCE FOR CANDY SWAPS', type:'heat' },
         { text:'PRICES EXPECTED TO SPIKE ON FINAL TRICK-OR-TREAT HOUR',          type:'surge'   },
       ],
     },
@@ -862,6 +882,7 @@
 
   let G = {};
   let inputAction = null;
+  let endWarnedUnits = 0;   // stash size the END GAME warning was last shown for
   let eventQueue = [];
 
   /* ─── SETTINGS ─── */
@@ -887,6 +908,8 @@
     document.getElementById('settingsOverlay').classList.add('hidden');
   }
   function openHelp() {
+    const [t1, t2, t3] = titleTiers();
+    document.getElementById('helpTiers').textContent = `CANDY TYCOON! over ${fmt(t1)}, SUGAR BARON over ${fmt(t2)}, SWEET SELLER over ${fmt(t3)}, SMALL TIMER above $0`;
     document.getElementById('helpRate').textContent = Math.round((SETTINGS.interest - 1) * 100) + '%/day';
     document.getElementById('helpUpgrades').innerHTML = UPGRADES.map(u => `${u.icon} <strong>${u.label} (${fmt(u.price)})</strong> — ${u.desc}`).join('<br>');
     document.getElementById('helpOverlay').classList.remove('hidden');
@@ -988,6 +1011,7 @@
   /* ─── GAME INIT ─── */
   function newGame() {
     eventQueue = [];
+    endWarnedUnits = 0;
     applyTheme(SETTINGS.theme);
     G = {
       day: 1, maxDays: SETTINGS.days,
@@ -1149,6 +1173,16 @@
     document.getElementById('eventMsg').textContent   = msg;
     document.getElementById('eventOverlay').classList.remove('hidden');
     document.getElementById('eventOk').focus();
+  }
+  // END GAME button: warn once per stash size while goods are unsold, then end on the next click.
+  function confirmEndGame() {
+    const n = carried();
+    if (n > 0 && n !== endWarnedUnits) {
+      endWarnedUnits = n;
+      showEvent('UNSOLD CANDY', `You still have ${n} piece${n !== 1 ? 's' : ''} of candy. Anything left in your bag when the game ends counts for nothing. Sell first, or hit END GAME again to go home anyway.`);
+      return;
+    }
+    endGame();
   }
   function showEndGameModal() {
     showEvent('LAST DAY!', "Time's up! Sell everything and pay back your parents. When you're ready, hit END GAME.");
@@ -1320,15 +1354,17 @@
   function applyHeadline() {
     const hl = HEADLINES[rnd(0, HEADLINES.length - 1)];
     const drugs = Object.keys(G.prices);
-    if (hl.type === 'surge' && drugs.length) {
-      const d = drugs[rnd(0, drugs.length - 1)];
+    // A headline with an item names what it hits; if that item is not on sale today it is flavour only.
+    const named = hl.item && drugs.includes(hl.item) ? hl.item : null;
+    if (hl.type === 'surge' && drugs.length && (!hl.item || named)) {
+      const d = named || drugs[rnd(0, drugs.length - 1)];
       G.prices[d] = Math.round(G.prices[d] * (1.3 + Math.random() * 0.4));
       addLog(`📰 ${hl.text} — ${d} prices are up.`, 'headline');
-    } else if (hl.type === 'drought' && drugs.length) {
+    } else if (hl.type === 'drought' && drugs.length && (!hl.item || (named && named !== citySpecialty()))) {
       const citySpec = citySpecialty();
       let pool = drugs.filter(d => d !== citySpec);
       if (!pool.length) pool = drugs;
-      const d = pool[rnd(0, pool.length - 1)];
+      const d = named || pool[rnd(0, pool.length - 1)];
       delete G.prices[d];
       delete G.market[d];
       addLog(`📰 ${hl.text} — ${d} is unavailable today.`, 'headline');
@@ -1381,7 +1417,7 @@
       }
     }
     if (!freeTrip && G.day > 15) maybeLateEvent();
-    if (!G.shown3DayWarning && G.day >= G.maxDays - 2) {
+    if (!G.shown3DayWarning && G.day >= G.maxDays - 3) {   // the counter reads "3 days left"
       G.shown3DayWarning = true;
       showEvent('3 DAYS LEFT!', 'Time is running out! Start selling your candy and pay back your parents before the last day.');
     }
@@ -1500,7 +1536,18 @@
   }
 
   /* ─── CUSTOM INPUT DIALOG ─── */
+  // Why an amount dialog would be pointless right now (nothing to move), or null.
+  function inputBlocked(action) {
+    if (action === 'deposit'  && G.cash <= 0) return 'No coins to save.';
+    if (action === 'withdraw' && G.bank <= 0) return 'Your piggy bank is empty.';
+    if (action === 'loan'     && G.debt <= 0) return 'No debt to pay.';
+    if (action === 'loan'     && G.cash <= 0) return 'Not enough coins to pay your parents.';
+    if (action === 'borrow'   && DAILY_BORROW_LIMIT - (G.borrowedToday || 0) <= 0) return "Your parents won't advance any more today.";
+    return null;
+  }
   function openInput(action, labelText) {
+    const blocked = inputBlocked(action);
+    if (blocked) { addLog(blocked, 'bad'); return; }
     inputAction = action;
     document.getElementById('inputLabel').textContent = labelText;
     document.getElementById('inputField').value = 0;
@@ -1516,7 +1563,8 @@
     const amt    = parseInt(document.getElementById('inputField').value) || 0;
     const action = inputAction;
     closeInput();
-    if (action === 'loan' && G.debt <= 0) { addLog('No debt to pay.', 'bad'); return; }
+    const blocked = action && inputBlocked(action);
+    if (blocked) { addLog(blocked, 'bad'); return; }
     if (amt <= 0) { addLog('Enter an amount above $0.', 'bad'); return; }
     if (action === 'deposit') {
       const a = Math.min(amt, G.cash);
@@ -1662,15 +1710,23 @@
     }).join('');
   }
 
+  // Title thresholds scale with the theme's priciest item, so every theme is judged alike
+  // (phase 7 balance run: the old fixed $100k top title went to every competent run).
+  function titleTiers() {
+    const top = Math.max(...DRUGS.map(d => d.base));
+    return [top * 500, top * 100, top * 20];
+  }
+
   /* ─── GAME OVER ─── */
   function endGame() {
     if (G.ended) return;
     G.ended = true;
     const net = G.cash + G.bank - G.debt;
+    const [topTier, midTier, lowTier] = titleTiers();
     let title, flavor;
-    if (net > 100000)     { title = 'CANDY TYCOON!';   flavor = 'You own this neighborhood. Everyone comes to you for candy!'; }
-    else if (net > 50000) { title = 'SUGAR BARON';     flavor = 'Big earner. Everyone knows your name around here.'; }
-    else if (net > 10000) { title = 'SWEET SELLER';    flavor = 'Nice work! You came out ahead.'; }
+    if (net > topTier)      { title = 'CANDY TYCOON!';   flavor = 'You own this neighborhood. Everyone comes to you for candy!'; }
+    else if (net > midTier) { title = 'SUGAR BARON';     flavor = 'Big earner. Everyone knows your name around here.'; }
+    else if (net > lowTier) { title = 'SWEET SELLER';    flavor = 'Nice work! You came out ahead.'; }
     else if (net > 0)     { title = 'SMALL TIMER';     flavor = 'You made it — barely. Try harder next time!'; }
     else                  { title = 'BROKE KID';       flavor = "You owe your parents everything you had. Better luck next time!"; }
 
@@ -1846,7 +1902,7 @@
     if (isLastDay) {
       const endBtn = document.createElement('div');
       endBtn.style.cssText = 'grid-column:1/-1;text-align:center;padding:12px 4px';
-      endBtn.innerHTML = `<button class="modal-ok" onclick="endGame()" style="font-size:14px;padding:8px 24px">END GAME</button>`;
+      endBtn.innerHTML = `<button class="modal-ok" onclick="confirmEndGame()" style="font-size:14px;padding:8px 24px">END GAME</button>`;
       cg.appendChild(endBtn);
       if (!G.shownEndGamePopup) {
         G.shownEndGamePopup = true;
