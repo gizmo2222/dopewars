@@ -18,7 +18,7 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 | 2 | Bug hunt | done | overhaul/phase-2 |
 | 3 | Tests | done | overhaul/phase-3 |
 | 4 | Security | done | overhaul/phase-4 |
-| 5 | Clean-up | todo | |
+| 5 | Clean-up | done | overhaul/phase-5 |
 | 6 | UI | todo | |
 | 7 | Simulation / game balance | todo | |
 | 8 | Research | todo | |
@@ -56,3 +56,8 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 - Three findings were confirmed and fixed in both games: XSS from a tampered save, an `endGame` crash from a malformed score list, and unfiltered settings. A save now resumes only if every name is from the theme and every number is finite (`cleanSave`, `cleanSettings`). Scores are filtered, the score date is escaped, and a CSP `<meta>` was added. `tests\security.test.js` adds 18 tests (659 pass). In a real browser, fonts load and travel and buy work, with no CSP violations.
 - CI, secrets and server items are logged in `docs\overhaul-findings.md`, not fixed: checkout isn't SHA-pinned, there's no `permissions:` block, SFTP uses a password, and `.claude/settings.local.json` is still in history. Phase 5 leads: the inline `onclick` handlers block a stricter CSP, and the CLAUDE.md doc map line numbers after the helpers have shifted by about 45 lines (phase 9 refreshes them).
 - Choices made without asking: an independent sweep and two Opus verifiers stood in for a full workflow. Saved data is validated once at load rather than escaped at every `innerHTML` sink. An unknown saved theme falls back to the default theme. The gitignored `.claude/launch.json` was emptied by mistake and recreated with one python "static" server config.
+
+### 5. Clean-up (done)
+- Applied the safe simplifications in both games, with no behaviour change. `travel` calls `maybeEvent`. The dead debt clamps and the `maybeLateEvent` fallback are gone. About 15 helpers replace copied code (`addStock`, `readQty`, `payDebt`, `themeOf`, `badge`...). Unused CSS rules were removed, and repeated inline styles are now classes (`.modal-ok.alt`, `.setting-row.sep`, `.help-h`). `.overlay` and `.input-overlay` share one rule. There are 663 tests, all passing (2 new `maybeEvent` tests). A Playwright check found every element's computed style unchanged at 1280px and 375px.
+- Risky items are logged in `docs\overhaul-findings.md` under "Phase 5", not applied: the unused score `debt` field, NaN from saves missing `borrowedToday` or `carTripsToday`, the unreachable safehouse (/land decides), inline `onclick` blocking a hash CSP, and merging the forks. There are no dependencies.
+- Choices made without asking: a workflow of 10 Opus finders and verifiers produced the list. Three Sonnet appliers then ran one after another in this checkout (script edits, then CSS/HTML), and the session reviewed each diff. Phase 6 should know two things. The header buttons' look now lives in `.action-btn`, which is used only there. The CLAUDE.md doc map lines have shifted by about 10-60 lines (phase 9 refreshes them).

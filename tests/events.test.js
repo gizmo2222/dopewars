@@ -73,17 +73,40 @@ for (const name of GAMES) {
     assert.equal(g.run('G.cash'), 1000);
   });
 
-  test(`${name}: maybeEvent fires on a roll equal to the event chance and shows the log text`, () => {
+  test(`${name}: maybeEvent fires on a roll just below the event chance and shows the log text`, () => {
     const g = fresh(name, { cash: 1000 });
     g.run('SETTINGS.events = 0.5');
     const bribe = g.run("EVENTS.findIndex(e => e.type === 'bribe')");
     const n = g.run('EVENTS.length');
-    g.rig([0.5, ix(bribe, n)]);
+    g.rig([0.4999, ix(bribe, n)]);
     g.run('maybeEvent()');
     assert.equal(g.hidden('eventOverlay'), false);
     assert.equal(g.run('G.cash'), 800);
     assert.equal(g.el('eventTitle').textContent, g.run(`EVENTS[${bribe}].title`));
     assert.equal(g.el('eventMsg').textContent, T.bribeOk);
+  });
+
+  test(`${name}: maybeEvent does nothing when the roll equals the event chance`, () => {
+    const g = fresh(name, { cash: 1000 });
+    g.run('SETTINGS.events = 0.5');
+    g.rig([0.5, 0]);
+    g.run('maybeEvent()');
+    assert.equal(g.hidden('eventOverlay'), true);
+  });
+
+  test(`${name}: maybeEvent blocks the shark event before day 6 and when debt is cleared`, () => {
+    const g = fresh(name);
+    g.run('SETTINGS.events = 1');
+    const shark = g.run("EVENTS.findIndex(e => e.type === 'shark')");
+    const n = g.run('EVENTS.length');
+    g.run('G.day = 3; G.debt = 1000');
+    g.rig([0, ix(shark, n)]);
+    g.run('maybeEvent()');
+    assert.equal(g.hidden('eventOverlay'), true);
+    g.run('G.day = 8; G.debt = 0');
+    g.rig([0, ix(shark, n)]);
+    g.run('maybeEvent()');
+    assert.equal(g.hidden('eventOverlay'), true);
   });
 
   test(`${name}: maybeEvent falls back to the event's own message when the effect has no log text`, () => {

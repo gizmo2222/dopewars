@@ -38,7 +38,7 @@ Method: `tools\coverage.ps1` (V8 coverage mapped to each inline script) to list 
 module test files written by workers, then `tools\mutate.ps1` per module range to find mutants the tests
 miss. No game bugs turned up. What the survivors and the coverage gaps show:
 
-### Dead or duplicated code (for phase 5)
+### Dead or duplicated code (for phase 5; resolved in phase 5 except the safehouse)
 - `maybeEvent` is never called in either game: `travel()` inlines its own event roll. It is tested
   directly, but either `travel` should call it or it should go.
 - `if (G.debt < 0) G.debt = 0` in `confirmInput` (dw 1605 / cw 1517) and `payAllLoan` (dw 1623 / cw 1535)
@@ -89,3 +89,29 @@ Saves are now validated on load, scores are filtered, the score date is escaped,
 - The CSP needs `script-src 'unsafe-inline'` because every button uses an inline `onclick`. Moving them to `addEventListener` would allow a hash-based CSP; that is a phase 5 candidate.
 - Two equivalent mutants in `esc`: inside the regex character class, `<`→`<=` and `>`→`>=` still match the same characters.
 - There are no npm packages, so no dependencies to audit. The `tools\*.ps1` scripts pass argv arrays to `spawn`, and their deletes stay inside `mkdtemp` folders.
+
+## Phase 5: clean-up
+
+Applied in both games (behaviour unchanged, the suite passes): `travel` now calls `maybeEvent` instead
+of an inline copy; the dead `G.debt < 0` clamps and the unreachable `maybeLateEvent` fallback are gone;
+shared helpers replace copied code (`SETTING_KEYS` loops, `themeOf`, `renderHeaderSub`, `gameInProgress`,
+`payDebt`, `coatUpgradePrice`, `upgradeKey`, `citySpecialty`, `addStock`, `readQty`, `fireSaleMax`, the
+render `badge` helper); `supplierBuy` passes its price to `executeBuy` instead of swapping `G.prices`;
+`DAILY_BORROW_LIMIT` names the 10000; repeated inline styles became CSS classes.
+
+Logged, not applied (behaviour or product changes, or against the project's conventions):
+- `saveScore` stores a `debt` field that nothing reads; `money-save.test.js` asserts it. Dropping it
+  changes the saved score format, so it is left for /land to decide.
+- A crafted save that lacks `borrowedToday` or `carTripsToday` passes `cleanSave` and later yields NaN
+  in the borrow limit and free-trip count. Defaulting them to 0 in `cleanSave` is a small behaviour change.
+- `cleanSave` checks `isObj` on fields that the later per-key checks would also reject. Kept as defence in depth.
+- The safehouse in Dope Wars is still unreachable (`hasSafehouse` is never set). Delete it or add it to
+  the shop: a product decision for /land. Candy Wars still creates an unused `G.safehouse = {}`.
+- Inline `onclick` handlers force `script-src 'unsafe-inline'`. Moving ~100 handlers to `addEventListener`
+  is a large rewrite of both files; deferred.
+- Merging the two forks into one file with a theme switch would remove most duplication but breaks the
+  "one self-contained file per game" convention and the per-game deploy.
+- `readSettings` has no guard for a missing input element; all inputs exist in both files, so it is only
+  a hardening note.
+- No dependencies: there is no `package.json`, and the only external resource is Google Fonts.
+- The CLAUDE.md doc map line numbers have shifted again; phase 9 refreshes them.
