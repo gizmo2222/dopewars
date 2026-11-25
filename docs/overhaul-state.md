@@ -16,7 +16,7 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 |---|---|---|---|
 | 1 | Map | done | overhaul/phase-1 |
 | 2 | Bug hunt | done | overhaul/phase-2 |
-| 3 | Tests | todo | |
+| 3 | Tests | done | overhaul/phase-3 |
 | 4 | Security | todo | |
 | 5 | Clean-up | todo | |
 | 6 | UI | todo | |
@@ -46,3 +46,8 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 - Choices made without asking: the workflow used 4 area hunters (each covering all five bug classes) and
   4 disprovers, 8 agents, not one per area x class; the dead safehouse code is left for phase 5 or /land
   to wire up or delete. Phase 3: measure coverage with `node --test --experimental-test-coverage`.
+
+### 3. Tests (done)
+- Built `tools\coverage.ps1` (V8 coverage mapped to the inline scripts, since node's own misreads the HTML) and `tools\mutate.ps1`; five workers wrote `tests\{trade,events,travel-shop,money-save,ui}.test.js`. The suite now has 641 tests, all passing. Line coverage went from 81.4% to 95.3% (dopewars) and from 85.3% to 99.9% (candywars). On a seeded 150-mutant sample per game, mutants killed went from 16% to 91.3% (dopewars) and from 16% to 100% (candywars).
+- No game bugs found. Every survivor is equivalent, unreachable, or in the unreachable safehouse (all listed in `docs\overhaul-findings.md`). Phase 5 leads: `maybeEvent` is never called (`travel` inlines it), dead `G.debt < 0` clamps, an unreachable `maybeLateEvent` fallback, and the safehouse to wire up or delete.
+- Choices made without asking: 5 Sonnet workers, not one per function. Their worktrees were cut from `main`, so only their new test files were copied in and their branches were deleted unmerged. The safehouse was left untested. A seeded 150-mutant sample stood in for full ~600-mutant runs. Phase 4 can run `tools\coverage.ps1` again after any fix.

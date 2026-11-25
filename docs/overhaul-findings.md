@@ -31,3 +31,34 @@ git history. 17 findings after dedupe: 14 confirmed and fixed in both games with
   `openSafehouse`. Candy Wars creates `G.safehouse = {}` and has no UI at all.
 - Not fixed because the fix is a choice, not a bug fix: wire it up as an upgrade (and port it to Candy
   Wars) or delete it. Left for phase 5 (dead code) or `/land`.
+
+## Phase 3: tests
+
+Method: `tools\coverage.ps1` (V8 coverage mapped to each inline script) to list the untested paths, five
+module test files written by workers, then `tools\mutate.ps1` per module range to find mutants the tests
+miss. No game bugs turned up. What the survivors and the coverage gaps show:
+
+### Dead or duplicated code (for phase 5)
+- `maybeEvent` is never called in either game: `travel()` inlines its own event roll. It is tested
+  directly, but either `travel` should call it or it should go.
+- `if (G.debt < 0) G.debt = 0` in `confirmInput` (dw 1605 / cw 1517) and `payAllLoan` (dw 1623 / cw 1535)
+  can never fire: repayments are already capped at the debt.
+- The `maybeLateEvent` fallback `eligible[eligible.length - 1].fn()` (dw 1268 / cw 1242) is unreachable:
+  the weighted pick always lands first. Both games' only uncovered lines besides the safehouse.
+- The safehouse (dw 1374-1377 rent in `travel`, 1525-1575, 1851-1852 in `renderStash`) is untested
+  because nothing can reach it (see `safehouse-unreachable` above).
+
+### Equivalent mutants (no test can kill them; listed so nobody chases them)
+- `applyEvent` bust `Math.min(0.9, ...)`: the fraction is at most 0.7, so the cap never binds.
+- `|| 0` / `: 0` defaults that never see a falsy value: `executeBuy` `avgCost || 0` (dw 1182 / cw 1161),
+  `supplierBuy` `market || 0` (dw 1215 / cw 1194), the travel tip-off `|| 0` (dw 1384 / cw 1352),
+  `renderCities` `freeLeft ... : 0` (dw 1873 / cw 1772).
+- `buyMax` `qty <= 0` -> `< 0` (dw 1203 / cw 1182): zero falls through to a no-op buy.
+- `G.day > 15` -> `>= 15` (dw 1400 / cw 1366) only shifts the first late-event day; tests pin day 16+.
+- The `setTimeout` delay of 50 ms (dw 1905 / cw 1804); safehouse-only lines in `renderStash`
+  (dw 1825, 1836, 1849; cw 1744).
+
+### Observations, not bugs
+- The settings modal shows Cancel on first load, because `newGame()` runs at boot and sets `G.day = 1`.
+  Cancel then keeps the default game, which is harmless.
+- There is no bank interest; only the loan accrues. README and help agree, so this is by design.

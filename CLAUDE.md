@@ -41,6 +41,22 @@ boots a game; `newGame(name, settingsOverrides)` starts one past the settings mo
 `<game>: <behaviour>` and loop over `GAMES` so each check covers both files.
 
 `tests\smoke.test.js` covers boot and a random walk; `tests\bugs.test.js` has one regression test per fixed bug.
+The module tests are `trade` (market, buy, sell, supplier), `events` (random, late-game, headlines),
+`travel-shop` (travel, coat offer, upgrades), `money-save` (bank, loans, save, scores, game over) and `ui`
+(settings, themes, render, trays), each `tests\<module>.test.js`. `docs\coverage.md` lists what is still untested.
+
+Coverage and mutation testing (node's own `--experimental-test-coverage` misreads the HTML files, so use these):
+
+```powershell
+powershell -File tools\coverage.ps1 -Out $env:TEMP\coverage.md
+```
+
+```powershell
+powershell -File tools\mutate.ps1 -Game dopewars -Lines 1168-1248
+```
+
+`mutate.ps1` edits a temp copy one operator or number at a time and lists the edits no test catches;
+a full run of one game is about 600 mutants and several minutes.
 
 Scripts are indexed in `tools\README.md`.
 
