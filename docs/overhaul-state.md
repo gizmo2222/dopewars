@@ -23,7 +23,7 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 | 7 | Simulation / game balance | done | overhaul/phase-7 |
 | 8 | Research | done | overhaul/phase-8 |
 | 9 | Wrap-up | done | overhaul/phase-9 |
-| 10 | Land | todo | |
+| 10 | Land | done | merged into `main` (4c31fd2), phase branches deleted |
 
 ## Notes per phase
 
@@ -82,3 +82,47 @@ Base branch: `main` (pushing `main` deploys to metacrystal.com; never push it du
 - Wrote `docs/overhaul-summary.md`: what changed and what was left per phase, the top ten next steps (phase 8's ranked features merged with the findings: safehouse decision first, then seeded RNG, per-theme scores, report card, debt warning, scaled losses, deploy hardening, save hardening, short games and a daily run, cheap items and upgrades), and the tools added.
 - Choices made without asking: did this phase directly, without a workflow, because it was doc work over symbols a grep located. For /land: `overhaul/phase-9` holds all nine phases (19 commits on `main`); the open decisions are the safehouse (keep and sell it, or delete), the unused score `debt` field, and the CI/secret items in findings Phase 4. Pushing `main` deploys.
 
+### 10. Land (done, 2026-11-25)
+- Nick's decisions: leave the safehouse for /backlog; fix the save NaN guard and the `readSettings` guard;
+  harden the deploy workflow (permissions + SHA pin); push and deploy; delete the phase branches.
+- Fixed in both games, commit 2aa49c6, tests 16-17 in `tests\bugs.test.js` (723 pass): `cleanSave` sets any
+  missing optional counter (`borrowedToday`, `carTripsToday`, `coatsBought`, `supplierBurnedUntil`,
+  `corneredUntil`, `tippedExpiry`) to 0. That is wider than the two fields logged: a missing `supplierBurnedUntil`
+  also silently disabled the supplier. `readSettings` keeps the current value when a group has no active button.
+- `deploy.yml`: `permissions: contents: read`; `actions/checkout` pinned to fbc6f39 (v5.1.0, what `v5` pointed to).
+- Merged `overhaul/phase-9` into `main` with `--no-ff` (4c31fd2). `main` had not moved, so there were no conflicts.
+  Pushed with Nick's yes. Deploy run 45728697858 succeeded at every step. Both live files on metacrystal.com
+  are byte-identical to `main`, and in Chrome both boot on day 1 with a full market and no console errors.
+- The nine `overhaul/phase-N` branches were deleted (all merged). There were no stray worktrees or worker branches.
+- Choice made without asking: did the two small fixes in this session instead of starting a worker or workflow,
+  because they were three lines per file.
+
+## Deferred (pick up with /backlog)
+
+Each entry: what it is, where, what settles it. Details are in `docs/overhaul-findings.md` (phase noted)
+and `docs/research.md` section 6 (R-numbers).
+
+1. **Safehouse** (findings Phase 2 `safehouse-unreachable`, R12). `dopewars.html` has the full modal, `openSafehouse`,
+   `shStash`, `shRetrieve` and rent in `travel`, but nothing sets `G.hasSafehouse`. Candy Wars only has
+   `G.safehouse = {}`. Nick chose to keep it as a feature: sell it in `UPGRADES` with rent and a theft risk, build a
+   Candy Wars UI, add tests (it is the main coverage gap) and re-run `tools\balance.ps1`.
+2. **Seeded RNG, seed replay, `?seed=` link** (R1, size M): 13 `Math.random` calls per file. The base for item 9.
+3. **High scores per theme and difficulty, with the end title** (R2, Phase 7): new saved score fields plus `loadScores` checks.
+4. **End-of-game report card** (R3): profit by item, interest paid, busts and muggings, best trade.
+5. **Debt projection and borrow warning** (R5; Phase 7 debt snowball).
+6. **Losses that scale with cash carried** (R4; Phase 7 trivial late muggings). Re-run the balance tools after.
+7. **Deploy and server, Nick's manual items** (Phase 4): swap the SFTP password (`secrets.SFTP_PASSWORD`, `sshpass`)
+   for a deploy key limited to the web root and rotate the password once; check the server for leftover Flask
+   files; decide whether to rewrite history for the old `.claude/settings.local.json` (no secrets, only the
+   username and paths). Optional: move `actions/checkout` from v5 to v7 (pin the SHA again).
+8. **Unused score `debt` field** (Phase 5): `saveScore` stores it and nothing reads it. Nick left it as is;
+   dropping it changes the score format for no player gain.
+9. **Short games and a Daily Deal** (R7, R6; needs item 2).
+10. **Cheap items and upgrades** (R8-R10; Phase 7): cheap items earn 0-1% of profit, and upgrades are all owned by day 7.
+11. **Phase 6 low polish**: loss styling on the game-over screen (`.loss` in `endGame`), preset highlight,
+    screen-reader glyphs, qty input contrast, GOT IT only at the bottom of help, centred score rows, disabled
+    BUY/MAX with no reason shown, Candy Wars name wrapping, current-run highlight in high scores (a new saved field).
+12. **Large refactors**: inline `onclick` to `addEventListener` (for a hash CSP); self-hosting the fonts (drops
+    Google from the CSP); merging the forks (against the single-file convention, so probably never).
+13. **Later research items**: achievements (R11), save export and import (R13), Candy Wars demand forecast (R14),
+    bust as a choice (R15). Never build the items in research.md section 7.
