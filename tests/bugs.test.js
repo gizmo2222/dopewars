@@ -242,6 +242,27 @@ for (const name of GAMES) {
     g.run('G.day = G.maxDays; renderAll()');
     assert.match(g.el('cityGrid').innerHTML, /onclick="confirmEndGame\(\)"/);
   });
+
+  // 16. a save without the optional day counters resumes with 0s, not NaN (land: findings phase 5)
+  test(`${name}: a save missing the optional counters resumes with them set to 0`, () => {
+    const g = newGame(name, noEvents);
+    const fields = ['borrowedToday', 'carTripsToday', 'coatsBought', 'supplierBurnedUntil', 'corneredUntil', 'tippedExpiry'];
+    const save = JSON.parse(g.localStorage.getItem(name + '_game'));
+    fields.forEach(k => { delete save[k]; });
+    const g2 = loadGame(name, { storage: { [name + '_game']: JSON.stringify(save) } });
+    assert.ok(g2.logLines().some(l => /Session restored/.test(l)), 'save was restored');
+    fields.forEach(k => assert.equal(g2.run(`G.${k}`), 0, k));
+    assert.ok(Number.isFinite(g2.run('DAILY_BORROW_LIMIT - G.borrowedToday')));
+  });
+
+  // 17. readSettings keeps the current value when a settings group has no active button
+  test(`${name}: readSettings keeps a setting whose group has no active button`, () => {
+    const g = newGame(name, noEvents);
+    const before = g.run('SETTINGS.days');
+    g.document.querySelectorAll('#set-days .sopt').forEach(b => b.classList.remove('active'));
+    g.run('readSettings()');
+    assert.equal(g.run('SETTINGS.days'), before);
+  });
 }
 
 // 15. dopewars help names the real button

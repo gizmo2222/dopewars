@@ -990,10 +990,10 @@
   }
 
   function readSettings() {
-    const pick = id => parseFloat(document.querySelector('#' + id + ' .sopt.active').dataset.val);
+    const pick = (id, cur) => { const el = document.querySelector('#' + id + ' .sopt.active'); return el ? parseFloat(el.dataset.val) : cur; };
     const activeTheme = document.querySelector('#set-theme .sopt.active');
     if (activeTheme) SETTINGS.theme = activeTheme.dataset.theme;
-    SETTING_KEYS.forEach(k => { SETTINGS[k] = pick('set-' + k); });
+    SETTING_KEYS.forEach(k => { SETTINGS[k] = pick('set-' + k, SETTINGS[k]); });
   }
   function startFromSettings() {
     readSettings();
@@ -1638,6 +1638,7 @@
     if (!['day', 'maxDays', 'cash', 'bank', 'debt', 'coat'].every(k => isNum(s[k]))) return null;
     const optional = ['borrowedToday', 'carTripsToday', 'coatsBought', 'supplierBurnedUntil', 'corneredUntil', 'tippedExpiry'];
     if (!optional.every(k => s[k] === undefined || isNum(s[k]))) return null;
+    optional.forEach(k => { if (s[k] === undefined) s[k] = 0; }); // older or hand-edited saves: no NaN later
     if (!places.has(s.city)) return null;
     const maps = { stash: items, safehouse: items, prices: items, prevPrices: items, market: items, avgCost: items, lastVisit: places };
     for (const k of Object.keys(maps)) {
